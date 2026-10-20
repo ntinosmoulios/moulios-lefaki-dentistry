@@ -1,6 +1,7 @@
 // The scroll engine: Lenis smooth scroll + one GSAP master timeline whose time
-// is the (smoothed) scroll position in pixels, driving a single Three.js scene
-// that follows the visitor through the whole page.
+// is the (smoothed) scroll position in pixels. It drives a single Three.js scene
+// with a "film camera": dolly zooms, orbits, dutch angles, impact shake and a
+// final fly-through, while the tooth itself assembles, whitens and gets scanned.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -60,38 +61,49 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     document.documentElement.classList.add('no-webgl');
   }
 
+  /* ---------- State ----------
+     sx, sy: where the tooth sits on screen (fraction of the viewport, 0 = centre)
+     dist/orbit/pitch/roll/fov: the camera; lookY: what the camera aims at (model units) */
   const S = {};
-  const base = () => {
-    const P = poses();
-    return {
-      ...P.hero, modelY: 0.4, tiltX: 0.25, rotY: -0.5,
-      screwY: 0, abutY: 0.04, crownY: 0.38, spin: 0,
-      jaw: 0, glow: 0, parts: 1, white: 1, scan: 5, scanOn: 0, wire: 0
-    };
-  };
   function poses() {
     const m = isMobile();
-    return {
-      hero: m ? { x: 0, y: 1.7, scale: 0.6 } : { x: 2.35, y: 0.15, scale: 1.25 },
-      story: m ? { x: 0, y: 0.95, scale: 0.5 } : { x: 2.1, y: 0.3, scale: 0.95 },
-      about: m ? { x: 0.9, y: 2.6, scale: 0.0001 } : { x: 2.75, y: -0.1, scale: 0.72 },
-      services: m ? { x: 0, y: 1.95, scale: 0.42 } : { x: 0, y: -0.2, scale: 1.15 },
-      white: m ? { x: 0, y: 2.1, scale: 1.0 } : { x: 2.3, y: 0.95, scale: 1.65 },
-      tech: m ? { x: 0, y: 2.0, scale: 0.95 } : { x: 2.3, y: 1.0, scale: 1.6 }
+    return m ? {
+      hero: { sx: 0, sy: 0.25, scale: 0.6 },
+      story: { sx: 0, sy: 0.25, scale: 0.4 },
+      about: { sx: 0, sy: 0.3, scale: 0.0001 },
+      services: { sx: 0, sy: 0.3, scale: 0.5 },
+      white: { sx: 0, sy: 0.25, scale: 0.62 },
+      tech: { sx: 0, sy: 0.25, scale: 0.6 }
+    } : {
+      hero: { sx: 0.23, sy: 0.02, scale: 1.25 },
+      story: { sx: 0.21, sy: 0, scale: 0.95 },
+      about: { sx: 0.27, sy: -0.02, scale: 0.72 },
+      services: { sx: 0, sy: 0.02, scale: 1.15 },
+      white: { sx: 0.24, sy: 0, scale: 1.15 },
+      tech: { sx: 0.24, sy: 0, scale: 1.15 }
     };
   }
+  const base = () => ({
+    ...poses().hero, modelY: 0.4, tiltX: 0.25, rotY: -0.5, lookY: 0.2,
+    dist: 11, orbit: 0, pitch: 0.04, roll: 0, fov: 32,
+    screwY: 0, abutY: 0.04, crownY: 0.38, spin: 0,
+    jaw: 0, glow: 0, parts: 1, white: 1, scan: 5, scanOn: 0,
+    sparkle: 0, shake: 0, flash: 0
+  });
   Object.assign(S, base());
 
-  // Intro overlay values (applied on top of the scroll state)
-  const I = { scale: reduceMotion ? 1 : 0, rot: reduceMotion ? 0 : -2.4, crown: reduceMotion ? 0 : 1.4, screw: reduceMotion ? 0 : -1 };
+  // Intro overlay, applied on top of the scroll state: a macro shot that pulls back
+  const I = reduceMotion
+    ? { scale: 1, rot: 0, crown: 0, screw: 0, dist: 0, roll: 0, center: 1, fov: 0 }
+    : { scale: 0.001, rot: -2.4, crown: 1.4, screw: -1, dist: -7, roll: 0.35, center: 0, fov: 22 };
 
-  let tooth, composer, bloom, scene, camera, particles;
-  // Adaptive quality: start reasonable, step down if the device can't keep up
-  const quality = { dpr: 1, level: 0, samples: [], settleAt: 0 };
+  let tooth, composer, bloom, scene, camera, particles, sparkles;
+  const quality = { dpr: 1, level: 0, samples: [], settleAt: 0, bloom: 0.34 };
   const pointer = { x: 0, y: 0 }, target = { x: 0, y: 0 };
 
   if (renderer) {
     quality.dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.25 : 1.5);
+    quality.bloom = isMobile() ? 0.28 : 0.34;
     renderer.setPixelRatio(quality.dpr);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -106,8 +118,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environmentIntensity = 0.6;
 
-    camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.1, 60);
-    camera.position.set(0, 0.4, 11);
+    camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.05, 80);
 
     const key = new THREE.DirectionalLight(0xffffff, 1.7);
     key.position.set(4, 6, 5);
@@ -120,12 +131,15 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     tooth = buildTooth();
     scene.add(tooth.pivot);
 
+    sparkles = makeSparkles(70);
+    tooth.crown.add(sparkles);
+
     particles = makeParticles(isMobile() ? 380 : 900);
     scene.add(particles);
 
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), isMobile() ? 0.28 : 0.34, 0.45, 0.9);
+    bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), quality.bloom, 0.45, 0.9);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     sizeComposer();
@@ -150,15 +164,18 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   /* ---------- Master timeline: time = scroll px ---------- */
   let tl = null;
   let marks = {};
+  let cards = [];
   const top = el => el.getBoundingClientRect().top + window.scrollY;
 
   function build() {
     const vh = window.innerHeight;
-    const svc = $('.services'), track = $('.track');
-    if (svc && track && !reduceMotion) {
-      const travel = Math.max(0, track.scrollWidth - window.innerWidth);
+    const svc = $('.services'), trackEl = $('.track');
+    if (svc && trackEl && !reduceMotion) {
+      trackEl.style.transform = 'none';
+      const travel = Math.max(0, trackEl.scrollWidth - window.innerWidth);
       svc.style.height = `${travel + vh}px`;
       marks.travel = travel;
+      cards = [...trackEl.children].map(el => ({ el, c: el.offsetLeft + el.offsetWidth / 2, last: '' }));
     }
     const maxScroll = document.documentElement.scrollHeight - vh;
     const sec = id => { const el = $(id); return el ? { t: top(el), h: el.offsetHeight } : { t: 0, h: 0 }; };
@@ -169,61 +186,83 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     Object.assign(S, base());
     if (reduceMotion) return;
     const P = poses();
+    const m = isMobile();
     tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
     let cursor = 0;
     const enter = (t, d = vh) => { const s = Math.max(cursor, t - d); const dur = Math.max(1, t - s); cursor = t; return [s, dur]; };
+    const io = 'power2.inOut';
 
-    // Hero → implant: move aside and explode the parts above the jaw
-    tl.to(S, { ...P.story, tiltX: 0.12, rotY: -0.35, modelY: 0.15, duration: imp.t }, 0)
+    // 1. Hero → implant: the camera swoops up and around while the tooth comes apart
+    tl.to(S, { ...P.story, tiltX: 0.08, rotY: -0.2, modelY: 0.15, lookY: 1.15, duration: imp.t }, 0)
+      .to(S, { orbit: -0.55, pitch: 0.32, dist: 9.5, roll: -0.05, ease: io, duration: imp.t }, 0)
       .to(S, { jaw: 1, screwY: 2.7, abutY: 2.85, crownY: 3.35, ease: 'power1.inOut', duration: imp.t }, 0);
     cursor = imp.t;
 
-    // Implant story (sticky section)
+    // 2. Implant story (sticky). Each step gets its own shot.
     const len = Math.max(1, imp.h - vh), u = len / 3, s0 = imp.t;
+    // step 1: push in on the screw as it drills down, turning
     tl.to(S, { screwY: 0, spin: TAU * 4, modelY: 0.55, ease: 'power1.inOut', duration: u }, s0)
       .to(S, { abutY: 1.3, crownY: 2.1, duration: u }, s0)
+      .to(S, { dist: m ? 7.4 : 7.6, orbit: -0.2, pitch: 0.12, roll: 0.06, lookY: -0.3, ease: io, duration: 0.9 * u }, s0)
+    // step 2: swing round into a macro on the bone as it integrates
       .to(S, { glow: 1, duration: 0.45 * u }, s0 + 1.05 * u)
       .to(S, { glow: 0.2, duration: 0.45 * u }, s0 + 1.55 * u)
       .to(S, { rotY: 0.6, duration: u }, s0 + u)
+      .to(S, { dist: m ? 6.8 : 7, orbit: 0.7, pitch: -0.06, roll: -0.05, lookY: -0.5, ease: io, duration: 0.9 * u }, s0 + u)
+    // step 3: pull back fast as the crown drops in; a hit of shake and light on impact
+      .to(S, { dist: 10, orbit: 0.15, pitch: 0.1, roll: 0, lookY: 0.2, ease: io, duration: 0.7 * u }, s0 + 2 * u)
       .to(S, { abutY: 0.04, ease: 'power2.in', duration: 0.45 * u }, s0 + 2.05 * u)
       .to(S, { crownY: 0.38, ease: 'power3.in', duration: 0.55 * u }, s0 + 2.35 * u)
-      .to(S, { rotY: -0.3, tiltX: 0.2, duration: 0.6 * u }, s0 + 2.2 * u);
+      .to(S, { rotY: -0.3, tiltX: 0.2, duration: 0.6 * u }, s0 + 2.2 * u)
+      .to(S, { shake: 1, flash: 1, duration: 0.02 * u }, s0 + 2.9 * u)
+      .to(S, { shake: 0, flash: 0, ease: 'power2.out', duration: 0.08 * u }, s0 + 2.92 * u);
     cursor = s0 + len;
     marks.story = { s0, len };
 
-    // About: the finished implant drifts to the side, turning, jaw dissolves
+    // 3. About: dutch angle, the camera keeps circling the finished implant
     let [s, d] = enter(ab.t + vh * 0.2, vh * 1.1);
-    tl.to(S, { ...P.about, jaw: 0, glow: 0, rotY: TAU - 0.4, tiltX: 0.35, modelY: 0.3, ease: 'power2.inOut', duration: d }, s);
+    tl.to(S, { ...P.about, jaw: 0, glow: 0, rotY: TAU - 0.4, tiltX: 0.35, modelY: 0.3, lookY: 0.25,
+      dist: 12, orbit: 0.9, pitch: 0.18, roll: 0.12, ease: io, duration: d }, s);
+    const abEnd = sv.t - vh;
+    if (abEnd > cursor + 10) { tl.to(S, { orbit: 1.9, roll: -0.06, duration: abEnd - cursor }, cursor); cursor = abEnd; }
 
-    // Services: comes to the centre behind the glass cards and spins with the track
+    // 4. Services: far wide shot, then a slow push-in while the camera orbits once
     [s, d] = enter(sv.t);
-    tl.to(S, { ...P.services, tiltX: 0.15, rotY: TAU + 0.2, ease: 'power2.inOut', duration: d }, s);
+    tl.to(S, { ...P.services, tiltX: 0.15, rotY: TAU + 0.2, lookY: 0.25, dist: 16, pitch: 0.05, roll: 0, ease: io, duration: d }, s);
     const svLen = Math.max(1, sv.h - vh);
-    tl.to(S, { rotY: TAU * 3 + 0.2, duration: svLen }, sv.t);
+    tl.to(S, { rotY: TAU * 3 + 0.2, duration: svLen }, sv.t)
+      .to(S, { orbit: 1.9 + TAU, duration: svLen }, sv.t)
+      .to(S, { dist: m ? 10 : 8.5, ease: 'power1.inOut', duration: svLen }, sv.t);
     cursor = sv.t + svLen;
 
-    // Whitening: only the crown remains, and turns white as you scroll
+    // 5. Whitening: a vertigo dolly-zoom into the crown, which whitens and starts to sparkle
     [s, d] = enter(wh.t);
-    tl.to(S, { ...P.white, parts: 0, modelY: -0.85, tiltX: 0.45, rotY: TAU * 3 - 0.5, white: 0, ease: 'power2.inOut', duration: d }, s);
+    tl.to(S, { ...P.white, parts: 0, modelY: -0.85, tiltX: 0.45, rotY: TAU * 3 - 0.5, white: 0, lookY: 0.1,
+      dist: 6.5, fov: 24, pitch: 0.35, orbit: 1.9 + TAU + 0.4, ease: io, duration: d }, s);
     const whLen = Math.max(1, wh.h - vh);
     tl.to(S, { white: 1, duration: whLen * 0.85, ease: 'power1.inOut' }, wh.t)
-      .to(S, { rotY: TAU * 3 + 0.5, duration: whLen }, wh.t);
+      .to(S, { rotY: TAU * 3 + 0.5, duration: whLen }, wh.t)
+      .to(S, { dist: 7.6, fov: 30, duration: whLen }, wh.t)
+      .to(S, { sparkle: 1, duration: whLen * 0.25 }, wh.t + whLen * 0.62);
     cursor = wh.t + whLen;
     marks.whiteRange = { start: wh.t, len: whLen * 0.85 };
 
-    // Tech: the intraoral scanner sweeps over the crown and digitises it
+    // 6. Tech: top-down shot that circles while the scanner digitises the crown
     [s, d] = enter(te.t);
-    tl.to(S, { ...P.tech, tiltX: 0.55, rotY: TAU * 3 - 0.2, scan: 1.35, ease: 'power2.inOut', duration: d }, s);
+    tl.to(S, { ...P.tech, tiltX: 0.55, rotY: TAU * 3 - 0.2, scan: 1.35, sparkle: 0, dist: 7, fov: 32, pitch: 0.55, orbit: 1.9 + TAU + 1.1, ease: io, duration: d }, s);
     const teLen = Math.max(1, te.h - vh);
     tl.to(S, { scanOn: 1, duration: teLen * 0.08 }, te.t)
       .to(S, { scan: -0.12, ease: 'power1.inOut', duration: teLen * 0.8 }, te.t)
       .to(S, { rotY: TAU * 3 + 0.9, duration: teLen }, te.t)
+      .to(S, { orbit: 1.9 + TAU * 1.75 + 1.1, pitch: 0.12, duration: teLen }, te.t)
       .to(S, { scanOn: 0, duration: teLen * 0.12 }, te.t + teLen * 0.82);
     cursor = te.t + teLen;
 
-    // FAQ: the tooth leaves
+    // 7. FAQ: the camera flies straight into the tooth, a flash, and it is gone
     [s, d] = enter(fq.t, vh * 0.9);
-    tl.to(S, { scale: 0.0001, y: '+=1.2', rotY: '+=' + Math.PI, ease: 'power2.in', duration: d }, s);
+    tl.to(S, { sx: 0, sy: 0, dist: 0.9, fov: 62, roll: 0.25, ease: 'power3.in', duration: d * 0.9 }, s)
+      .to(S, { flash: 1.4, duration: d * 0.12 }, s + d * 0.78)
+      .to(S, { scale: 0.0001, flash: 0, duration: d * 0.1 }, s + d * 0.9);
 
     tl.to({}, { duration: 1 }, Math.max(cursor, maxScroll));
     tl.time(0);
@@ -231,7 +270,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
   /* ---------- Frame ---------- */
   let smooth = window.scrollY;
-  let lastStep = -1, lastShade = -1, idle = 0, frameCount = 0, introRunning = !reduceMotion;
+  let lastStep = -1, lastShade = -1, idle = 0, frameCount = 0, introRunning = !reduceMotion, lastTrackP = -1;
   const topbar = $('.topbar'), bar = $('.progress span'), track = $('.track'), trackBar = $('.track__bar span');
   const v3 = new THREE.Vector3(), q = new THREE.Quaternion(), n = new THREE.Vector3();
 
@@ -242,13 +281,25 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     if (Math.abs(y - smooth) < 0.1) smooth = y;
     if (tl) tl.time(Math.min(smooth, tl.duration()));
 
-    // DOM bits tied to scroll
+    // DOM bits tied to scroll (transform/opacity only)
     topbar?.classList.toggle('is-scrolled', y > 40);
     if (bar && marks.maxScroll) bar.style.transform = `scaleX(${Math.min(1, y / marks.maxScroll)})`;
     if (track && marks.sv && marks.travel) {
       const p = clamp01((smooth - marks.sv.t) / Math.max(1, marks.sv.h - window.innerHeight));
-      track.style.transform = `translate3d(${-p * marks.travel}px,0,0)`;
-      if (trackBar) trackBar.style.transform = `scaleX(${p})`;
+      if (Math.abs(p - lastTrackP) > 0.0005) {
+        lastTrackP = p;
+        const tx = -p * marks.travel;
+        track.style.transform = `translate3d(${tx}px,0,0)`;
+        if (trackBar) trackBar.style.transform = `scaleX(${p})`;
+        // Coverflow: cards turn and recede the further they are from the centre
+        const half = window.innerWidth / 2;
+        for (const c of cards) {
+          const dd = Math.max(-1.6, Math.min(1.6, (c.c + tx - half) / half));
+          const a = Math.abs(dd);
+          const tr = `perspective(1100px) translateZ(${(-a * 140).toFixed(1)}px) rotateY(${(-dd * 22).toFixed(2)}deg) scale(${(1 - a * 0.05).toFixed(3)})`;
+          if (tr !== c.last) { c.el.style.transform = tr; c.el.style.opacity = (1 - Math.min(1, a) * 0.45).toFixed(3); c.last = tr; }
+        }
+      }
     }
     if (marks.story) {
       const p = (smooth - marks.story.s0) / marks.story.len;
@@ -260,7 +311,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
     if (!renderer) return;
 
-    // Measure real frame time while scrolling and step quality down if it's slow
+    // Measure real frame time and step quality down if the device can't keep up
     const now = performance.now();
     if (dtMs && now > quality.settleAt && quality.level < 3 && !document.hidden) {
       quality.samples.push(dtMs);
@@ -270,19 +321,20 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
       }
     }
 
-    // Nothing visible is moving: skip the GPU work entirely
+    // Nothing visible is moving: skip or halve the GPU work
     const moving = Math.abs(y - smooth) > 0.5 || Math.abs(target.x - pointer.x) > 0.002 || Math.abs(target.y - pointer.y) > 0.002;
     if (!moving && !introRunning && !(tooth.pivot.visible || particles.visible)) return;
-    if (!moving && !introRunning && (frameCount++ & 1)) return; // idle sway at half rate
+    if (!moving && !introRunning && S.sparkle < 0.05 && (frameCount++ & 1)) return;
 
     pointer.x += (target.x - pointer.x) * k * 0.45;
     pointer.y += (target.y - pointer.y) * k * 0.45;
     if (!reduceMotion) idle += 0.005;
 
+    /* Tooth */
     const t = tooth;
-    t.pivot.position.set(S.x, S.y, 0);
-    t.pivot.scale.setScalar(Math.max(0.0001, S.scale * I.scale));
-    t.pivot.visible = S.scale * I.scale > 0.01;
+    const sc = Math.max(0.0001, S.scale * I.scale);
+    t.pivot.scale.setScalar(sc);
+    t.pivot.visible = sc > 0.01;
     t.pivot.rotation.set(S.tiltX + pointer.y * 0.12, S.rotY + I.rot + pointer.x * 0.3 + Math.sin(idle) * 0.15, 0);
     t.model.position.y = S.modelY + Math.sin(idle * 1.7) * 0.04;
     t.screw.position.y = S.screwY + I.screw;
@@ -293,8 +345,33 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     t.setJaw(S.jaw, S.glow);
     t.enamel.color.lerpColors(YELLOW, WHITE, clamp01(S.white));
     t.enamel.emissiveIntensity = Math.max(0, S.white - 0.85) * 0.5 * (S.parts < 0.5 ? 1 : 0);
+    sparkles.visible = S.sparkle > 0.01;
+    if (sparkles.visible) {
+      sparkles.rotation.y = idle * 2.2;
+      sparkles.material.opacity = S.sparkle * (0.55 + 0.45 * Math.sin(idle * 14));
+      sparkles.material.size = 0.07 + 0.03 * Math.sin(idle * 9 + 1);
+    }
 
-    // Scanner clipping planes, computed in world space from the crown's frame
+    /* Camera: orbit around the tooth, aim, roll, then frame it on screen with a view offset */
+    const W = window.innerWidth, H = window.innerHeight;
+    const dist = Math.max(0.6, S.dist + I.dist);
+    const orb = S.orbit + pointer.x * 0.08;
+    const pit = S.pitch + pointer.y * 0.05;
+    const look = S.lookY * sc;
+    const jx = S.shake ? (Math.random() - 0.5) * 0.12 * S.shake : 0;
+    const jy = S.shake ? (Math.random() - 0.5) * 0.12 * S.shake : 0;
+    camera.position.set(Math.sin(orb) * Math.cos(pit) * dist + jx, look + Math.sin(pit) * dist + jy, Math.cos(orb) * Math.cos(pit) * dist);
+    camera.lookAt(0, look, 0);
+    camera.rotateZ(S.roll + I.roll);
+    camera.fov = S.fov + I.fov;
+    const cx = S.sx * I.center, cy = S.sy;
+    camera.setViewOffset(W, H, -cx * W, cy * H, W, H);
+    camera.updateProjectionMatrix();
+    scene.fog.near = Math.max(1, dist - 2);
+    scene.fog.far = dist + 14;
+    if (bloom.enabled) bloom.strength = quality.bloom + S.flash * 1.1;
+
+    /* Scanner clipping planes, computed in world space from the crown's frame */
     t.pivot.updateMatrixWorld(true);
     t.crown.getWorldQuaternion(q);
     n.set(0, 1, 0).applyQuaternion(q);
@@ -308,8 +385,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     t.scanRingMat.opacity = 0.9 * S.scanOn;
 
     particles.rotation.y = idle * 0.25 + smooth * 0.00008;
-    particles.position.y = smooth * 0.0012 + pointer.y * -0.15;
-    particles.position.x = pointer.x * -0.2;
+    particles.position.y = smooth * 0.0012;
 
     composer.render();
   }
@@ -334,6 +410,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
         camera.updateProjectionMatrix();
       }
       build();
+      lastTrackP = -1;
       ScrollTrigger.refresh();
     }, 120);
   };
@@ -351,15 +428,17 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
   build();
 
-  /* ---------- Intro ---------- */
+  /* ---------- Intro: macro close-up on the crown, then the camera pulls back ---------- */
   const html = document.documentElement;
   const heroIn = () => {
     onIntroDone?.();
     gsap.timeline({ defaults: { ease: 'expo.out' } })
-      .to(I, { scale: 1, duration: 2 }, 0)
-      .to(I, { rot: 0, duration: 2.4 }, 0)
-      .to(I, { crown: 0, screw: 0, duration: 1.8, ease: 'power3.out' }, 0.5)
-      .from('.hero__lead, .hero__actions, .topbar', { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.08 }, 0.6)
+      .to(I, { scale: 1, duration: 1.6 }, 0)
+      .to(I, { dist: 0, fov: 0, roll: 0, duration: 3 }, 0)
+      .to(I, { rot: 0, duration: 2.8 }, 0)
+      .to(I, { center: 1, duration: 2.6, ease: 'power3.inOut' }, 0.4)
+      .to(I, { crown: 0, screw: 0, duration: 1.8, ease: 'power3.out' }, 0.7)
+      .from('.hero__lead, .hero__actions, .topbar', { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.08 }, 0.8)
       .add(() => { introRunning = false; quality.settleAt = performance.now() + 500; });
   };
 
@@ -372,10 +451,10 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
       .to(count, { v: 100, duration: 2, onUpdate: () => { if (counter) counter.textContent = Math.round(count.v); } }, 0)
       .from('.loader__name', { autoAlpha: 0, y: 12, duration: 0.8 }, 0.5)
       .to('.loader__tooth', { fill: 'rgba(242,238,228,1)', duration: 0.5 }, 1.9)
-      .to('.loader__center', { autoAlpha: 0, scale: 0.94, duration: 0.6 }, 2.5)
+      .to('.loader__center', { autoAlpha: 0, scale: 1.6, duration: 0.7, ease: 'power3.in' }, 2.4)
       .to('.loader__half--top', { yPercent: -100, duration: 1.2, ease: 'expo.inOut' }, 2.8)
       .to('.loader__half--bot', { yPercent: 100, duration: 1.2, ease: 'expo.inOut' }, 2.8)
-      .add(() => heroIn(), 3.1)
+      .add(() => heroIn(), 2.9)
       .add(() => {
         html.classList.remove('has-loader');
         try { sessionStorage.setItem('ml-intro', '1'); } catch {}
@@ -396,27 +475,52 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
 function clamp01(v) { return Math.min(1, Math.max(0, v)); }
 
-function makeParticles(count) {
-  const g = new THREE.BufferGeometry();
-  const pos = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    pos[i * 3] = (Math.random() - 0.5) * 22;
-    pos[i * 3 + 1] = 9 - Math.random() * 42;
-    pos[i * 3 + 2] = -Math.random() * 12 + 3;
-  }
-  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+function dotTexture(inner = 'rgba(190,235,245,.5)') {
   const c = document.createElement('canvas');
   c.width = c.height = 64;
   const x = c.getContext('2d');
   const grd = x.createRadialGradient(32, 32, 0, 32, 32, 32);
   grd.addColorStop(0, 'rgba(255,255,255,1)');
-  grd.addColorStop(0.3, 'rgba(190,235,245,.5)');
+  grd.addColorStop(0.3, inner);
   grd.addColorStop(1, 'rgba(190,235,245,0)');
   x.fillStyle = grd;
   x.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+}
+
+function makeParticles(count) {
+  const g = new THREE.BufferGeometry();
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    // A tall ring around the tooth so the orbiting camera always has depth around it
+    const a = Math.random() * TAU, r = 3.5 + Math.random() * 12;
+    pos[i * 3] = Math.cos(a) * r;
+    pos[i * 3 + 1] = 9 - Math.random() * 42;
+    pos[i * 3 + 2] = Math.sin(a) * r;
+  }
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const m = new THREE.PointsMaterial({
-    size: 0.09, map: new THREE.CanvasTexture(c), transparent: true, opacity: 0.75,
+    size: 0.08, map: dotTexture(), transparent: true, opacity: 0.75,
     depthWrite: false, blending: THREE.AdditiveBlending, color: 0xa9dcea
   });
   return new THREE.Points(g, m);
+}
+
+function makeSparkles(count) {
+  const g = new THREE.BufferGeometry();
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * TAU, h = Math.random() * 1.4 - 0.1, r = 0.75 + Math.random() * 0.45;
+    pos[i * 3] = Math.cos(a) * r;
+    pos[i * 3 + 1] = h;
+    pos[i * 3 + 2] = Math.sin(a) * r;
+  }
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const m = new THREE.PointsMaterial({
+    size: 0.08, map: dotTexture('rgba(255,250,235,.7)'), transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending, color: 0xfffaf0
+  });
+  const p = new THREE.Points(g, m);
+  p.visible = false;
+  return p;
 }

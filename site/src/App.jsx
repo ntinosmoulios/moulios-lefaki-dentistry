@@ -12,6 +12,7 @@ import Magnet from './reactbits/Magnet.jsx';
 import ClickSpark from './reactbits/ClickSpark.jsx';
 import StarBorder from './reactbits/StarBorder.jsx';
 import SpotlightCard from './reactbits/SpotlightCard.jsx';
+import TiltedCard from './reactbits/TiltedCard.jsx';
 
 const PHONE = '22350 51834';
 const TEL = 'tel:+302235051834';
@@ -25,6 +26,14 @@ const SERVICES = [
   ['Ορθοδοντική', 'Διόρθωση της θέσης των δοντιών και της σύγκλεισης.'],
   ['Παιδιά', 'Καθαρισμός, φθορίωση, προληπτικές εμφράξεις και έλεγχος κάθε έξι μήνες.'],
   ['Πρόληψη', 'Έλεγχος και καθαρισμός δύο φορές τον χρόνο, και οδηγίες για βουρτσάκια, νήμα και στοματικά διαλύματα.']
+];
+
+// Photos: put the files in site/public/images/doctors/ and set the paths here
+const DOCTORS = [
+  { ini: 'ΜΜ', name: 'Μιχάλης Μούλιος', photo: './images/doctors/moulios.webp', focus: 'Μικροχειρουργική και εμφυτευματολογία.',
+    bio: 'Εξειδίκευση στη μικροχειρουργική και την εμφυτευματολογία στο Πανεπιστήμιο της Κολωνίας. Μέλος της Ευρωπαϊκής Ένωσης Εμφυτευματολογίας (BDIZ EDI).' },
+  { ini: 'ΜΛ', name: 'Μαρία Λεφάκη', photo: './images/doctors/lefaki.webp', focus: 'Αισθητική οδοντιατρική: όψεις, bonding, λευκά σφραγίσματα και λεύκανση.',
+    bio: 'Μεταπτυχιακές σπουδές στην αισθητική οδοντιατρική: όψεις, λευκά σφραγίσματα, bonding και λεύκανση.' }
 ];
 
 const SHADES = [['A4', '#D9C9A3'], ['A3.5', '#E2D3B0'], ['A3', '#E8DCBE'], ['A2', '#EEE4CC'], ['A1', '#F2EBD8'], ['B1', '#F6F1E4'], ['BL2', '#FAF8F0']];
@@ -162,15 +171,28 @@ export default function App() {
               <SplitText text="Δύο οδοντίατροι, ένα ιατρείο, και χρόνος για να σας εξηγήσουμε τι κάνουμε." tag="span" splitType="words" delay={40} effect="rise" mask textAlign="left" />
             </h2>
             <div className="doctors">
-              {[
-                ['ΜΜ', 'Μιχάλης Μούλιος', 'Εξειδίκευση στη μικροχειρουργική και την εμφυτευματολογία στο Πανεπιστήμιο της Κολωνίας. Μέλος της Ευρωπαϊκής Ένωσης Εμφυτευματολογίας (BDIZ EDI).'],
-                ['ΜΛ', 'Μαρία Λεφάκη', 'Μεταπτυχιακές σπουδές στην αισθητική οδοντιατρική: όψεις, λευκά σφραγίσματα, bonding και λεύκανση.']
-              ].map(([ini, name, bio]) => (
+              {DOCTORS.map(({ ini, name, bio, focus, photo }) => (
                 <SpotlightCard key={name} className="doctor" theme="dark" spotlightColor="rgba(191,244,255,0.35)" intensity={0.2} spotlightSize={320}>
-                  <div className="doctor__photo" role="img" aria-label={`Φωτογραφία: ${name} (σύντομα)`}><span>{ini}</span></div>
+                  <TiltedCard
+                    className="doctor__tilt"
+                    imageSrc={photo || undefined}
+                    altText={`${name}, χειρουργός οδοντίατρος`}
+                    containerWidth="100%" containerHeight="320px" imageWidth="100%" imageHeight="320px"
+                    rotateAmplitude={14} scaleOnHover={1.04} radius={18} glare={0.35} shadow={0.6}
+                    showTooltip={false} gyroscope
+                    backContent={
+                      <div className="doctor__back">
+                        <p>{focus}</p>
+                        <a className="btn btn--small" href={TEL} onClick={e => e.stopPropagation()}>Ραντεβού: {PHONE}</a>
+                      </div>
+                    }
+                  >
+                    {!photo && <div className="doctor__photo" role="img" aria-label={`Φωτογραφία: ${name} (σύντομα)`}><span>{ini}</span></div>}
+                  </TiltedCard>
                   <div>
                     <h3>{name}</h3>
                     <p className="doctor__role">Χειρουργός οδοντίατρος</p>
+                    <p className="doctor__hint">Πατήστε τη φωτογραφία για να γυρίσει</p>
                     <p>{bio}</p>
                   </div>
                 </SpotlightCard>
