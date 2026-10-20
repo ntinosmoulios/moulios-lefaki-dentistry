@@ -179,6 +179,9 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     }
     const maxScroll = document.documentElement.scrollHeight - vh;
     const sec = id => { const el = $(id); return el ? { t: top(el), h: el.offsetHeight } : { t: 0, h: 0 }; };
+    const film = sec('.film');
+    const filmEnd = film.h ? film.t + film.h - vh : 0;
+    marks.filmCover = film.h ? film.t + (film.h - vh) * 0.96 : -1;
     const imp = sec('.implant'), ab = sec('.about'), sv = sec('.services'), wh = sec('.whitening'), te = sec('.tech'), fq = sec('.faq');
     marks = { ...marks, imp, ab, sv, wh, te, fq, maxScroll };
 
@@ -193,9 +196,10 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     const io = 'power2.inOut';
 
     // 1. Hero → implant: the camera swoops up and around while the tooth comes apart
-    tl.to(S, { ...P.story, tiltX: 0.08, rotY: -0.2, modelY: 0.15, lookY: 1.15, duration: imp.t }, 0)
-      .to(S, { orbit: -0.55, pitch: 0.32, dist: 9.5, roll: -0.05, ease: io, duration: imp.t }, 0)
-      .to(S, { jaw: 1, screwY: 2.7, abutY: 2.85, crownY: 3.35, ease: 'power1.inOut', duration: imp.t }, 0);
+    const d0 = Math.max(1, imp.t - filmEnd);
+    tl.to(S, { ...P.story, tiltX: 0.08, rotY: -0.2, modelY: 0.15, lookY: 1.15, duration: d0 }, filmEnd)
+      .to(S, { orbit: -0.55, pitch: 0.32, dist: 9.5, roll: -0.05, ease: io, duration: d0 }, filmEnd)
+      .to(S, { jaw: 1, screwY: 2.7, abutY: 2.85, crownY: 3.35, ease: 'power1.inOut', duration: d0 }, filmEnd);
     cursor = imp.t;
 
     // 2. Implant story (sticky). Each step gets its own shot.
@@ -323,6 +327,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
     // Nothing visible is moving: skip or halve the GPU work
     const moving = Math.abs(y - smooth) > 0.5 || Math.abs(target.x - pointer.x) > 0.002 || Math.abs(target.y - pointer.y) > 0.002;
+    if (marks.filmCover > 0 && smooth < marks.filmCover) return; // the film covers the 3D scene
     if (!moving && !introRunning && !(tooth.pivot.visible || particles.visible)) return;
     if (!moving && !introRunning && S.sparkle < 0.05 && (frameCount++ & 1)) return;
 

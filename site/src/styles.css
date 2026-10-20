@@ -7,6 +7,8 @@
 @font-face { font-family: "Commissioner"; src: url(./assets/fonts/commissioner-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0000-024F, U+2000-206F, U+20AC; }
 @font-face { font-family: "Commissioner"; src: url(./assets/fonts/commissioner-greek-500-normal.woff2) format("woff2"); font-weight: 500; font-display: swap; unicode-range: U+0370-03FF, U+1F00-1FFF; }
 @font-face { font-family: "Commissioner"; src: url(./assets/fonts/commissioner-latin-500-normal.woff2) format("woff2"); font-weight: 500; font-display: swap; unicode-range: U+0000-024F, U+2000-206F, U+20AC; }
+@font-face { font-family: "Commissioner"; src: url(./assets/fonts/commissioner-greek-900-normal.woff2) format("woff2"); font-weight: 900; font-display: swap; unicode-range: U+0370-03FF, U+1F00-1FFF; }
+@font-face { font-family: "Commissioner"; src: url(./assets/fonts/commissioner-latin-900-normal.woff2) format("woff2"); font-weight: 900; font-display: swap; unicode-range: U+0000-024F, U+2000-206F, U+20AC; }
 @font-face { font-family: "Commissioner"; src: url(./assets/fonts/commissioner-greek-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; unicode-range: U+0370-03FF, U+1F00-1FFF; }
 @font-face { font-family: "Commissioner"; src: url(./assets/fonts/commissioner-latin-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; unicode-range: U+0000-024F, U+2000-206F, U+20AC; }
 
@@ -129,6 +131,39 @@ main, .footer { position: relative; z-index: 2; }
   .hero__scroll { display: none; }
   .hero__lead { font-size: var(--step-0); }
 }
+
+/* ---------- Film (scroll-driven walk-in) ---------- */
+.film { height: 880vh; position: relative; z-index: 3; }
+.film__sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.film__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; background: var(--night); }
+.film__ov { position: absolute; margin: 0; visibility: hidden; will-change: transform, opacity; }
+.film__mega {
+  font: 900 min(15vw, 16rem, calc(136vw / var(--len))) / 0.86 var(--sans);
+  letter-spacing: -0.045em; color: #fff; text-transform: uppercase;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, .25), 0 12px 70px rgba(0, 0, 0, .45);
+  display: flex; flex-direction: column;
+}
+.film__ov--left { left: var(--gutter); top: 24%; }
+.film__ov--right { right: var(--gutter); top: 26%; text-align: right; align-items: flex-end; }
+.film__ov--center { left: 0; right: 0; top: 30%; text-align: center; align-items: center; }
+.film__ov--bottom-left { left: var(--gutter); bottom: 12vh; }
+.film__ov--bottom-right { right: var(--gutter); bottom: 12vh; text-align: right; }
+.film__small { max-width: 34ch; font: 500 var(--step-1)/1.35 var(--sans); color: var(--enamel); text-shadow: 0 2px 20px rgba(0, 0, 0, .55); }
+.film__cta { position: absolute; }
+.film__hint { position: absolute; left: 50%; bottom: 28px; width: 1px; height: 56px; background: rgba(255, 255, 255, .25); overflow: hidden; translate: -50% 0; }
+.film__hint span { position: absolute; left: 0; width: 1px; height: 20px; background: #fff; animation: drip 2.2s cubic-bezier(.6, 0, .3, 1) infinite; }
+@media (max-width: 760px) {
+  .film { height: 780vh; }
+  .film__ov--left, .film__ov--right, .film__ov--center { top: 18%; }
+  .film__small { font-size: var(--step-0); max-width: 28ch; }
+}
+
+/* ---------- Statement ---------- */
+.statement { background: #EBC9C3; color: #142B2E; padding: clamp(110px, 20vh, 220px) 0; position: relative; z-index: 3; }
+.statement__text { margin: 0; font: 900 clamp(2.8rem, 1rem + 8vw, 9rem)/0.9 var(--sans); letter-spacing: -0.04em; text-transform: uppercase; max-width: 14ch; }
+.statement .scroll-float { font: inherit; margin: 0; }
+.statement__float.scroll-float-text { font: inherit; text-align: left; }
+.statement__sub { margin: 1.4em 0 0; max-width: 40ch; font-size: var(--step-1); line-height: 1.4; color: #3b4a4c; }
 
 /* ---------- Sticky story sections ---------- */
 .sticky { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }

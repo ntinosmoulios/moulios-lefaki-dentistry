@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { startEngine } from './scene/engine.js';
+import { startFilm } from './scene/film.js';
+import { SCENES, OVERLAYS } from './filmContent.js';
 
 // React Bits components (MIT + Commons Clause, see src/reactbits/LICENSE.md)
 import SplitText from './reactbits/SplitText.jsx';
@@ -65,6 +67,37 @@ function MagnetBtn({ href, children, className = 'btn' }) {
   );
 }
 
+function Film() {
+  const section = useRef(null), canvas = useRef(null), els = useRef([]);
+  useEffect(() => startFilm({
+    section: section.current, canvas: canvas.current, scenes: SCENES,
+    overlays: OVERLAYS.map((o, i) => ({ ...o, el: els.current[i] }))
+  }), []);
+  return (
+    <section className="film" id="top" ref={section} aria-label="Μπείτε στο ιατρείο">
+      <div className="film__sticky">
+        <canvas ref={canvas} className="film__canvas" aria-hidden="true" />
+        {OVERLAYS.map((o, i) => {
+          const ref = el => { els.current[i] = el; };
+          const cls = `film__ov film__ov--${o.pos}`;
+          if (o.kind === 'mega') {
+            const len = Math.max(...o.lines.map(l => l.length));
+            const Tag = i === 0 ? 'h1' : 'p';
+            return (
+              <Tag key={i} ref={ref} className={`${cls} film__mega`} style={{ '--len': len }} aria-label={i === 0 ? 'Μούλιος & Λεφάκη, Χειρουργοί Οδοντίατροι' : undefined}>
+                {o.lines.map(l => <span key={l}>{l}</span>)}
+              </Tag>
+            );
+          }
+          if (o.kind === 'cta') return <a key={i} ref={ref} className={`${cls} btn film__cta`} href={TEL}>{o.text}</a>;
+          return <p key={i} ref={ref} className={`${cls} film__small`}>{o.text}</p>;
+        })}
+        <div className="film__hint" aria-hidden="true"><span /></div>
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   const [step, setStep] = useState(0);
   const [shade, setShade] = useState(6);
@@ -117,33 +150,8 @@ export default function App() {
       <div className="progress" aria-hidden="true"><span /></div>
 
       <main id="main">
-        {/* HERO */}
-        <section className="hero" id="top">
-          <div className="hero__text">
-            <h1 className="hero__title" aria-label="Μούλιος Λεφάκη">
-              <span className="line" aria-hidden="true">
-                {introDone
-                  ? <SplitText text="Μούλιος" tag="span" splitType="chars" delay={55} duration={1.3} effect="rise" mask textAlign="left" threshold={0} rootMargin="0px" />
-                  : <span className="ghost">Μούλιος</span>}
-              </span>
-              <span className="line line--indent" aria-hidden="true">
-                {introDone
-                  ? <SplitText text="Λεφάκη" tag="span" splitType="chars" delay={55} duration={1.3} effect="flip" textAlign="left" threshold={0} rootMargin="0px" />
-                  : <span className="ghost">Λεφάκη</span>}
-              </span>
-            </h1>
-            <p className="hero__lead"><ShinyText className="hero__who" text="Χειρουργοί οδοντίατροι στον Μώλο Φθιώτιδας." color="#BFF4FF" shineColor="#FFFFFF" speed={3.2} /> Εμφυτεύματα σε δικό μας χειρουργικό χώρο, αισθητική αποκατάσταση και τακτική φροντίδα για όλη την οικογένεια. Με ραντεβού, Δευτέρα έως Παρασκευή.</p>
-            <div className="hero__actions">
-              <Magnet padding={70} magnetStrength={3} wrapperClassName="magnet">
-                <StarBorder as="a" href={TEL} className="cta" color="#BFF4FF" backgroundColor="#F2EEE4" textColor="#0F1C1F" borderColor="rgba(191,244,255,.35)" radius={999} thickness={2} duration={3} glow={0.9} sparkle>
-                  Κλείστε ραντεβού: {PHONE}
-                </StarBorder>
-              </Magnet>
-              <a className="link" href="#emfytevmata">Δείτε πώς τοποθετείται ένα εμφύτευμα</a>
-            </div>
-          </div>
-          <div className="hero__scroll" aria-hidden="true"><span /></div>
-        </section>
+        {/* FILM: scroll-driven walk into the clinic, on real photos */}
+        <Film />
 
         {/* IMPLANT STORY */}
         <section className="implant" id="emfytevmata" aria-labelledby="implant-title">
@@ -213,6 +221,16 @@ export default function App() {
               skewWithVelocity={6}
               outlineAlternate
             />
+          </div>
+        </section>
+
+        {/* STATEMENT */}
+        <section className="statement" aria-label="Η φιλοσοφία μας">
+          <div className="wrap">
+            <p className="statement__text">
+              <ScrollFloat textClassName="statement__float" animationDuration={1} stagger={0.02}>Ίδια φροντίδα στις 9:00 και στις 17:00.</ScrollFloat>
+            </p>
+            <p className="statement__sub">Το πρώτο και το τελευταίο ραντεβού της ημέρας παίρνουν τον ίδιο χρόνο και την ίδια προσοχή.</p>
           </div>
         </section>
 
