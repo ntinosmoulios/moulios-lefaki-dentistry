@@ -1,12 +1,22 @@
 # Μούλιος – Λεφάκη, Χειρουργοί Οδοντίατροι
 
-Στατική ιστοσελίδα (HTML/CSS/JS) για το οδοντιατρείο στον Μώλο.
+Ιστοσελίδα του οδοντιατρείου στον Μώλο. React + Vite, με GSAP, Lenis, Three.js και React Bits.
 
-- `index.html`: όλο το περιεχόμενο
-- `css/style.css`: εμφάνιση
-- `js/main.js`: 3D εμφύτευμα (Three.js) και animations κύλισης (GSAP + Lenis)
-- `vendor/`, `fonts/`: βιβλιοθήκες και γραμματοσειρές, τοπικά (καμία εξάρτηση από τρίτους servers)
-- `images/`: φωτογραφίες
+## Πού είναι τι
+- `site/`: ο πηγαίος κώδικας (εδώ γίνονται οι αλλαγές)
+  - `site/src/App.jsx`: όλο το περιεχόμενο και τα κείμενα
+  - `site/src/styles.css`: εμφάνιση
+  - `site/src/scene/`: το 3D δόντι και τα animations κύλισης
+  - `site/src/reactbits/`: components από το React Bits (άδεια: `site/src/reactbits/LICENSE.md`)
+- `index.html`, `assets/`, `images/` στη ρίζα: η **έτοιμη** ιστοσελίδα (παράγεται αυτόματα, μην την αλλάζετε με το χέρι)
 
-## Δημοσίευση (Cloudflare Pages)
-Framework preset: None · Build command: (κενό) · Output directory: `/`
+## Εντολές
+```
+npm install
+npm run dev     # τοπική προεπισκόπηση με ζωντανές αλλαγές
+npm run build   # ξαναφτιάχνει την έτοιμη ιστοσελίδα στη ρίζα
+```
+
+## Δημοσίευση
+GitHub Pages: Settings → Pages → Deploy from a branch → `main` / `(root)`.
+Cloudflare Pages: Build command κενό, Output directory `/`.
