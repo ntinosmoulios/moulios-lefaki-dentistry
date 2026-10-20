@@ -8,7 +8,6 @@ export function buildTooth() {
 
   const enamel = new THREE.MeshPhysicalMaterial({
     color: 0xf8f6ee, roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.1,
-    sheen: 0.5, sheenColor: new THREE.Color(0xdff1f5),
     emissive: new THREE.Color(0xffffff), emissiveIntensity: 0,
     clippingPlanes: [planeSolid]
   });
@@ -22,7 +21,7 @@ export function buildTooth() {
     [0.0, 0.0], [0.38, 0.0], [0.44, 0.08], [0.56, 0.32], [0.63, 0.55], [0.62, 0.78],
     [0.55, 0.95], [0.42, 1.05], [0.25, 1.08], [0.1, 1.02], [0.0, 1.0]
   ].map(([x, y]) => new THREE.Vector2(x, y));
-  const crownGeo = new THREE.LatheGeometry(new THREE.SplineCurve(profile).getPoints(90), 128);
+  const crownGeo = new THREE.LatheGeometry(new THREE.SplineCurve(profile).getPoints(64), 96);
   {
     const p = crownGeo.attributes.position, v = new THREE.Vector3();
     for (let i = 0; i < p.count; i++) {
@@ -85,7 +84,7 @@ export function buildTooth() {
       return target.set(Math.cos(a) * r, y, Math.sin(a) * r);
     }
   }
-  const thread = new THREE.Mesh(new THREE.TubeGeometry(new Helix(), 600, 0.05, 8, false), titanium);
+  const thread = new THREE.Mesh(new THREE.TubeGeometry(new Helix(), 380, 0.05, 6, false), titanium);
   screw.add(core, apex, thread);
 
   /* Jaw block */

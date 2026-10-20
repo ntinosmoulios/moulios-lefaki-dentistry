@@ -110,9 +110,6 @@ export default function App() {
         {/* HERO */}
         <section className="hero" id="top">
           <div className="hero__text">
-            <p className="hero__kicker">
-              <ShinyText text="Χειρουργοί οδοντίατροι στον Μώλο Φθιώτιδας" color="#9DB1B0" shineColor="#F2EEE4" speed={3.2} />
-            </p>
             <h1 className="hero__title" aria-label="Μούλιος Λεφάκη">
               <span className="line" aria-hidden="true">
                 {introDone
@@ -125,7 +122,7 @@ export default function App() {
                   : <span className="ghost">Λεφάκη</span>}
               </span>
             </h1>
-            <p className="hero__lead">Εμφυτεύματα σε δικό μας χειρουργικό χώρο, αισθητική αποκατάσταση και τακτική φροντίδα για όλη την οικογένεια. Με ραντεβού, Δευτέρα έως Παρασκευή.</p>
+            <p className="hero__lead"><ShinyText className="hero__who" text="Χειρουργοί οδοντίατροι στον Μώλο Φθιώτιδας." color="#BFF4FF" shineColor="#FFFFFF" speed={3.2} /> Εμφυτεύματα σε δικό μας χειρουργικό χώρο, αισθητική αποκατάσταση και τακτική φροντίδα για όλη την οικογένεια. Με ραντεβού, Δευτέρα έως Παρασκευή.</p>
             <div className="hero__actions">
               <Magnet padding={70} magnetStrength={3} wrapperClassName="magnet">
                 <StarBorder as="a" href={TEL} className="cta" color="#BFF4FF" backgroundColor="#F2EEE4" textColor="#0F1C1F" borderColor="rgba(191,244,255,.35)" radius={999} thickness={2} duration={3} glow={0.9} sparkle>
@@ -180,7 +177,7 @@ export default function App() {
               ))}
             </div>
             <div className="about__body">
-              <ScrollReveal baseOpacity={0.12} enableBlur blurStrength={6} baseRotation={0} textClassName="about__reveal">
+              <ScrollReveal baseOpacity={0.14} enableBlur={false} baseRotation={0} textClassName="about__reveal">
                 Στόχος μας είναι μια θεραπεία ανώδυνη και ποιοτική, προσαρμοσμένη σε κάθε άνθρωπο. Δεχόμαστε με ραντεβού, και για επείγοντα περιστατικά συνεννοούμαστε τηλεφωνικά για να σας δούμε το συντομότερο.
               </ScrollReveal>
             </div>
@@ -222,7 +219,7 @@ export default function App() {
               <h2 id="whitening-title" className="h2">
                 <SplitText text="Λεύκανση, με μέτρο" tag="span" splitType="chars" delay={35} effect="skew" textAlign="left" />
               </h2>
-              <p>Χρησιμοποιούμε το σύστημα Beyond Polus από το <CountUp from={1990} to={2008} duration={1.8} />, με δύο υλικά σε διαφορετικές συγκεντρώσεις. Έτσι διαλέγουμε μαζί σας πόσο πιο λευκά θέλετε τα δόντια σας, ώστε να δείχνουν φυσικά.</p>
+              <p>Χρησιμοποιούμε το σύστημα Beyond Polus, με δύο υλικά σε διαφορετικές συγκεντρώσεις. Έτσι διαλέγουμε μαζί σας πόσο πιο λευκά θέλετε τα δόντια σας, ώστε να δείχνουν φυσικά.</p>
               <figure className="shade">
                 <div className="shade__guide" role="group" aria-label="Χρωματολόγιο δοντιών">
                   {SHADES.map(([name, c], i) => (
@@ -288,7 +285,7 @@ export default function App() {
                 <table className="hours">
                   <caption>Ωράριο, μόνο με ραντεβού</caption>
                   <tbody>
-                    <tr><th scope="row">Δευτέρα – Παρασκευή</th><td>09:00 – 20:00</td></tr>
+                    <tr><th scope="row">Δευτέρα – Παρασκευή</th><td>09:00 – 17:00</td></tr>
                     <tr><th scope="row">Σάββατο – Κυριακή</th><td>Κλειστά</td></tr>
                   </tbody>
                 </table>

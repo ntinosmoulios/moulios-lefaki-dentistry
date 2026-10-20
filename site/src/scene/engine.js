@@ -28,7 +28,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   /* ---------- Smooth scroll ---------- */
   let lenis = null;
   if (!reduceMotion) {
-    lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9 });
+    lenis = new Lenis({ lerp: 0.12, wheelMultiplier: 0.9 });
     lenis.on('scroll', ScrollTrigger.update);
     const raf = t => lenis.raf(t * 1000);
     gsap.ticker.add(raf);
@@ -86,10 +86,13 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   const I = { scale: reduceMotion ? 1 : 0, rot: reduceMotion ? 0 : -2.4, crown: reduceMotion ? 0 : 1.4, screw: reduceMotion ? 0 : -1 };
 
   let tooth, composer, bloom, scene, camera, particles;
+  // Adaptive quality: start reasonable, step down if the device can't keep up
+  const quality = { dpr: 1, level: 0, samples: [], settleAt: 0 };
   const pointer = { x: 0, y: 0 }, target = { x: 0, y: 0 };
 
   if (renderer) {
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile() ? 1.5 : 2));
+    quality.dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.25 : 1.5);
+    renderer.setPixelRatio(quality.dpr);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -122,9 +125,26 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), isMobile() ? 0.28 : 0.34, 0.45, 0.9);
+    bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), isMobile() ? 0.28 : 0.34, 0.45, 0.9);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
+    sizeComposer();
+  }
+
+  // Bloom runs at half resolution: it is a blur, so nobody can tell, and it costs a quarter
+  function sizeComposer() {
+    composer.setPixelRatio(quality.dpr);
+    composer.setSize(window.innerWidth, window.innerHeight);
+    bloom.setSize(Math.round(window.innerWidth * quality.dpr / 2), Math.round(window.innerHeight * quality.dpr / 2));
+  }
+
+  function degrade() {
+    quality.level++;
+    if (quality.level === 1) { quality.dpr = Math.min(quality.dpr, 1); renderer.setPixelRatio(quality.dpr); sizeComposer(); }
+    else if (quality.level === 2) { bloom.enabled = false; }
+    else if (quality.level === 3) { particles.visible = false; }
+    quality.samples = [];
+    quality.settleAt = performance.now() + 1500;
   }
 
   /* ---------- Master timeline: time = scroll px ---------- */
@@ -211,13 +231,13 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
   /* ---------- Frame ---------- */
   let smooth = window.scrollY;
-  let lastStep = -1, lastShade = -1, idle = 0;
+  let lastStep = -1, lastShade = -1, idle = 0, frameCount = 0, introRunning = !reduceMotion;
   const topbar = $('.topbar'), bar = $('.progress span'), track = $('.track'), trackBar = $('.track__bar span');
   const v3 = new THREE.Vector3(), q = new THREE.Quaternion(), n = new THREE.Vector3();
 
   function frame(time, dtMs) {
     const y = window.scrollY;
-    const k = reduceMotion ? 1 : 1 - Math.exp(-(Math.min(dtMs || 16, 250) / 1000) * 7);
+    const k = reduceMotion ? 1 : 1 - Math.exp(-(Math.min(dtMs || 16, 250) / 1000) * 16);
     smooth += (y - smooth) * k;
     if (Math.abs(y - smooth) < 0.1) smooth = y;
     if (tl) tl.time(Math.min(smooth, tl.duration()));
@@ -239,6 +259,22 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     if (shade !== lastShade) { lastShade = shade; onShade?.(shade); }
 
     if (!renderer) return;
+
+    // Measure real frame time while scrolling and step quality down if it's slow
+    const now = performance.now();
+    if (dtMs && now > quality.settleAt && quality.level < 3 && !document.hidden) {
+      quality.samples.push(dtMs);
+      if (quality.samples.length >= 45) {
+        const s = [...quality.samples].sort((a, b) => a - b);
+        if (s[Math.floor(s.length / 2)] > 24) degrade(); else quality.samples = [];
+      }
+    }
+
+    // Nothing visible is moving: skip the GPU work entirely
+    const moving = Math.abs(y - smooth) > 0.5 || Math.abs(target.x - pointer.x) > 0.002 || Math.abs(target.y - pointer.y) > 0.002;
+    if (!moving && !introRunning && !(tooth.pivot.visible || particles.visible)) return;
+    if (!moving && !introRunning && (frameCount++ & 1)) return; // idle sway at half rate
+
     pointer.x += (target.x - pointer.x) * k * 0.45;
     pointer.y += (target.y - pointer.y) * k * 0.45;
     if (!reduceMotion) idle += 0.005;
@@ -293,7 +329,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     rebuildTimer = setTimeout(() => {
       if (renderer) {
         renderer.setSize(window.innerWidth, window.innerHeight);
-        composer.setSize(window.innerWidth, window.innerHeight);
+        sizeComposer();
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
       }
@@ -308,7 +344,8 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   };
   window.addEventListener('resize', onResize);
   cleanups.push(() => window.removeEventListener('resize', onResize));
-  const ro = new ResizeObserver(rebuild);
+  let lastH = 0;
+  const ro = new ResizeObserver(([e]) => { const h = e.contentRect.height; if (Math.abs(h - lastH) > 2) { lastH = h; rebuild(); } });
   ro.observe(document.querySelector('main'));
   cleanups.push(() => ro.disconnect());
 
@@ -322,7 +359,8 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
       .to(I, { scale: 1, duration: 2 }, 0)
       .to(I, { rot: 0, duration: 2.4 }, 0)
       .to(I, { crown: 0, screw: 0, duration: 1.8, ease: 'power3.out' }, 0.5)
-      .from('.hero__kicker, .hero__lead, .hero__actions, .topbar', { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.08 }, 0.6);
+      .from('.hero__lead, .hero__actions, .topbar', { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.08 }, 0.6)
+      .add(() => { introRunning = false; quality.settleAt = performance.now() + 500; });
   };
 
   if (html.classList.contains('has-loader')) {
