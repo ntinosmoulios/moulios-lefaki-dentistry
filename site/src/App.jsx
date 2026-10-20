@@ -104,6 +104,7 @@ export default function App() {
         <nav className="nav" aria-label="Κύρια πλοήγηση">
           <a href="#emfytevmata">Εμφυτεύματα</a>
           <a href="#iatreio">Το ιατρείο</a>
+          <a href="./tour.html">3D περιήγηση</a>
           <a href="#ypiresies">Υπηρεσίες</a>
           <a href="#leukansi">Λεύκανση</a>
           <a href="#erotiseis">Ερωτήσεις</a>
@@ -212,6 +213,21 @@ export default function App() {
               skewWithVelocity={6}
               outlineAlternate
             />
+          </div>
+        </section>
+
+        {/* 3D TOUR teaser */}
+        <section className="tourcta" aria-labelledby="tour-title">
+          <div className="wrap tourcta__inner">
+            <h2 id="tour-title" className="h2 h2--xl">
+              <ScrollFloat textClassName="float-title" animationDuration={1} stagger={0.03}>Μπείτε στο ιατρείο</ScrollFloat>
+            </h2>
+            <p className="tourcta__text">Μια 3D περιήγηση από την υποδοχή μέχρι το χειρουργείο εμφυτευμάτων. Η βοηθός μας στην υποδοχή απαντά σε ό,τι θέλετε να ρωτήσετε.</p>
+            <Magnet padding={80} magnetStrength={3} wrapperClassName="magnet">
+              <StarBorder as="a" href="./tour.html" className="cta" color="#BFF4FF" backgroundColor="#F2EEE4" textColor="#0F1C1F" borderColor="rgba(191,244,255,.35)" radius={999} thickness={2} duration={3} glow={0.9} sparkle>
+                Ξεκινήστε την 3D περιήγηση
+              </StarBorder>
+            </Magnet>
           </div>
         </section>
 

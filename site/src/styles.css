@@ -182,6 +182,11 @@ main, .footer { position: relative; z-index: 2; }
 .marquee { margin-top: clamp(80px, 14vh, 160px); padding: 18px 0; border-block: 1px solid var(--line); overflow: hidden; background: rgba(15, 28, 31, .8); }
 .marquee__text { font: 400 clamp(2.4rem, 1.6rem + 4vw, 5.4rem)/1.1 var(--serif); letter-spacing: -.02em; color: var(--enamel); }
 
+/* ---------- 3D tour teaser ---------- */
+.tourcta { padding: clamp(100px, 18vh, 200px) 0; }
+.tourcta__inner { display: grid; justify-items: start; gap: 28px; }
+.tourcta__text { max-width: 46ch; font-size: var(--step-1); line-height: 1.45; color: rgba(242, 238, 228, .88); margin: 0; }
+
 /* ---------- Services: horizontal track ---------- */
 .services { position: relative; }
 .sticky--h { max-width: none; padding: 0; overflow: hidden; display: block; }
