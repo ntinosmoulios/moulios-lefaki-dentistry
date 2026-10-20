@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Μούλιος – Λεφάκη | Χειρουργοί Οδοντίατροι στον Μώλο</title>
+  <meta name="description" content="Οδοντιατρείο Μούλιος Μιχάλης – Λεφάκη Μαρία στον Μώλο Φθιώτιδας. Εμφυτεύματα, αισθητική οδοντιατρική, λεύκανση και οδοντιατρική για όλη την οικογένεια. Ραντεβού: 22350 51834.">
+  <meta name="theme-color" content="#F1F5F4">
+  <meta property="og:title" content="Μούλιος – Λεφάκη | Χειρουργοί Οδοντίατροι">
+  <meta property="og:description" content="Εμφυτεύματα, αισθητική οδοντιατρική και λεύκανση στον Μώλο Φθιώτιδας.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="el_GR">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/noto-serif-display-greek-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/commissioner-greek-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dentist",
+    "name": "Μούλιος Μιχάλης – Λεφάκη Μαρία, Χειρουργοί Οδοντίατροι",
+    "telephone": "+302235051834",
+    "email": "info@moulios-lefaki.gr",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Πάροδος Ανδρούτσου, Κόμβος Μώλου",
+      "addressLocality": "Μώλος",
+      "postalCode": "35009",
+      "addressRegion": "Φθιώτιδα",
+      "addressCountry": "GR"
+    },
+    "geo": { "@type": "GeoCoordinates", "latitude": 38.80736, "longitude": 22.64763 },
+    "openingHoursSpecification": [{
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+      "opens": "09:00", "closes": "20:00"
+    }],
+    "paymentAccepted": "Μετρητά, Κάρτες"
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Μετάβαση στο περιεχόμενο</a>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Μούλιος – Λεφάκη, αρχική">
+      <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 4c-3.4 0-6 2.8-6 6.6 0 3.2 1.4 5.3 2.4 7.6.9 2.2 1.1 5.4 1.8 8.3.4 1.6 1.2 2.5 2.2 2.5 1.3 0 1.8-1.4 2.2-3.4.5-2.5.9-5.6 2.4-5.6s1.9 3.1 2.4 5.6c.4 2 .9 3.4 2.2 3.4 1 0 1.8-.9 2.2-2.5.7-2.9.9-6.1 1.8-8.3 1-2.3 2.4-4.4 2.4-7.6C26 6.8 23.4 4 20 4c-2.3 0-3.3 1.2-5.5 1.2S11.3 4 9 4z"/></svg>
+      <span>Μούλιος <span class="brand__amp">&amp;</span> Λεφάκη</span>
+    </a>
+    <nav class="nav" aria-label="Κύρια πλοήγηση">
+      <a href="#emfytevmata">Εμφυτεύματα</a>
+      <a href="#iatreio">Το ιατρείο</a>
+      <a href="#ypiresies">Υπηρεσίες</a>
+      <a href="#erotiseis">Ερωτήσεις</a>
+      <a href="#epikoinonia">Επικοινωνία</a>
+    </nav>
+    <a class="btn btn--small" href="tel:+302235051834">22350 51834</a>
+  </header>
+
+  <canvas id="scene" aria-hidden="true"></canvas>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="hero__text">
+        <p class="hero__kicker">Χειρουργοί οδοντίατροι στον Μώλο Φθιώτιδας</p>
+        <h1 class="hero__title">
+          <span class="line"><span>Μούλιος</span></span>
+          <span class="line line--indent"><span>Λεφάκη</span></span>
+        </h1>
+        <p class="hero__lead">Εμφυτεύματα σε δικό μας χειρουργικό χώρο, αισθητική αποκατάσταση και τακτική φροντίδα για όλη την οικογένεια. Με ραντεβού, Δευτέρα έως Παρασκευή.</p>
+        <div class="hero__actions">
+          <a class="btn" href="tel:+302235051834">Κλείστε ραντεβού: 22350 51834</a>
+          <a class="link" href="#emfytevmata">Δείτε πώς τοποθετείται ένα εμφύτευμα</a>
+        </div>
+      </div>
+      <p class="hero__hint" aria-hidden="true">Κυλήστε προς τα κάτω</p>
+    </section>
+
+    <!-- IMPLANT STORY (pinned, scroll-driven 3D) -->
+    <section class="implant" id="emfytevmata" aria-labelledby="implant-title">
+      <div class="implant__sticky">
+        <div class="implant__panel">
+          <h2 id="implant-title" class="h2">Πώς αντικαθίσταται ένα δόντι με εμφύτευμα</h2>
+          <ol class="steps">
+            <li class="step is-active" data-step="0">
+              <h3>Τοποθέτηση</h3>
+              <p>Μια μικρή βίδα τιτανίου μπαίνει στο οστό της γνάθου, στον αποστειρωμένο χειρουργικό χώρο του ιατρείου. Για ένα δόντι χωρίς ανάγκη οστικού μοσχεύματος, η επέμβαση διαρκεί συνήθως 20 έως 40 λεπτά.</p>
+            </li>
+            <li class="step" data-step="1">
+              <h3>Οστεοενσωμάτωση</h3>
+              <p>Τις επόμενες εβδομάδες το οστό «δένει» με τον τιτάνιο. Έτσι το εμφύτευμα γίνεται σταθερή ρίζα, που μεταφέρει τη μάσηση στη γνάθο όπως ένα φυσικό δόντι.</p>
+            </li>
+            <li class="step" data-step="2">
+              <h3>Στεφάνη</h3>
+              <p>Πάνω στο εμφύτευμα στερεώνεται το καινούργιο δόντι. Με τον ενδοστοματικό σαρωτή, το αποτύπωμα στέλνεται ψηφιακά στο εργαστήριο, χωρίς τη δυσάρεστη πάστα.</p>
+            </li>
+          </ol>
+          <p class="implant__note">Σε κάποιες περιπτώσεις το εμφύτευμα τοποθετείται την ίδια μέρα με την εξαγωγή. Θα σας εξηγήσουμε στην εξέταση τι ταιριάζει σε εσάς.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="about" id="iatreio" aria-labelledby="about-title">
+      <div class="wrap">
+        <h2 id="about-title" class="h2 about__title">Δύο οδοντίατροι, ένα ιατρείο, και χρόνος για να σας εξηγήσουμε τι κάνουμε.</h2>
+        <div class="doctors">
+          <article class="doctor">
+            <div class="doctor__photo" role="img" aria-label="Φωτογραφία του Μιχάλη Μούλιου (σύντομα)"><span>ΜΜ</span></div>
+            <h3>Μιχάλης Μούλιος</h3>
+            <p class="doctor__role">Χειρουργός οδοντίατρος</p>
+            <p>Εξειδίκευση στη μικροχειρουργική και την εμφυτευματολογία στο Πανεπιστήμιο της Κολωνίας. Μέλος της Ευρωπαϊκής Ένωσης Εμφυτευματολογίας (BDIZ EDI).</p>
+          </article>
+          <article class="doctor">
+            <div class="doctor__photo" role="img" aria-label="Φωτογραφία της Μαρίας Λεφάκη (σύντομα)"><span>ΜΛ</span></div>
+            <h3>Μαρία Λεφάκη</h3>
+            <p class="doctor__role">Χειρουργός οδοντίατρος</p>
+            <p>Μεταπτυχιακές σπουδές στην αισθητική οδοντιατρική: όψεις, λευκά σφραγίσματα, bonding και λεύκανση.</p>
+          </article>
+        </div>
+        <p class="about__body">Στόχος μας είναι μια θεραπεία ανώδυνη και ποιοτική, προσαρμοσμένη σε κάθε άνθρωπο. Δεχόμαστε με ραντεβού, και για επείγοντα περιστατικά συνεννοούμαστε τηλεφωνικά για να σας δούμε το συντομότερο.</p>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="services" id="ypiresies" aria-labelledby="services-title">
+      <div class="wrap services__grid">
+        <h2 id="services-title" class="h2">Τι κάνουμε</h2>
+        <dl class="svc">
+          <div class="svc__row">
+            <dt>Εμφυτεύματα</dt>
+            <dd>Αντικατάσταση ενός, περισσότερων ή όλων των δοντιών. Άμεση τοποθέτηση μετά από εξαγωγή και γέφυρες πάνω σε τέσσερα εμφυτεύματα.</dd>
+          </div>
+          <div class="svc__row">
+            <dt>Αισθητική οδοντιατρική</dt>
+            <dd>Πορσελάνινες όψεις, όψεις ρητίνης, bonding και λευκά σφραγίσματα που ταιριάζουν στο χρώμα των δοντιών σας.</dd>
+          </div>
+          <div class="svc__row">
+            <dt>Λεύκανση</dt>
+            <dd>Στο ιατρείο, στο σπίτι με εξατομικευμένους νάρθηκες, ή συνδυαστικά.</dd>
+          </div>
+          <div class="svc__row">
+            <dt>Προσθετική</dt>
+            <dd>Στεφάνες, γέφυρες και οδοντοστοιχίες, με ψηφιακό αποτύπωμα.</dd>
+          </div>
+          <div class="svc__row">
+            <dt>Θεραπείες</dt>
+            <dd>Σφραγίσματα, απονευρώσεις, εξαγωγές, θεραπεία ουλίτιδας και περιοδοντίτιδας, εφαρμογές laser.</dd>
+          </div>
+          <div class="svc__row">
+            <dt>Ορθοδοντική</dt>
+            <dd>Διόρθωση της θέσης των δοντιών και της σύγκλεισης.</dd>
+          </div>
+          <div class="svc__row">
+            <dt>Παιδιά</dt>
+            <dd>Καθαρισμός, φθορίωση, προληπτικές εμφράξεις και έλεγχος κάθε έξι μήνες.</dd>
+          </div>
+          <div class="svc__row">
+            <dt>Πρόληψη</dt>
+            <dd>Έλεγχος και καθαρισμός δύο φορές τον χρόνο, και οδηγίες για βουρτσάκια, νήμα και στοματικά διαλύματα.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- WHITENING -->
+    <section class="whitening" aria-labelledby="whitening-title">
+      <div class="wrap whitening__grid">
+        <div>
+          <h2 id="whitening-title" class="h2">Λεύκανση, με μέτρο</h2>
+          <p>Χρησιμοποιούμε το σύστημα Beyond Polus από το 2008, με δύο υλικά σε διαφορετικές συγκεντρώσεις. Έτσι διαλέγουμε μαζί σας πόσο πιο λευκά θέλετε τα δόντια σας, ώστε να δείχνουν φυσικά.</p>
+          <p class="muted">Οι σύγχρονες τεχνικές λεύκανσης δεν καταστρέφουν το σμάλτο.</p>
+        </div>
+        <figure class="shade" aria-labelledby="shade-cap">
+          <div class="shade__guide" role="group" aria-label="Χρωματολόγιο δοντιών">
+            <button type="button" class="tab" style="--c:#D9C9A3" data-name="A4">A4</button>
+            <button type="button" class="tab" style="--c:#E2D3B0" data-name="A3.5">A3.5</button>
+            <button type="button" class="tab" style="--c:#E8DCBE" data-name="A3">A3</button>
+            <button type="button" class="tab" style="--c:#EEE4CC" data-name="A2">A2</button>
+            <button type="button" class="tab" style="--c:#F2EBD8" data-name="A1">A1</button>
+            <button type="button" class="tab" style="--c:#F6F1E4" data-name="B1">B1</button>
+            <button type="button" class="tab is-on" style="--c:#FAF8F0" data-name="BL2">BL2</button>
+          </div>
+          <figcaption id="shade-cap">Το χρωματολόγιο που κρατάμε δίπλα στο χαμόγελό σας. Πατήστε μια απόχρωση: <strong class="shade__now">BL2</strong></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- TECHNOLOGY -->
+    <section class="tech" aria-labelledby="tech-title">
+      <div class="wrap">
+        <h2 id="tech-title" class="h2">Ο εξοπλισμός του ιατρείου</h2>
+        <ul class="tech__list">
+          <li><h3>Χειρουργικός χώρος</h3><p>Ξεχωριστή αίθουσα για εμφυτεύματα, με αποστειρωμένο ρουχισμό για προσωπικό και ασθενείς.</p></li>
+          <li><h3>Ενδοστοματικός σαρωτής</h3><p>Ψηφιακό αποτύπωμα του στόματος, που στέλνεται κατευθείαν στο οδοντοτεχνικό εργαστήριο.</p></li>
+          <li><h3>Φυγόκεντρος PRP</h3><p>Για θεραπείες με πλάσμα πλούσιο σε αιμοπετάλια, που βοηθούν την επούλωση.</p></li>
+          <li><h3>Αποστείρωση</h3><p>Κλίβανος αποστείρωσης για όλα τα εργαλεία, μετά από κάθε χρήση.</p></li>
+        </ul>
+        <div class="gallery" id="gallery" aria-label="Φωτογραφίες ιατρείου">
+          <!-- Οι φωτογραφίες του 2021 θα μπουν εδώ: images/clinic-*.jpg -->
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="erotiseis" aria-labelledby="faq-title">
+      <div class="wrap faq__grid">
+        <h2 id="faq-title" class="h2">Συχνές ερωτήσεις</h2>
+        <div class="faq__list">
+          <details><summary>Κάθε πότε πρέπει να έρχομαι για έλεγχο;</summary><p>Αν δεν έχετε κάποιο πρόβλημα, κάθε έξι μήνες. Αν νιώσετε ενόχληση, μην περιμένετε τον επόμενο έλεγχο και καλέστε μας.</p></details>
+          <details><summary>Το δόντι μου πρήστηκε. Αν πάρω αντιβίωση, θα περάσει;</summary><p>Η αντιβίωση ανακουφίζει προσωρινά το πρήξιμο, αλλά δεν λύνει το πρόβλημα. Συνήθως χρειάζεται απονεύρωση, για να καθαριστεί το μολυσμένο νεύρο.</p></details>
+          <details><summary>Η λεύκανση χαλάει το σμάλτο;</summary><p>Όχι. Τα σύγχρονα υλικά και οι τεχνικές λεύκανσης δεν βλάπτουν την επιφάνεια του δοντιού.</p></details>
+          <details><summary>Τα λευκά σφραγίσματα αντέχουν όσο τα μαύρα;</summary><p>Κανένα σφράγισμα δεν κρατά για πάντα. Τα σύγχρονα λευκά υλικά έχουν βελτιωθεί πολύ και προτιμώνται όλο και περισσότερο, επειδή δεν φαίνονται.</p></details>
+          <details><summary>Μπορεί ένα σφραγισμένο δόντι να χαλάσει ξανά;</summary><p>Ναι, και μάλιστα πιο εύκολα από ένα υγιές. Γι' αυτό ελέγχουμε τα σφραγίσματα τακτικά και τα αλλάζουμε όταν φθαρούν.</p></details>
+          <details><summary>Αφού τα νεογιλά δόντια θα αλλάξουν, τι πειράζει αν χαλάσουν;</summary><p>Τα νεογιλά οδηγούν τα μόνιμα δόντια στη σωστή θέση. Αν χαθούν νωρίς, μπορεί να χρειαστεί αργότερα ορθοδοντική θεραπεία, και να επηρεαστεί η μάσηση και η ομιλία.</p></details>
+          <details><summary>Γιατί ματώνουν τα ούλα μου όταν βουρτσίζω;</summary><p>Συνήθως είναι σημάδι φλεγμονής (ουλίτιδας). Κλείστε ένα ραντεβού για να το δούμε έγκαιρα.</p></details>
+          <details><summary>Ποιος είναι κατάλληλος για εμφύτευμα;</summary><p>Γενικά οι υγιείς ενήλικες με αρκετό οστό στη γνάθο. Ορισμένες καταστάσεις, όπως ο αρρύθμιστος διαβήτης, μπορεί να δυσκολέψουν την επούλωση. Αυτό το εκτιμούμε μαζί στην εξέταση.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="contact" id="epikoinonia" aria-labelledby="contact-title">
+      <div class="wrap contact__grid">
+        <div>
+          <h2 id="contact-title" class="h2">Ελάτε να σας δούμε</h2>
+          <address class="contact__addr">
+            Πάροδος Ανδρούτσου, Κόμβος Μώλου<br>
+            350 09 Μώλος Φθιώτιδας
+          </address>
+          <ul class="contact__lines">
+            <li><span>Ιατρείο</span><a href="tel:+302235051834">22350 51834</a></li>
+            <li><span>Δεύτερη γραμμή</span><a href="tel:+302235041073">22350 41073</a></li>
+            <li><span>Κινητό</span><a href="tel:+306978361763">697 836 1763</a></li>
+            <li><span>Email</span><a href="mailto:info@moulios-lefaki.gr">info@moulios-lefaki.gr</a></li>
+          </ul>
+          <table class="hours">
+            <caption>Ωράριο, μόνο με ραντεβού</caption>
+            <tbody>
+              <tr><th scope="row">Δευτέρα – Παρασκευή</th><td>09:00 – 20:00</td></tr>
+              <tr><th scope="row">Σάββατο – Κυριακή</th><td>Κλειστά</td></tr>
+            </tbody>
+          </table>
+          <p class="muted">Δεχόμαστε όλες τις κάρτες.</p>
+        </div>
+        <div class="map" id="map">
+          <div class="map__placeholder">
+            <p>Ο χάρτης φορτώνει από το Google Maps μόνο αν το επιλέξετε, ώστε να μη στέλνονται δεδομένα χωρίς τη συγκατάθεσή σας.</p>
+            <button type="button" class="btn btn--ghost" id="loadMap">Εμφάνιση χάρτη</button>
+            <a class="link" href="https://www.google.com/maps/dir/?api=1&amp;destination=38.80736,22.64763" target="_blank" rel="noopener">Οδηγίες στο Google Maps</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__row">
+      <p>© <span id="year">2026</span> Μούλιος Μιχάλης – Λεφάκη Μαρία, Χειρουργοί Οδοντίατροι</p>
+      <p>Ο ιστότοπος δεν χρησιμοποιεί cookies.</p>
+    </div>
+  </footer>
+
+  <script src="vendor/gsap.min.js"></script>
+  <script src="vendor/ScrollTrigger.min.js"></script>
+  <script src="vendor/lenis.min.js"></script>
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
