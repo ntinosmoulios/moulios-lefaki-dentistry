@@ -317,12 +317,13 @@ export default function App() {
               <div className="map">
                 {mapOn ? (
                   <iframe title="Χάρτης: Οδοντιατρείο Μούλιος – Λεφάκη, Μώλος" loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-                    src="https://www.google.com/maps?q=38.80736,22.64763&z=16&output=embed" />
+                    src="https://www.google.com/maps?q=38.8040618,22.652544&z=17&hl=el&output=embed" />
                 ) : (
                   <div className="map__placeholder">
                     <p>Ο χάρτης φορτώνει από το Google Maps μόνο αν το επιλέξετε, ώστε να μη στέλνονται δεδομένα χωρίς τη συγκατάθεσή σας.</p>
                     <button type="button" className="btn btn--ghost" onClick={() => setMapOn(true)}>Εμφάνιση χάρτη</button>
-                    <a className="link" href="https://www.google.com/maps/dir/?api=1&destination=38.80736,22.64763" target="_blank" rel="noopener">Οδηγίες στο Google Maps</a>
+                    <a className="link" href="https://www.google.com/maps/dir/?api=1&destination=38.8040618,22.652544&destination_place_id=ChIJQRUAHRanoBQRosHl4fSzs0Y" target="_blank" rel="noopener">Οδηγίες στο Google Maps</a>
+                    <a className="link" href="https://maps.google.com/?cid=5094613467829485986" target="_blank" rel="noopener">Το ιατρείο στο Google Maps</a>
                   </div>
                 )}
               </div>
