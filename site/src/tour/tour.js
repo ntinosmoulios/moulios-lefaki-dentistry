@@ -32,7 +32,7 @@ scene.add(new THREE.HemisphereLight(0xeaf6ff, 0xd8c8b0, 0.85));
 const sun = new THREE.DirectionalLight(0xfff4e6, 2.1);
 sun.position.set(9, 14, 5);
 sun.castShadow = true;
-sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
+sun.shadow.mapSize.set(mobile ? 1024 : 1536, mobile ? 1024 : 1536);
 Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 40 });
 sun.shadow.bias = -0.0004;
 sun.shadow.normalBias = 0.02;
@@ -55,6 +55,7 @@ const motes = (() => {
 const rig = { pos: new THREE.Vector3(-0.6, 32, 28), look: new THREE.Vector3(-0.5, 0, 0.3) };
 const view = { yaw: 0, pitch: 0, tYaw: 0, tPitch: 0, orbit: true, auto: 0 };
 let current = 'overview';
+let visitedEntrance = false;
 let flying = false;
 
 function applyCamera(dt) {
@@ -133,13 +134,14 @@ function arrive(id) {
   const stop = STOPS[id];
   showPanel({ title: stop.title, text: stop.text, photo: stop.photo });
   if (id === 'reception') { greet(); openChat(); }
+  if (id === 'entrance' && !visitedEntrance) { visitedEntrance = true; setTimeout(() => { if (current === 'entrance' && !flying) flyTo('reception'); }, 3200); }
 }
 
 /* ---------- Hotspots ---------- */
 const layer = $('.t-hotspots');
 const hsEls = {};
 const LABELS = {
-  assistant: 'Μιλήστε με τη βοηθό', waiting: 'Αναμονή', sign: 'Το ιατρείο', chair1: 'Έδρα', tv: 'Τηλεόραση',
+  assistant: 'Μιλήστε με τη βοηθό', waiting: 'Αναμονή', door: 'Η πόρτα μας', xray: 'Ακτινογραφικό', sign: 'Το ιατρείο', chair1: 'Έδρα', tv: 'Τηλεόραση',
   chair2: 'Αισθητική', whitening: 'Λεύκανση', surgery: 'Χειρουργείο', prp: 'PRP', autoclave: 'Αποστείρωση', scanner: 'Σαρωτής'
 };
 function makeHotspot(key) {
@@ -162,7 +164,7 @@ const tmp = new THREE.Vector3();
 function hotspotWorld(key) {
   if (key.startsWith('go:')) {
     const g = GO_POINTS[key.slice(3)];
-    return tmp.set(...(current === 'overview' ? g.overview : g.inside));
+    return tmp.set(...(g[current] || (current === 'overview' ? g.overview : g.inside)));
   }
   return tmp.copy(clinic.hotspots[key]);
 }
@@ -323,7 +325,7 @@ document.fonts?.ready.then(() => {
     x: STOPS.overview.cam[0] * OV, y: STOPS.overview.cam[1] * OV, z: STOPS.overview.cam[2] * OV, duration: 3, ease: 'power3.out',
     onComplete: () => {
       if (STOPS[startAt] && startAt !== 'overview') flyTo(startAt);
-      else { showPanel(STOPS.overview); setTimeout(() => { if (current === 'overview' && !flying) flyTo('reception'); }, 2600); }
+      else { showPanel(STOPS.overview); setTimeout(() => { if (current === 'overview' && !flying) flyTo('entrance'); }, 2600); }
     }
   });
 });

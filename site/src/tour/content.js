@@ -10,14 +10,21 @@ export const STOPS = {
     title: 'Το ιατρείο από ψηλά',
     text: 'Η υποδοχή, δύο ιατρεία και ο χειρουργικός χώρος για εμφυτεύματα. Πατήστε έναν χώρο για να μπείτε μέσα.',
     cam: [-0.6, 13.5, 12.5], look: [-0.5, 0, 0.3], walls: 0.32, orbit: true,
-    hotspots: ['go:reception', 'go:room1', 'go:room2', 'go:surgery']
+    hotspots: ['go:entrance', 'go:reception', 'go:room1', 'go:room2', 'go:surgery']
+  },
+  entrance: {
+    label: 'Είσοδος',
+    title: 'Η είσοδος',
+    text: 'Πάροδος Ανδρούτσου, στον Κόμβο Μώλου. Θα μας βρείτε από τη λευκή πόρτα με το δόντι.',
+    cam: [-0.7, 1.55, 10.4], look: [-2.15, 1.35, 6.0], walls: 1,
+    hotspots: ['door', 'go:reception']
   },
   reception: {
     label: 'Υποδοχή',
     title: 'Υποδοχή',
     text: 'Καλώς ήρθατε. Πατήστε τη βοηθό μας για ό,τι θέλετε να ρωτήσετε.',
-    cam: [-1.75, 1.62, 5.45], look: [-3.4, 1.35, 2.0], walls: 1,
-    hotspots: ['assistant', 'waiting', 'sign', 'go:room1']
+    cam: [-2.15, 1.62, 5.45], look: [-3.0, 1.25, 0.8], walls: 1,
+    hotspots: ['assistant', 'waiting', 'sign', 'go:room1', 'go:surgery']
   },
   room1: {
     label: 'Ιατρείο κ. Μούλιου',
@@ -25,7 +32,7 @@ export const STOPS = {
     text: 'Χειρουργός οδοντίατρος, με εξειδίκευση στη μικροχειρουργική και την εμφυτευματολογία στο Πανεπιστήμιο της Κολωνίας. Μέλος της Ευρωπαϊκής Ένωσης Εμφυτευματολογίας (BDIZ EDI).',
     photo: './images/doctors/moulios.webp',
     cam: [0.6, 1.62, 4.95], look: [3.0, 0.95, 3.0], walls: 1,
-    hotspots: ['chair1', 'tv', 'go:room2', 'go:reception']
+    hotspots: ['chair1', 'tv', 'xray', 'go:room2', 'go:reception']
   },
   room2: {
     label: 'Ιατρείο κας Λεφάκη',
@@ -46,13 +53,16 @@ export const STOPS = {
 
 // Where the "go to room" markers sit in the overview / at doorways
 export const GO_POINTS = {
-  reception: { overview: [-3, 0.6, 3], inside: [-1.2, 1.4, 4.1] },
+  entrance: { overview: [-2.15, 0.6, 7.3], inside: [-2.15, 1.3, 5.7] },
+  reception: { overview: [-3, 0.6, 3], inside: [-0.25, 1.4, 4.1], entrance: [-2.15, 1.25, 6.3] },
   room1: { overview: [2.5, 0.6, 3], inside: [0.15, 1.4, 4.1] },
   room2: { overview: [2.5, 0.6, -2.5], inside: [0.9, 1.4, 0.1] },
-  surgery: { overview: [-3, 0.6, -2.5], inside: [-0.05, 1.4, -0.9] }
+  surgery: { overview: [-3, 0.6, -2.5], inside: [-0.05, 1.4, -0.9], reception: [-4.9, 1.4, 0.15] }
 };
 
 export const INFO = {
+  door: { title: 'Καλώς ήρθατε', text: 'Δεχόμαστε Δευτέρα έως Παρασκευή, 09:00 με 17:00, μόνο με ραντεβού. Πατήστε «Υποδοχή» για να μπείτε μέσα.' },
+  xray: { title: 'Ακτινογραφικό', text: 'Ενδοστοματικό ακτινογραφικό στον τοίχο δίπλα στην έδρα, για να βλέπουμε αμέσως τι χρειάζεται το δόντι.' },
   waiting: { title: 'Χώρος αναμονής', text: 'Δεχόμαστε μόνο με ραντεβού. Για επείγοντα περιστατικά συνεννοούμαστε τηλεφωνικά για να σας δούμε το συντομότερο.' },
   sign: { title: 'Μούλιος & Λεφάκη', text: 'Χειρουργοί οδοντίατροι στον Μώλο Φθιώτιδας. Δεχόμαστε όλες τις κάρτες.' },
   chair1: { title: 'Οδοντιατρική έδρα', text: 'Εδώ γίνονται οι περισσότερες θεραπείες: έλεγχος και καθαρισμός, σφραγίσματα, απονευρώσεις και προσθετική.' },
