@@ -149,10 +149,11 @@ function cabinets(parent, x, z, length, ry, drawerMat, { sink = false } = {}) {
 }
 
 // Dental chair with upholstery colour, operating light, assistant arm and optional monitor/TV
-function dentalChair(parent, x, z, ry, uph, { tray = 'cream', monitor = false, led = 'warm' } = {}) {
+function dentalChair(parent, x, z, ry, uph, { tray = 'cream', monitor = false, led = 'warm', mirror = false, base = null } = {}) {
   const g = new THREE.Group();
   g.position.set(x, 0, z);
   g.rotation.y = ry;
+  if (mirror) g.scale.x = -1;   // left-handed setup: delivery unit on the other side
   // base and column
   at(rbox(0.7, 0.08, 1.0, MAT.cream, 0.04), 0, 0.04, 0, g);
   at(rbox(0.36, 0.42, 0.42, MAT.cream, 0.08), 0, 0.29, 0.05, g);
@@ -625,181 +626,198 @@ function entranceDoor(parent, x, z) {
   return g;
 }
 
-/* ---------- The clinic ---------- */
+/* ---------- The clinic ----------
+   Plan (top view, the street is at +z; "left/right" as you walk in):
+
+                 street, entrance at x=0
+        ┌──────────────┬───────────────┐ z=6
+        │ waiting area │ reception desk│        Reception x[-4,4]
+        │  (sofas)     │  (assistant)  │
+        └──────────┬─double door─┬─────┘ z=0
+   ┌────────┬──────┴──┐  hall  ┌──┴──────────┐
+   │Surgery │ Moulios │ x[-1,1]│ Maria Lefaki │
+   │ black  │  blue   │        │  teal, left- │
+   │ chair  │  chair  │        │ handed chair │
+   └────────┴─────────┴────────┴──────────────┘ z=-6
+  x=-10    x=-6     x=-1     x=1             x=6
+*/
 export function buildClinic() {
   const root = new THREE.Group();
   const walls = new THREE.Group();
   root.add(walls);
   const hotspots = {};
 
-  // Floors, with the tiles from the photos (a little richer than in the pictures)
   const floor = (x1, z1, x2, z2, tex, tile = 0.6) => {
     tex.repeat.set((x2 - x1) / (tile * 4), (z2 - z1) / (tile * 4));
-    const f = new THREE.Mesh(new THREE.BoxGeometry(x2 - x1, 0.08, z2 - z1), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35, metalness: 0 }));
+    const f = new THREE.Mesh(new THREE.BoxGeometry(x2 - x1, 0.08, z2 - z1), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35 }));
     f.position.set((x1 + x2) / 2, -0.04, (z1 + z2) / 2);
     f.receiveShadow = true;
     root.add(f);
   };
-  floor(-6, 0, 0, 6, tiles([206, 128, 82], '#e9d2bd', { vary: 22, seed: 3 }), 0.45);                 // reception: terracotta
-  floor(0, 0, 5, 6, tiles([170, 128, 92], '#7a5a42', { marble: true, vary: 16, seed: 7 }), 0.6);      // rooms: brown marble-look
-  floor(0, -5, 5, 0, tiles([174, 132, 96], '#7a5a42', { marble: true, vary: 16, seed: 11 }), 0.6);
-  floor(-6, -5, 0, 0, tiles([196, 186, 170], '#a49a8a', { marble: true, vary: 10, seed: 5 }), 0.6);  // surgery: lighter stone
-  // porch outside the entrance
-  const porchT = porchTiles(); porchT.repeat.set(11 / 1.6, 2.2 / 1.6);
-  const porch = new THREE.Mesh(new THREE.BoxGeometry(11, 0.06, 2.2), new THREE.MeshStandardMaterial({ map: porchT, roughness: 0.6 }));
-  porch.position.set(-0.5, -0.05, 7.15); porch.receiveShadow = true;
+  const terracotta = () => tiles([206, 128, 82], '#e9d2bd', { vary: 22, seed: 3 });
+  floor(-4, 0, 4, 6, terracotta(), 0.45);
+  floor(-1, -6, 1, 0, terracotta(), 0.45);
+  floor(-6, -6, -1, 0, tiles([170, 128, 92], '#7a5a42', { marble: true, vary: 16, seed: 7 }), 0.6);
+  floor(1, -6, 6, 0, tiles([174, 132, 96], '#7a5a42', { marble: true, vary: 16, seed: 11 }), 0.6);
+  floor(-10, -6, -6, 0, tiles([196, 186, 170], '#a49a8a', { marble: true, vary: 10, seed: 5 }), 0.6);
+  const porchT = porchTiles(); porchT.repeat.set(8 / 1.6, 2.2 / 1.6);
+  const porch = new THREE.Mesh(new THREE.BoxGeometry(8, 0.06, 2.2), new THREE.MeshStandardMaterial({ map: porchT, roughness: 0.6 }));
+  porch.position.set(0, -0.05, 7.15); porch.receiveShadow = true;
   root.add(porch);
-  const plinth = new THREE.Mesh(new RoundedBoxGeometry(11.6, 0.5, 13.6, 4, 0.12), mat(0x1b2c30, { roughness: 0.9 }));
-  plinth.position.set(-0.5, -0.33, 1.4);
-  plinth.receiveShadow = true;
+  const plinth = new THREE.Mesh(new RoundedBoxGeometry(17, 0.5, 15, 4, 0.12), mat(0x1b2c30, { roughness: 0.9 }));
+  plinth.position.set(-2, -0.33, 0.8); plinth.receiveShadow = true;
   root.add(plinth);
 
-  // Wall colours (from the photos, cleaned up)
-  const wReception = mat(0xf5f5f1);
-  const wBlue = mat(0xc9def2);     // Dr Moulios' room
-  const wMint = mat(0xd3efe6);     // Dr Lefaki's room
-  const wSurgery = mat(0xf0f3f3);
-  const wSage = mat(0x9aa79c, { roughness: 0.85 });   // facade
-  const door = (from) => ({ from, to: from + 0.95, top: 2.12 });
+  const wReception = mat(0xf5f5f1), wBlue = mat(0xc9def2), wMint = mat(0xd3efe6), wSurgery = mat(0xf0f3f3), wHall = mat(0xf2f2ee);
+  const wSage = mat(0x9aa79c, { roughness: 0.85 });
+  const door = (from, w = 0.95) => ({ from, to: from + w, top: 2.12 });
   const win = (from, to) => ({ from, to, sill: 0.9, top: 2.45 });
 
-  // Outer walls
-  const street = [{ from: 3.3, to: 4.4, top: 2.28 }, win(0.6, 2.4), win(7.2, 10.4)];
-  wall(walls, -6, 6, 5, 6, wReception, street);
-  wall(walls, -6, 6.075, 5, 6.075, wSage, street, 0.03);            // sage facade outside
-  wall(walls, 5, 6, 5, -5, wBlue, [win(1.4, 4.6), win(6.6, 9.8)]);
-  wall(walls, 5, -5, -6, -5, wSurgery, [win(7.4, 9.8)]);
-  wall(walls, -6, -5, -6, 6, wReception, [win(6.4, 8.4), win(8.8, 10.6)]);   // reception windows
-  // Inner walls
-  wall(walls, 0, 6, 0, 0, wBlue, [door(1.4)]);
-  wall(walls, -6, 0, 0, 0, wReception, [door(0.6)]);
-  wall(walls, 0, 0, 5, 0, wMint, [door(0.4)]);
-  wall(walls, 0, 0, 0, -5, wSurgery, [door(0.4)]);
-  // Skirting boards, blue in Dr Moulios' room as in the photo
+  // Reception shell
+  const front = [win(0.5, 3.0), { from: 3.45, to: 4.55, top: 2.28 }, win(5.0, 7.5)];
+  wall(walls, -4, 6, 4, 6, wReception, front);
+  wall(walls, -4, 6.075, 4, 6.075, wSage, front, 0.03);
+  wall(walls, -4, 0, -4, 6, wReception, []);                              // left wall
+  wall(walls, 4, 6, 4, 0, wReception, [win(0.5, 2.6)]);                   // right wall, window by the desk side
+  wall(walls, -6, 0, 6, 0, wReception, [door(5.3, 1.4)]);                 // back wall with the double door (x -0.7..0.7)
+  // Hall and rooms
+  wall(walls, -1, 0, -1, -6, wHall, [door(0.95)]);                         // door to Dr Moulios (left)
+  wall(walls, 1, 0, 1, -6, wHall, [door(0.95)]);                           // door to Dr Lefaki (right)
+  wall(walls, -10, -6, 6, -6, wReception, [win(1.2, 3.2), win(5.4, 8.4)]);
+  wall(walls, 6, 0, 6, -6, wMint, [win(1.6, 4.4)]);
+  wall(walls, -6, 0, -6, -6, wBlue, [door(2.4)]);                          // Moulios -> surgery
+  wall(walls, -10, 0, -6, 0, wSurgery, []);
+  wall(walls, -10, 0, -10, -6, wSurgery, []);
+  const blueSkirt = mat(0x2a55b8), brownSkirt = mat(0x6a4a34);
   const skirt = (x1, z1, x2, z2, m) => {
-    const len = Math.hypot(x2 - x1, z2 - z1);
-    const b = new THREE.Mesh(new THREE.BoxGeometry(len, 0.08, 0.02), m);
-    b.position.set((x1 + x2) / 2, 0.04, (z1 + z2) / 2);
-    b.rotation.y = -Math.atan2(z2 - z1, x2 - x1);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(Math.hypot(x2 - x1, z2 - z1), 0.08, 0.02), m);
+    b.position.set((x1 + x2) / 2, 0.04, (z1 + z2) / 2); b.rotation.y = -Math.atan2(z2 - z1, x2 - x1);
     walls.add(b);
   };
-  const blueSkirt = mat(0x2a55b8), brownSkirt = mat(0x6a4a34);
-  skirt(4.93, 5.9, 4.93, 0.1, blueSkirt); skirt(0.07, 0.07, 4.9, 0.07, blueSkirt);
-  skirt(4.93, -0.1, 4.93, -4.9, brownSkirt); skirt(0.1, -4.93, 4.9, -4.93, brownSkirt);
+  skirt(-5.93, -0.07, -1.07, -0.07, blueSkirt); skirt(-5.93, -5.93, -1.07, -5.93, blueSkirt);
+  skirt(1.07, -0.07, 5.93, -0.07, brownSkirt); skirt(1.07, -5.93, 5.93, -5.93, brownSkirt);
 
-  // Windows: vertical blinds in the treatment rooms (blue-grey and grey-green), zebra blinds in reception
+  // Windows
   const vb = (x, z, w, ry, c) => { const g = windowBlinds(walls, x, z, w, ry); g.children[1].material.color.set(c); };
-  vb(4.93, 3.0, 3.0, -Math.PI / 2, 0x9fb6d6);
-  vb(4.93, -2.2, 3.0, -Math.PI / 2, 0xb9cdc4);
-  vb(-3.4, -4.93, 2.4, 0, 0xf3f4f2);
-  vb(2.8, 5.93, 3.0, Math.PI, 0x9fb6d6);
-  zebraBlind(walls, -5.93, 4.5, 1.9, Math.PI / 2);
-  zebraBlind(walls, -5.93, 2.4, 1.9, Math.PI / 2);
-  zebraBlind(walls, -4.5, 5.93, 1.7, Math.PI);
+  vb(-3.1, -5.93, 3.0, 0, 0x9fb6d6);           // Moulios, blue-grey blinds
+  vb(5.93, -3.0, 2.8, -Math.PI / 2, 0xb9cdc4); // Lefaki, grey-green blinds
+  vb(-7.8, -5.93, 2.0, 0, 0xf3f4f2);             // surgery
+  zebraBlind(walls, -2.25, 5.93, 2.5, Math.PI);
+  zebraBlind(walls, 2.25, 5.93, 2.5, Math.PI);
+  zebraBlind(walls, 3.93, 4.45, 2.1, -Math.PI / 2);
 
-  /* Entrance (outside) */
-  entranceDoor(walls, -2.15, 6.0);
-  tallPlanter(root, -3.05, 6.55);
-  plant(root, -4.3, 6.6, 0.6);
-  at(rbox(1.0, 0.02, 0.6, mat(0x33373a, { roughness: 0.95 }), 0.005), -2.15, 0.0, 6.55, root);
-  hotspots.door = new THREE.Vector3(-2.15, 2.6, 6.1);
+  /* Entrance */
+  entranceDoor(walls, 0, 6.0);
+  tallPlanter(root, -0.95, 6.55);
+  plant(root, -2.6, 6.6, 0.6);
+  at(rbox(1.0, 0.02, 0.6, mat(0x33373a, { roughness: 0.95 }), 0.005), 0, 0.0, 6.55, root);
+  hotspots.door = new THREE.Vector3(0, 2.6, 6.1);
 
-  /* Reception & waiting (photo: terracotta floor, two blue-grey sofas facing each other,
-     glass table with a bonsai, teal squares with sconces, striped-wood counter at the back) */
+  /* Reception: waiting area on the left, the assistant's desk on the right, double door ahead */
   const R = new THREE.Group();
   root.add(R);
   const sofaMat = mat(0xa7bcc8, { roughness: 0.95 });
-  sofaPiece(R, -5.3, 3.4, Math.PI / 2, sofaMat, 2.0);
-  sofaPiece(R, -0.75, 3.4, -Math.PI / 2, sofaMat, 2.0);
-  glassTable(R, -3.0, 3.4);
-  // teal squares + half-cylinder sconces on the wall towards Dr Moulios' room
+  sofaPiece(R, -3.45, 3.3, Math.PI / 2, sofaMat, 2.0);
+  sofaPiece(R, -1.05, 3.3, -Math.PI / 2, sofaMat, 1.7);
+  glassTable(R, -2.25, 3.3);
   const tealSq = mat(0x5fb7b2, { roughness: 0.7 });
-  for (const zz of [5.3, 3.0]) {
+  for (const zz of [4.9, 2.6]) {
     const sq = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.7, 0.7), tealSq);
-    sq.position.set(-0.07, 2.2, zz);
-    R.add(sq);
-    sconce(R, -0.1, 2.2, zz, Math.PI);
+    sq.position.set(-3.93, 2.2, zz); R.add(sq);
+    sconce(R, -3.9, 2.2, zz, 0);
   }
-  coatStand(R, -0.35, 5.3);
-  // reception counter: striped wood front, white top; glass screen and a wall cabinet behind
+  coatStand(R, -3.5, 5.5);
+  plant(R, -3.55, 0.45, 0.8);
+  // assistant's desk on the right: striped-wood front facing the room
+  const D = new THREE.Group();
+  D.position.set(2.3, 0, 2.6); D.rotation.y = -Math.PI / 2;
+  R.add(D);
   const deskWood = new THREE.MeshStandardMaterial({ map: stripedWood(), roughness: 0.6 });
-  at(rbox(2.6, 1.08, 0.12, deskWood, 0.01), -3.0, 0.54, 1.25, R);
-  for (const sx of [-1, 1]) at(rbox(0.12, 1.08, 0.7, deskWood, 0.01), -3.0 + sx * 1.24, 0.54, 0.95, R);
-  at(rbox(2.7, 0.05, 0.42, MAT.counter, 0.01), -3.0, 1.1, 1.18, R);
-  at(rbox(2.5, 0.04, 0.55, MAT.white, 0.01), -3.0, 0.78, 0.9, R);
-  deskMonitor(R, -2.4, 1.12, 1.05, Math.PI * 0.9);
-  at(rbox(0.2, 0.05, 0.14, MAT.white, 0.01), -3.7, 1.15, 1.1, R);                  // phone
-  plant(R, -3.9, 1.15, 0.35).position.y = 1.12;
-  const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.1), MAT.glass);
-  screen.position.set(-2.2, 1.8, 0.35); R.add(screen);
-  const cab = at(rbox(0.9, 0.9, 0.3, MAT.white, 0.02), -3.4, 1.95, 0.2, R);
-  for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) at(rbox(0.18, 0.18, 0.02, mat([0xeef0ee, 0xdfe3e2, 0xf7f7f4][(i + j) % 3]), 0.005), -3.7 + i * 0.2, 1.7 + j * 0.22, 0.36, R);
-  const rec = assistant(R, -3.0, 0.55, 0);
+  at(rbox(2.4, 1.08, 0.12, deskWood, 0.01), 0, 0.54, 0.3, D);
+  for (const sx of [-1, 1]) at(rbox(0.12, 1.08, 0.7, deskWood, 0.01), sx * 1.14, 0.54, 0, D);
+  at(rbox(2.5, 0.05, 0.42, MAT.counter, 0.01), 0, 1.1, 0.24, D);
+  at(rbox(2.3, 0.04, 0.55, MAT.white, 0.01), 0, 0.78, -0.05, D);
+  deskMonitor(D, 0.5, 1.12, 0.1, Math.PI * 0.9);
+  at(rbox(0.2, 0.05, 0.14, MAT.white, 0.01), -0.6, 1.15, 0.2, D);
+  plant(D, -0.95, 0.2, 0.35).position.y = 1.12;
+  const rec = assistant(R, 3.15, 2.6, -Math.PI / 2);
+  const cab = at(rbox(0.3, 0.9, 0.9, MAT.white, 0.02), 3.8, 1.95, 2.0, R);
+  const glassScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.0), MAT.glass);
+  glassScreen.rotation.y = -Math.PI / 2; glassScreen.position.set(3.7, 1.8, 3.4); R.add(glassScreen);
+  waterCooler(R, 3.6, 5.4);
+  armchair(R, 3.3, 4.4, -Math.PI / 2 - 0.3);
+  plant(R, 3.6, 0.45, 0.8);
+  // double door straight ahead: one frame, two dark-wood leaves opened into the hall
+  {
+    const fm = mat(0x4a3226, { roughness: 0.5 }), lm = mat(0x4a3226, { roughness: 0.45 });
+    for (const sx of [-0.7, 0.7]) at(rbox(0.08, 2.14, 0.16, fm, 0.01), sx, 1.07, 0, R);
+    at(rbox(1.48, 0.08, 0.16, fm, 0.01), 0, 2.14, 0, R);
+    for (const side of [-1, 1]) {
+      const hinge = new THREE.Group();
+      hinge.position.set(side * 0.66, 0, -0.06);
+      hinge.rotation.y = side * 1.25;          // swung open towards the hall
+      R.add(hinge);
+      at(rbox(0.64, 2.06, 0.04, lm, 0.01), -side * 0.32, 1.04, 0, hinge);
+      at(cyl(0.015, 0.015, 0.12, MAT.chrome, 8), -side * 0.56, 1.02, 0.05, hinge).rotation.x = Math.PI / 2;
+    }
+  }
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.7), new THREE.MeshStandardMaterial({ map: signTexture(), roughness: 0.5 }));
-  sign.position.set(-1.45, 1.95, 0.07);
-  R.add(sign);
-  waterCooler(R, -5.6, 1.3);
-  armchair(R, -5.3, 0.6 + 1.6, Math.PI / 2 + 0.3);
-  plant(R, -5.55, 5.55, 0.9);
-  plant(R, -0.55, 1.3, 0.8);
-  plant(R, -1.5, 0.45, 0.55);
-  // interior doors: dark brown, the one to Dr Moulios' room with an orange edge (photo)
-  doorLeaf(R, -0.06, 4.6, Math.PI / 2, { frame: 0xe8622c, leaf: 0xf3f2ee, open: 1.3 });
-  doorLeaf(R, -5.4, 0.06, 0, { open: 0.25 });
-  hotspots.assistant = new THREE.Vector3(-3.0, 1.98, 0.55);
-  hotspots.waiting = new THREE.Vector3(-3.0, 1.0, 3.4);
-  hotspots.sign = new THREE.Vector3(-1.45, 2.45, 0.1);
+  sign.position.set(-2.3, 1.85, 0.07); R.add(sign);
+  hotspots.assistant = new THREE.Vector3(3.15, 1.98, 2.6);
+  hotspots.waiting = new THREE.Vector3(-2.25, 1.05, 3.3);
+  hotspots.sign = new THREE.Vector3(-2.3, 2.4, 0.1);
 
-  /* Room 1: Dr Moulios. Light blue, royal-blue chair, blue drawer tops, x-ray on the wall (photo) */
+  /* Hall */
+  plant(root, 0, -5.5, 0.9);
+  doorLeaf(root, -1.06, -0.95, Math.PI / 2, { open: 1.2 });
+  doorLeaf(root, 1.06, -0.95, Math.PI / 2, { open: -1.2 });
+
+  /* Dr Moulios (left): light blue, royal-blue chair, blue drawers, x-ray, TV over the chair */
   const R1 = new THREE.Group();
   root.add(R1);
   const royal = mat(0x2a55b8, { roughness: 0.45 });
-  cabinets(R1, 3.0, 0.4, 3.4, 0, royal, { sink: true });
-  deskMonitor(R1, 3.9, 0.87, 0.35, 0);
-  at(rbox(0.36, 0.02, 0.26, MAT.dark, 0.005), 2.6, 0.885, 0.4, R1);              // laptop base
-  const lap = at(rbox(0.36, 0.24, 0.015, MAT.dark, 0.005), 2.6, 1.0, 0.27, R1); lap.rotation.x = -0.25;
+  cabinets(R1, -3.5, -5.6, 3.6, 0, royal, { sink: true });
+  deskMonitor(R1, -2.6, 0.87, -5.65, 0);
+  at(rbox(0.36, 0.02, 0.26, MAT.dark, 0.005), -4.4, 0.885, -5.6, R1);
+  const lap = at(rbox(0.36, 0.24, 0.015, MAT.dark, 0.005), -4.4, 1.0, -5.73, R1); lap.rotation.x = -0.25;
   const lapS = new THREE.Mesh(new THREE.PlaneGeometry(0.33, 0.21), MAT.screenOn); lapS.position.z = 0.009; lap.add(lapS);
-  at(rbox(0.22, 0.3, 0.2, MAT.dark, 0.02), 4.45, 1.02, 0.35, R1);                 // speaker
-  at(rbox(0.5, 1.0, 0.45, mat(0x1d2c52, { roughness: 0.4 }), 0.04), 4.6, 0.5, 0.95, R1); // navy floor unit by the counter
-  dentalChair(R1, 2.8, 3.5, -Math.PI / 2, royal, { monitor: true, led: 'warm' });
-  xray(R1, 0.07, 2.4, Math.PI / 2);
-  const tv = at(rbox(0.9, 0.52, 0.05, MAT.dark, 0.015), 2.45, 2.3, 3.5, R1);
-  tv.rotation.set(-0.55, -Math.PI / 2, 0, 'YXZ');
-  const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.47), MAT.screenOn);
-  tvScreen.position.z = 0.028;
-  tv.add(tvScreen);
-  at(cyl(0.015, 0.015, 0.45, MAT.chrome, 8), 2.45, 2.55, 3.5, R1);
-  at(cyl(0.2, 0.2, 0.1, royal), 2.0, 0.55, 2.7, R1);
-  at(cyl(0.03, 0.03, 0.45, MAT.chrome, 8), 2.0, 0.28, 2.7, R1);
-  at(cyl(0.25, 0.25, 0.03, MAT.dark, 5), 2.0, 0.04, 2.7, R1);
-  doorLeaf(R1, 0.4, 0.06, 0, { open: 1.1 });
-  hotspots.chair1 = new THREE.Vector3(2.8, 1.2, 3.5);
-  hotspots.tv = new THREE.Vector3(2.45, 2.75, 3.5);
-  hotspots.xray = new THREE.Vector3(0.6, 2.0, 3.0);
+  at(rbox(0.5, 1.0, 0.45, mat(0x1d2c52, { roughness: 0.4 }), 0.04), -1.6, 0.5, -5.5, R1);
+  dentalChair(R1, -3.7, -3.4, Math.PI / 2, royal, { monitor: true, led: 'warm' });
+  xray(R1, -5.93, -1.2, Math.PI / 2);
+  const tv = at(rbox(0.9, 0.52, 0.05, MAT.dark, 0.015), -3.35, 2.3, -3.4, R1);
+  tv.rotation.set(-0.55, Math.PI / 2, 0, 'YXZ');
+  const tvS = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.47), MAT.screenOn); tvS.position.z = 0.028; tv.add(tvS);
+  at(cyl(0.015, 0.015, 0.45, MAT.chrome, 8), -3.35, 2.55, -3.4, R1);
+  at(cyl(0.2, 0.2, 0.1, royal), -4.5, 0.55, -2.6, R1);
+  at(cyl(0.03, 0.03, 0.45, MAT.chrome, 8), -4.5, 0.28, -2.6, R1);
+  at(cyl(0.25, 0.25, 0.03, MAT.dark, 5), -4.5, 0.04, -2.6, R1);
+  doorLeaf(R1, -6.06, -2.4, Math.PI / 2, { open: 1.1 });
+  hotspots.chair1 = new THREE.Vector3(-3.7, 1.2, -3.4);
+  hotspots.tv = new THREE.Vector3(-3.35, 2.75, -3.4);
+  hotspots.xray = new THREE.Vector3(-5.6, 2.05, -1.2);
 
-  /* Room 2: Dr Lefaki. Mint walls, teal drawers, soft-green chair, turquoise stool, x-ray arm */
+  /* Dr Lefaki (right): mint, teal drawers, turquoise left-handed chair, Beyond Polus */
   const R2 = new THREE.Group();
   root.add(R2);
   const tealD = mat(0x2f9c97, { roughness: 0.45 });
-  cabinets(R2, 2.6, -4.6, 4.0, 0, tealD, { sink: true });
-  deskMonitor(R2, 1.4, 0.87, -4.65, 0);
-  for (let i = 0; i < 5; i++) at(cyl(0.05, 0.05, 0.16 + (i % 2) * 0.08, i === 2 ? MAT.green : i === 4 ? mat(0xf2d27a) : MAT.white, 14), 2.3 + i * 0.16, 0.95, -4.62, R2);
-  dentalChair(R2, 2.8, -2.2, -Math.PI / 2, mat(0x8fd49e, { roughness: 0.5 }), { tray: 'green', led: 'cool', monitor: true });
-  at(cyl(0.2, 0.2, 0.1, mat(0x48b8c4, { roughness: 0.5 })), 2.0, 0.55, -1.4, R2);
-  at(cyl(0.03, 0.03, 0.45, MAT.chrome, 8), 2.0, 0.28, -1.4, R2);
-  at(cyl(0.25, 0.25, 0.03, MAT.chrome, 5), 2.0, 0.04, -1.4, R2);
-  xray(R2, 4.93, -3.9, -Math.PI / 2);
-  const pol = polus(R2, 4.3, -0.7, Math.PI * 1.15);
-  doorLeaf(R2, 0.06, -0.4, Math.PI / 2, { open: 1.2 });
-  hotspots.chair2 = new THREE.Vector3(2.8, 1.2, -2.2);
-  hotspots.whitening = new THREE.Vector3(4.3, 1.75, -0.7);
+  cabinets(R2, 3.5, -5.6, 3.8, 0, tealD, { sink: true });
+  deskMonitor(R2, 2.2, 0.87, -5.65, 0);
+  for (let i = 0; i < 5; i++) at(cyl(0.05, 0.05, 0.16 + (i % 2) * 0.08, i === 2 ? MAT.green : i === 4 ? mat(0xf2d27a) : MAT.white, 14), 3.4 + i * 0.16, 0.95, -5.62, R2);
+  dentalChair(R2, 3.7, -3.4, -Math.PI / 2, mat(0x3fbfb4, { roughness: 0.45 }), { tray: 'green', led: 'cool', monitor: true, mirror: true });
+  at(cyl(0.2, 0.2, 0.1, mat(0x48b8c4, { roughness: 0.5 })), 4.5, 0.55, -2.6, R2);
+  at(cyl(0.03, 0.03, 0.45, MAT.chrome, 8), 4.5, 0.28, -2.6, R2);
+  at(cyl(0.25, 0.25, 0.03, MAT.chrome, 5), 4.5, 0.04, -2.6, R2);
+  xray(R2, 3.0, -0.07, Math.PI);
+  const pol = polus(R2, 5.3, -1.0, -Math.PI * 0.75);
+  hotspots.chair2 = new THREE.Vector3(3.7, 1.2, -3.4);
+  hotspots.whitening = new THREE.Vector3(5.3, 1.75, -1.0);
 
-  /* Surgery: sterile room for implants, with the LD-9800 centrifuge, autoclave and the scanner */
+  /* Surgery (through Dr Moulios' room, further left): black surgical chair */
   const RS = new THREE.Group();
   root.add(RS);
-  dentalChair(RS, -3.0, -2.4, -Math.PI / 2, mat(0x6f9fc0, { roughness: 0.5 }), { led: 'cool' });
+  dentalChair(RS, -8.0, -3.0, Math.PI / 2, mat(0x1c1f22, { roughness: 0.4 }), { led: 'cool' });
   const sl = new THREE.Group();
-  sl.position.set(-3.0, 0, -2.4);
+  sl.position.set(-8.0, 0, -3.0);
   RS.add(sl);
   at(cyl(0.03, 0.03, 0.5, MAT.chrome, 8), 0, 2.45, 0, sl);
   for (const s2 of [-1, 1]) {
@@ -807,40 +825,33 @@ export function buildClinic() {
     headL.position.set(s2 * 0.45, 2.05, s2 * 0.2);
     sl.add(headL);
     const dome = new THREE.Mesh(new THREE.SphereGeometry(0.28, 32, 12, 0, Math.PI * 2, 0, Math.PI / 2.6), MAT.white);
-    dome.castShadow = true;
-    headL.add(dome);
+    dome.castShadow = true; headL.add(dome);
     const face = new THREE.Mesh(new THREE.CircleGeometry(0.24, 32), MAT.ledCool);
-    face.rotation.x = Math.PI / 2;
-    face.position.y = 0.03;
-    headL.add(face);
+    face.rotation.x = Math.PI / 2; face.position.y = 0.03; headL.add(face);
   }
-  cabinets(RS, -5.6, -2.0, 4.0, Math.PI / 2, mat(0xdfe6e8), {});
-  centrifuge(RS, -5.5, 0.87, -3.3, Math.PI / 2);
-  const ac = at(rbox(0.5, 0.42, 0.5, MAT.white, 0.03), -5.55, 1.08, -1.2, RS);
+  cabinets(RS, -9.6, -3.0, 4.0, Math.PI / 2, mat(0xdfe6e8), {});
+  centrifuge(RS, -9.5, 0.87, -4.2, Math.PI / 2);
+  const ac = at(rbox(0.5, 0.42, 0.5, MAT.white, 0.03), -9.55, 1.08, -1.9, RS);
   const acDoor = new THREE.Mesh(new THREE.CircleGeometry(0.15, 32), MAT.chrome);
-  acDoor.rotation.y = Math.PI / 2;
-  acDoor.position.set(0.255, 0, 0);
-  ac.add(acDoor);
-  scannerCart(RS, -1.3, -3.9, 0.35);
-  hotspots.surgery = new THREE.Vector3(-3.0, 2.6, -2.4);
-  hotspots.prp = new THREE.Vector3(-5.5, 1.45, -3.3);
-  hotspots.autoclave = new THREE.Vector3(-5.55, 1.6, -1.2);
-  hotspots.scanner = new THREE.Vector3(-1.3, 1.95, -3.9);
+  acDoor.rotation.y = Math.PI / 2; acDoor.position.set(0.255, 0, 0); ac.add(acDoor);
+  scannerCart(RS, -7.0, -5.2, -0.4);
+  hotspots.surgery = new THREE.Vector3(-8.0, 2.6, -3.0);
+  hotspots.prp = new THREE.Vector3(-9.5, 1.45, -4.2);
+  hotspots.autoclave = new THREE.Vector3(-9.55, 1.6, -1.9);
+  hotspots.scanner = new THREE.Vector3(-7.0, 1.95, -5.2);
 
-  // Ceilings: planes facing down, seen from inside a room but invisible from above.
+  // Ceilings (planes facing down: seen from inside, invisible from above)
   const ceilMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, emissive: 0xf4f4f0, emissiveIntensity: 0.35 });
   const panelMat = new THREE.MeshBasicMaterial({ color: 0xfffdf6 });
-  for (const [x1, z1, x2, z2] of [[-6, 0, 0, 6], [0, 0, 5, 6], [0, -5, 5, 0], [-6, -5, 0, 0]]) {
+  for (const [x1, z1, x2, z2] of [[-4, 0, 4, 6], [-1, -6, 1, 0], [-6, -6, -1, 0], [1, -6, 6, 0], [-10, -6, -6, 0]]) {
     const c = new THREE.Mesh(new THREE.PlaneGeometry(x2 - x1, z2 - z1), ceilMat);
     c.rotation.x = Math.PI / 2;
     c.position.set((x1 + x2) / 2, H - 0.01, (z1 + z2) / 2);
     root.add(c);
-    for (const dx of [-0.25, 0.25]) {
-      const l = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 1.4), panelMat);
-      l.rotation.x = Math.PI / 2;
-      l.position.set((x1 + x2) / 2 + dx * (x2 - x1), H - 0.02, (z1 + z2) / 2);
-      root.add(l);
-    }
+    const l = new THREE.Mesh(new THREE.PlaneGeometry(0.3, Math.min(1.4, (z2 - z1) * 0.4)), panelMat);
+    l.rotation.x = Math.PI / 2;
+    l.position.set((x1 + x2) / 2, H - 0.02, (z1 + z2) / 2);
+    root.add(l);
   }
 
   return { root, walls, hotspots, receptionist: rec, wlGlow: pol.glow };
