@@ -59,7 +59,8 @@ p { margin: 0 0 1em; }
 .skip:focus { left: 8px; }
 
 .h2 { font-family: var(--serif); font-size: var(--step-2); line-height: 1.12; letter-spacing: -.01em; max-width: 22ch; }
-.h2--xl { font-size: var(--step-3); line-height: 1; letter-spacing: -.03em; max-width: none; }
+.h2--xl { font: 900 var(--step-3)/0.9 var(--sans); letter-spacing: -.045em; text-transform: uppercase; max-width: none; }
+.h2--xl .scroll-float { font: inherit; margin: 0; }
 .split-parent { display: inline !important; }
 
 /* ---------- Buttons ---------- */
@@ -229,7 +230,7 @@ main, .footer { position: relative; z-index: 2; }
 .track__intro { width: min(520px, 82vw); flex: none; }
 .track__intro .muted { margin-top: 1em; }
 .card.spotlight-card {
-  background-color: rgba(22, 39, 43, .72) !important;
+  background-color: rgba(22, 39, 43, .9) !important;
   flex: none; width: min(380px, 78vw); min-height: min(440px, 60vh);
   display: flex; flex-direction: column; justify-content: flex-end;
   padding: clamp(22px, 2.4vw, 34px); border-radius: 28px;

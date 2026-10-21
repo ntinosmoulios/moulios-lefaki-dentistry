@@ -38,6 +38,16 @@ export function startFilm({ section, canvas, overlays, scenes }) {
     ctx.drawImage(img, x * dpr, y * dpr, dw * dpr, dh * dpr);
   }
 
+  // Film grain: a small noise tile, drawn at a random offset each frame. It hides
+  // compression and upscaling artefacts and makes the photos read as footage.
+  const grain = document.createElement('canvas');
+  grain.width = grain.height = 192;
+  {
+    const g = grain.getContext('2d'), d = g.createImageData(192, 192);
+    for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+    g.putImageData(d, 0, 0);
+  }
+  let grainPattern = null;
   const N = scenes.length;
   let target = 0, smooth = 0, last = -1;
 
@@ -96,6 +106,14 @@ export function startFilm({ section, canvas, overlays, scenes }) {
       o.el.style.opacity = (o.scene === 0 && o.in[0] <= 0 ? 1 - eo : Math.min(ein, 1 - eo)).toFixed(3);
       o.el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) scale(${sc2.toFixed(3)})`;
     }
+    if (!grainPattern) grainPattern = ctx.createPattern(grain, 'repeat');
+    ctx.save();
+    ctx.globalAlpha = 0.07;
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.translate((Math.random() * 192) | 0, (Math.random() * 192) | 0);
+    ctx.fillStyle = grainPattern;
+    ctx.fillRect(-192, -192, canvas.width + 192, canvas.height + 192);
+    ctx.restore();
     // fade the whole film out at the end, revealing the 3D scene behind
     const endFade = clamp01((p - 0.965) / 0.035);
     canvas.style.opacity = (1 - endFade).toFixed(3);
