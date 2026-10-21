@@ -27,6 +27,6 @@ export const OVERLAYS = [
   { scene: 5, in: [0.15, 0.35], out: [0.5, 0.65], kind: 'small', text: 'Ψηφιακό αποτύπωμα με ενδοστοματικό σαρωτή.', pos: 'bottom-right' },
   { scene: 6, in: [0.05, 0.3], out: [0.55, 0.72], kind: 'mega', lines: ['PRP'], pos: 'right' },
   { scene: 6, in: [0.15, 0.35], out: [0.5, 0.65], kind: 'small', text: 'Πλάσμα πλούσιο σε αιμοπετάλια, για να βοηθά την επούλωση.', pos: 'bottom-left' },
-  { scene: 7, in: [0.45, 0.65], out: [0.92, 1.0], kind: 'mega', lines: ['ΧΡΟΝΟΣ', 'ΓΙΑ ΕΣΑΣ.'], pos: 'left' },
+  { scene: 7, in: [0.45, 0.65], out: [0.92, 1.0], kind: 'mega', lines: ['ΥΓΙΕΣ', 'ΧΑΜΟΓΕΛΟ,', 'ΥΓΙΗΣ ΖΩΗ.'], pos: 'left' },
   { scene: 7, in: [0.55, 0.72], out: [0.92, 1.0], kind: 'cta', text: 'Κλείστε ραντεβού: 22350 51834', pos: 'bottom-left' }
 ];
