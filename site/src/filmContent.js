@@ -22,7 +22,7 @@ export const OVERLAYS = [
   { scene: 3, in: [0.05, 0.3], out: [0.55, 0.72], kind: 'mega', lines: ['ΑΙΣΘΗΤΙΚΗ'], pos: 'right' },
   { scene: 3, in: [0.15, 0.35], out: [0.5, 0.65], kind: 'small', text: 'Μαρία Λεφάκη. Όψεις, bonding και λευκά σφραγίσματα.', pos: 'bottom-right' },
   { scene: 4, in: [0.05, 0.3], out: [0.55, 0.72], kind: 'mega', lines: ['ΛΕΥΚΑΝΣΗ'], pos: 'center' },
-  { scene: 4, in: [0.15, 0.35], out: [0.5, 0.65], kind: 'small', text: 'Beyond Polus, στο ιατρείο ή στο σπίτι.', pos: 'bottom-left' },
+  { scene: 4, in: [0.15, 0.35], out: [0.5, 0.65], kind: 'small', text: 'Λεύκανση στο ιατρείο με το σύστημα Beyond Polus.', pos: 'bottom-left' },
   { scene: 5, in: [0.05, 0.3], out: [0.55, 0.72], kind: 'mega', lines: ['ΧΩΡΙΣ', 'ΠΑΣΤΑ.'], pos: 'left' },
   { scene: 5, in: [0.15, 0.35], out: [0.5, 0.65], kind: 'small', text: 'Ψηφιακό αποτύπωμα με ενδοστοματικό σαρωτή.', pos: 'bottom-right' },
   { scene: 6, in: [0.05, 0.3], out: [0.55, 0.72], kind: 'mega', lines: ['PRP'], pos: 'right' },

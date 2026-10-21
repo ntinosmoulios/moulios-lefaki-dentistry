@@ -65,7 +65,7 @@ export function startFilm({ section, canvas, overlays, scenes }) {
       // the next room grows out of the hole we're diving into
       const [n0] = next.zoom || [1.04];
       draw(imgs[i + 1], 0.75 + (n0 - 0.75) * e, next.fx, next.fy, clamp01(e * 1.6));
-      const z = z1 * (1 + e * 5);
+      const z = z1 * (1 + e * 3.2);
       const a = 1 - clamp01((u - 0.25) / 0.75);
       draw(imgs[i], z, sc.fx, sc.fy, a);
       // zoom blur: ghosted copies while moving fast
