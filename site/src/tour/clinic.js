@@ -716,18 +716,24 @@ export function buildClinic() {
   /* Reception: waiting area on the left, the assistant's desk on the right, double door ahead */
   const R = new THREE.Group();
   root.add(R);
-  const sofaMat = mat(0xa7bcc8, { roughness: 0.95 });
+  const sofaMat = mat(0xe2dccf, { roughness: 0.95 });
   sofaPiece(R, -3.45, 3.3, Math.PI / 2, sofaMat, 2.0);
   sofaPiece(R, -1.05, 3.3, -Math.PI / 2, sofaMat, 1.7);
   glassTable(R, -2.25, 3.3);
-  const tealSq = mat(0x5fb7b2, { roughness: 0.7 });
-  for (const zz of [4.9, 2.6]) {
-    const sq = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.7, 0.7), tealSq);
-    sq.position.set(-3.93, 2.2, zz); R.add(sq);
-    sconce(R, -3.9, 2.2, zz, 0);
-  }
+  // as in the videos: mint band high on the walls, TV over the sofas, black leather armchairs, a pharmacy display
+  const mint = mat(0x8fbfae, { roughness: 0.8 });
+  const band = (x, z, w, ry) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, 0.3, 0.02), mint); b.position.set(x, 2.4, z); b.rotation.y = ry; R.add(b); };
+  band(-3.93, 3.0, 5.9, Math.PI / 2);
+  band(-2.35, 0.07, 3.2, 0);
+  band(2.35, 0.07, 3.2, 0);
+  const rtv = at(rbox(1.0, 0.58, 0.05, MAT.dark, 0.015), -3.9, 1.75, 3.3, R); rtv.rotation.y = Math.PI / 2;
+  const rtvS = new THREE.Mesh(new THREE.PlaneGeometry(0.94, 0.52), MAT.screenOn); rtvS.position.z = 0.028; rtv.add(rtvS);
+  armchair(R, -3.35, 5.35, Math.PI / 2 + 0.5);
+  armchair(R, -3.35, 1.45, Math.PI / 2 - 0.4);
+  const vit = at(rbox(0.5, 1.7, 0.4, MAT.glass, 0.02), -3.6, 0.85, 0.5, R);
+  at(rbox(0.5, 0.25, 0.4, MAT.dark, 0.02), -3.6, 1.82, 0.5, R);
   coatStand(R, -3.5, 5.5);
-  plant(R, -3.55, 0.45, 0.8);
+  plant(R, -2.9, 0.4, 0.8);
   // assistant's desk on the right: striped-wood front facing the room
   const D = new THREE.Group();
   D.position.set(2.3, 0, 2.6); D.rotation.y = -Math.PI / 2;
@@ -762,10 +768,10 @@ export function buildClinic() {
     }
   }
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.7), new THREE.MeshStandardMaterial({ map: signTexture(), roughness: 0.5 }));
-  sign.position.set(-2.3, 1.85, 0.07); R.add(sign);
+  sign.position.set(-2.3, 1.62, 0.07); R.add(sign);
   hotspots.assistant = new THREE.Vector3(3.15, 1.98, 2.6);
   hotspots.waiting = new THREE.Vector3(-2.25, 1.05, 3.3);
-  hotspots.sign = new THREE.Vector3(-2.3, 2.4, 0.1);
+  hotspots.sign = new THREE.Vector3(-2.3, 2.15, 0.1);
 
   /* Hall */
   plant(root, 0, -5.5, 0.9);
@@ -829,7 +835,8 @@ export function buildClinic() {
     const face = new THREE.Mesh(new THREE.CircleGeometry(0.24, 32), MAT.ledCool);
     face.rotation.x = Math.PI / 2; face.position.y = 0.03; headL.add(face);
   }
-  cabinets(RS, -9.6, -3.0, 4.0, Math.PI / 2, mat(0xdfe6e8), {});
+  cabinets(RS, -9.6, -3.0, 4.0, Math.PI / 2, mat(0x1e2124, { roughness: 0.4 }), {});
+  xray(RS, -9.3, -5.93, 0);
   centrifuge(RS, -9.5, 0.87, -4.2, Math.PI / 2);
   const ac = at(rbox(0.5, 0.42, 0.5, MAT.white, 0.03), -9.55, 1.08, -1.9, RS);
   const acDoor = new THREE.Mesh(new THREE.CircleGeometry(0.15, 32), MAT.chrome);
