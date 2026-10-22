@@ -48,7 +48,8 @@ export function startFilm({ section, canvas, overlays, scenes }) {
     const s = base * z;
     const dw = iw * s, dh = ih * s;
     // keep the focus point heading towards the screen centre as we zoom in
-    const k = clamp01((z - 1) / 2.5);
+    // on portrait screens a landscape image is cropped hard, so aim at the subject from the start
+    const k = W < H ? 1 : clamp01((z - 1) / 2.5);
     let x = W / 2 - fx * dw + (fx - 0.5) * iw * base * (1 - k);
     let y = H / 2 - fy * dh + (fy - 0.5) * ih * base * (1 - k);
     // never show the edges of the photo
@@ -111,7 +112,7 @@ export function startFilm({ section, canvas, overlays, scenes }) {
     g.addColorStop(1, 'rgba(8,16,18,.7)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'rgba(8,16,18,.26)';
+    ctx.fillStyle = 'rgba(8,16,18,.12)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // overlays: each has a scene index and [in, out] window in that scene's local time

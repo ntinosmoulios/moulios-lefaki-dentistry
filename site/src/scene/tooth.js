@@ -110,7 +110,14 @@ export function buildTooth() {
   const glowMat = new THREE.MeshBasicMaterial({ color: 0x7cc4d8, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
   const glow = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.36, 2.0, 48, 1, true), glowMat);
   glow.position.y = -1.05;
-  jaw.add(bone, gum, glow);
+  // read as an x-ray: hairline cyan edges over an almost invisible fill
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0xbff4ff, transparent: true, opacity: 0, depthWrite: false });
+  const gumEdgeMat = new THREE.LineBasicMaterial({ color: 0xf2a79c, transparent: true, opacity: 0, depthWrite: false });
+  const boneEdges = new THREE.LineSegments(new THREE.EdgesGeometry(bone.geometry, 25), edgeMat);
+  boneEdges.position.copy(bone.position);
+  const gumEdges = new THREE.LineSegments(new THREE.EdgesGeometry(gum.geometry, 25), gumEdgeMat);
+  gumEdges.position.copy(gum.position);
+  jaw.add(bone, gum, glow, boneEdges, gumEdges);
 
   const model = new THREE.Group();
   model.add(jaw, screw, abutment, crown);
@@ -127,8 +134,10 @@ export function buildTooth() {
       titanium.depthWrite = titaniumDark.depthWrite = v > 0.95;
     },
     setJaw(v, g) {
-      boneMat.opacity = 0.1 * v;
-      gumMat.opacity = 0.42 * v;
+      boneMat.opacity = 0.035 * v;
+      gumMat.opacity = 0.16 * v;
+      edgeMat.opacity = 0.5 * v;
+      gumEdgeMat.opacity = 0.6 * v;
       glowMat.opacity = 0.4 * g;
       jaw.visible = v > 0.01;
       glow.visible = g > 0.01;

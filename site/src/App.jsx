@@ -369,7 +369,7 @@ export default function App() {
       <footer className="footer">
         <div className="wrap footer__row">
           <p>© {new Date().getFullYear()} Μούλιος Μιχάλης – Λεφάκη Μαρία, Χειρουργοί Οδοντίατροι</p>
-          <p>Ο ιστότοπος δεν χρησιμοποιεί cookies.</p>
+          <p>Οι εικόνες της αρχικής ταινίας είναι ενδεικτικές. Ο ιστότοπος δεν χρησιμοποιεί cookies.</p>
         </div>
       </footer>
     </ClickSpark>
