@@ -1,15 +1,15 @@
 // The opening film: real photos of the clinic, in the order you walk through it.
 // fx/fy: the point the camera dives into (fraction of the photo).
 export const SCENES = [
-  { src: './images/clinic/entrance.webp', fx: 0.69, fy: 0.27, zoom: [1.02, 1.3] },     // the glass with the tooth
-  { src: './images/clinic/reception.webp', fx: 0.38, fy: 0.45, zoom: [1.08, 1.45] },   // dark door at the back
+  { frames: { base: './images/film/entrance/', count: 36 }, fx: 0.5, fy: 0.36, zoom: [1.0, 1.12] },  // walking up to the door with the tooth
+  { frames: { base: './images/film/salon/', count: 32 }, fx: 0.5, fy: 0.45, zoom: [1.0, 1.12] },     // the salon: sofas, armchairs, TV
   { src: './images/clinic/room-moulios.webp', fx: 0.44, fy: 0.42, zoom: [1.06, 1.4] }, // chair monitor
   // real video, scrubbed by the scroll: a slow pan across the surgical room
   { frames: { base: './images/film/surgery/', count: 32 }, fx: 0.5, fy: 0.6, zoom: [1.0, 1.1] },
-  { src: './images/clinic/room-lefaki.webp', fx: 0.55, fy: 0.42, zoom: [1.06, 1.4] },
+  { frames: { base: './images/film/lefaki/', count: 28 }, fx: 0.5, fy: 0.64, zoom: [1.0, 1.12] },    // Dr Lefaki's room, the turquoise chair
   { src: './images/clinic/whitening.webp', fx: 0.4, fy: 0.42, zoom: [1.04, 1.35] },    // the lamp's glow
   { frames: { base: './images/film/scanner/', count: 24 }, fx: 0.5, fy: 0.42, zoom: [1.0, 1.12] }, // the Launca scanner, real video
-  { src: './images/clinic/centrifuge.webp', fx: 0.62, fy: 0.45, zoom: [1.04, 1.3] },
+  { frames: { base: './images/film/centrifuge/', count: 28 }, fx: 0.5, fy: 0.5, zoom: [1.0, 1.1] },  // pushing in on the PRP centrifuge
   { src: './images/clinic/moulios-scanner.webp', fx: 0.5, fy: 0.62, reverse: true }     // pull back from the screen to the doctor
 ];
 

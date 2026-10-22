@@ -753,18 +753,19 @@ export function buildClinic() {
   waterCooler(R, 3.6, 5.4);
   armchair(R, 3.3, 4.4, -Math.PI / 2 - 0.3);
   plant(R, 3.6, 0.45, 0.8);
-  // double door straight ahead: one frame, two dark-wood leaves opened into the hall
+  // double door straight ahead: frameless frosted glass, an orange stripe and a round handle on each leaf
   {
-    const fm = mat(0x4a3226, { roughness: 0.5 }), lm = mat(0x4a3226, { roughness: 0.45 });
-    for (const sx of [-0.7, 0.7]) at(rbox(0.08, 2.14, 0.16, fm, 0.01), sx, 1.07, 0, R);
-    at(rbox(1.48, 0.08, 0.16, fm, 0.01), 0, 2.14, 0, R);
+    const frosted = new THREE.MeshStandardMaterial({ color: 0xf1f4ee, roughness: 0.25, transparent: true, opacity: 0.82 });
+    const orange = mat(0xc4501f, { roughness: 0.45 });
     for (const side of [-1, 1]) {
       const hinge = new THREE.Group();
-      hinge.position.set(side * 0.66, 0, -0.06);
-      hinge.rotation.y = side * 1.25;          // swung open towards the hall
+      hinge.position.set(side * 0.7, 0, -0.04);
+      hinge.rotation.y = side * 1.15;          // swung open towards the hall
       R.add(hinge);
-      at(rbox(0.64, 2.06, 0.04, lm, 0.01), -side * 0.32, 1.04, 0, hinge);
-      at(cyl(0.015, 0.015, 0.12, MAT.chrome, 8), -side * 0.56, 1.02, 0.05, hinge).rotation.x = Math.PI / 2;
+      at(rbox(0.68, 2.14, 0.02, frosted, 0.005), -side * 0.34, 1.08, 0, hinge);
+      at(rbox(0.11, 2.12, 0.025, orange, 0.004), -side * 0.6, 1.08, 0, hinge);
+      for (const zz of [-0.03, 0.03]) at(cyl(0.07, 0.07, 0.02, MAT.chrome, 24), -side * 0.58, 1.02, zz, hinge).rotation.x = Math.PI / 2;
+      for (const yy of [0.25, 1.9]) at(rbox(0.06, 0.1, 0.05, MAT.chrome, 0.01), -side * 0.03, yy, 0, hinge);
     }
   }
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.7), new THREE.MeshStandardMaterial({ map: signTexture(), roughness: 0.5 }));
