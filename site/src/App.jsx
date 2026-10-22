@@ -69,6 +69,44 @@ function MagnetBtn({ href, children, className = 'btn' }) {
   );
 }
 
+const SCRAMBLE = 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ0123456789/—·';
+function Scramble({ text }) {
+  const [out, setOut] = useState(text);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setOut(text); return; }
+    let f = 0, raf;
+    const tick = () => {
+      f++;
+      const done = Math.floor(f / 2);
+      setOut(text.split('').map((c, i) => (i < done || c === ' ' ? c : SCRAMBLE[(Math.random() * SCRAMBLE.length) | 0])).join(''));
+      if (done < text.length) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [text]);
+  return <span>{out}</span>;
+}
+
+const HUD_SECTIONS = [['#top', 'ΑΡΧΗ'], ['#emfytevmata', 'ΕΜΦΥΤΕΥΜΑ'], ['#iatreio', 'ΤΟ ΙΑΤΡΕΙΟ'], ['#ypiresies', 'ΥΠΗΡΕΣΙΕΣ'], ['#leukansi', 'ΛΕΥΚΑΝΣΗ'], ['#exoplismos', 'ΕΞΟΠΛΙΣΜΟΣ'], ['#erotiseis', 'ΕΡΩΤΗΣΕΙΣ'], ['#epikoinonia', 'ΕΠΙΚΟΙΝΩΝΙΑ']];
+function Hud() {
+  const [sec, setSec] = useState(0);
+  useEffect(() => {
+    const els = HUD_SECTIONS.map(([id]) => document.querySelector(id));
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) if (e.isIntersecting) { const i = els.indexOf(e.target); if (i >= 0) setSec(i); }
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    els.forEach(el => el && io.observe(el));
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div className="hud" aria-hidden="true">
+      <div className="hud-target"><i /><i /><i /><i /><span>ΕΜΦΥΤΕΥΜΑ / ΤΙΤΑΝΙΟ</span></div>
+      <p className="hud__bl">38.8041° Β · 22.6525° Α<br />ΜΩΛΟΣ ΦΘΙΩΤΙΔΑΣ</p>
+      <p className="hud__br"><Scramble text={`${String(sec + 1).padStart(2, '0')} — ${HUD_SECTIONS[sec][1]}`} /></p>
+    </div>
+  );
+}
+
 export default function App() {
   const [step, setStep] = useState(0);
   const [shade, setShade] = useState(6);
@@ -87,7 +125,7 @@ export default function App() {
   }, []);
 
   return (
-    <ClickSpark sparkColor="#BFF4FF" sparkSize={12} sparkRadius={26} sparkCount={10} duration={520} style={{ height: 'auto' }}>
+    <ClickSpark sparkColor="#1E6E86" sparkSize={12} sparkRadius={26} sparkCount={10} duration={520} style={{ height: 'auto' }}>
       <div className="loader" aria-hidden="true">
         <div className="loader__half loader__half--top" />
         <div className="loader__half loader__half--bot" />
@@ -118,6 +156,7 @@ export default function App() {
       </header>
 
       <canvas id="scene" aria-hidden="true" />
+      <Hud />
       <div className="progress" aria-hidden="true"><span /></div>
 
       <main id="main">

@@ -12,10 +12,11 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { buildTooth } from './tooth.js';
+import { makeSky, makeTerrain, makeContactShadow, addDissolve, makeCloud } from './frost.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const BG = 0x0f1c1f;
+const BG = 0xe3eaee;
 const YELLOW = new THREE.Color('#d6c294');
 const WHITE = new THREE.Color('#f8f6ee');
 const TAU = Math.PI * 2;
@@ -68,14 +69,14 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   function poses() {
     const m = isMobile();
     return m ? {
-      hero: { sx: 0, sy: 0.25, scale: 0.6 },
+      hero: { sx: 0, sy: 0.17, scale: 0.6 },
       story: { sx: 0, sy: 0.2, scale: 0.62 },
       about: { sx: 0, sy: 0.3, scale: 0.0001 },
       services: { sx: 0, sy: 0.3, scale: 0.5 },
       white: { sx: 0, sy: 0.25, scale: 0.62 },
       tech: { sx: 0, sy: 0.25, scale: 0.6 }
     } : {
-      hero: { sx: 0.27, sy: 0.02, scale: 1.15 },
+      hero: { sx: 0.31, sy: 0.02, scale: 1.1 },
       story: { sx: 0.24, sy: 0, scale: 0.95 },
       about: { sx: 0.27, sy: -0.02, scale: 0.72 },
       services: { sx: 0, sy: 0.02, scale: 1.15 },
@@ -87,7 +88,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     ...poses().hero, modelY: 0.4, tiltX: 0.25, rotY: -0.5, lookY: 0.2,
     dist: 11, orbit: 0, pitch: 0.04, roll: 0, fov: 32,
     screwY: 0, abutY: 0.04, crownY: 0.38, spin: 0,
-    jaw: 0, glow: 0, parts: 1, white: 1, scan: 5, scanOn: 0,
+    jaw: 0, glow: 0, parts: 1, white: 1, scan: 5, scanOn: 0, diss: 0, spread: 0, ground: 1,
     sparkle: 0, shake: 0, flash: 0
   });
   Object.assign(S, base());
@@ -95,20 +96,22 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   // Intro overlay, applied on top of the scroll state: a macro shot that pulls back
   const I = reduceMotion
     ? { scale: 1, rot: 0, crown: 0, screw: 0, dist: 0, roll: 0, center: 1, fov: 0 }
-    : { scale: 0.001, rot: -2.4, crown: 1.4, screw: -1, dist: -7, roll: 0.35, center: 0, fov: 22 };
+    : { scale: 1, rot: -1.4, crown: 0, screw: 0, dist: -4.5, roll: 0.2, center: 0, fov: 12, diss: 1 };
+  if (reduceMotion) I.diss = 0;
 
-  let tooth, composer, bloom, scene, camera, particles, sparkles;
+  let tooth, composer, bloom, scene, camera, particles, sparkles, sky, terrain, shadow, cloud;
+  const D = { uDiss: { value: 0 }, uSpread: { value: 0 }, uTime: { value: 0 }, uEdge: { value: new THREE.Color('#7fd8f0') } };
   const quality = { dpr: 1, level: 0, samples: [], settleAt: 0, bloom: 0.34 };
   const pointer = { x: 0, y: 0 }, target = { x: 0, y: 0 };
 
   if (renderer) {
     quality.dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.25 : 1.5);
-    quality.bloom = isMobile() ? 0.2 : 0.24;
+    quality.bloom = isMobile() ? 0.08 : 0.1;
     renderer.setPixelRatio(quality.dpr);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.88;
+    renderer.toneMappingExposure = 1.0;
     renderer.localClippingEnabled = true;
 
     scene = new THREE.Scene();
@@ -116,11 +119,11 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     scene.fog = new THREE.Fog(BG, 9, 22);
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environmentIntensity = 0.6;
+    scene.environmentIntensity = 0.38;
 
     camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.05, 80);
 
-    const key = new THREE.DirectionalLight(0xffffff, 1.7);
+    const key = new THREE.DirectionalLight(0xffffff, 2.2);
     key.position.set(4, 6, 5);
     const rim = new THREE.DirectionalLight(0x8fd6ea, 3.2);
     rim.position.set(-5, 3, -4);
@@ -128,8 +131,19 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     rim2.position.set(5, -2, -3);
     scene.add(key, rim, rim2);
 
+    scene.add(new THREE.HemisphereLight(0xf4f9fb, 0x8d9ca3, 0.55));
+    sky = makeSky(); scene.add(sky);
+    terrain = makeTerrain(); terrain.position.y = -2.75; scene.add(terrain);
+    shadow = makeContactShadow(); shadow.position.y = -2.7; scene.add(shadow);
+
     tooth = buildTooth();
     scene.add(tooth.pivot);
+    // dissolve + point cloud of the assembled implant
+    addDissolve(tooth.dissolveMats, D);
+    tooth.crown.position.y = 0.38; tooth.abutment.position.y = 0.04; tooth.screw.position.y = 0;
+    tooth.pivot.updateMatrixWorld(true);
+    cloud = makeCloud(tooth.cloudMeshes, tooth.model, isMobile() ? 7000 : 16000, D);
+    tooth.model.add(cloud);
 
     sparkles = makeSparkles(70);
     tooth.crown.add(sparkles);
@@ -139,7 +153,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), quality.bloom, 0.45, 0.93);
+    bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), quality.bloom, 0.4, 0.97);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     sizeComposer();
@@ -228,7 +242,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
     // 3. About: dutch angle, the camera keeps circling the finished implant
     let [s, d] = enter(ab.t + vh * 0.2, vh * 1.1);
-    tl.to(S, { ...P.about, jaw: 0, glow: 0, rotY: TAU - 0.4, tiltX: 0.35, modelY: 0.3, lookY: 0.25,
+    tl.to(S, { ...P.about, jaw: 0, glow: 0, ground: 0, rotY: TAU - 0.4, tiltX: 0.35, modelY: 0.3, lookY: 0.25,
       dist: 12, orbit: 0.9, pitch: 0.18, roll: 0.12, ease: io, duration: d }, s);
     const abEnd = sv.t - vh;
     if (abEnd > cursor + 10) { tl.to(S, { orbit: 1.9, roll: -0.06, duration: abEnd - cursor }, cursor); cursor = abEnd; }
@@ -267,9 +281,9 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
     // 7. FAQ: the camera flies straight into the tooth, a flash, and it is gone
     [s, d] = enter(fq.t, vh * 0.9);
-    tl.to(S, { sx: 0, sy: 0, dist: 0.9, fov: 62, roll: 0.25, ease: 'power3.in', duration: d * 0.9 }, s)
-      .to(S, { flash: 1.4, duration: d * 0.12 }, s + d * 0.78)
-      .to(S, { scale: 0.0001, flash: 0, duration: d * 0.1 }, s + d * 0.9);
+    tl.to(S, { sx: 0, sy: 0, dist: 8.5, fov: 34, roll: 0.08, rotY: '+=1.2', ease: io, duration: d * 0.9 }, s)
+      .to(S, { diss: 1, spread: 3.6, flash: 0, duration: d * 0.45 }, s + d * 0.55)
+      .to(S, { scale: 0.0001, duration: d * 0.05 }, s + d * 1.0);
 
     tl.to({}, { duration: 1 }, Math.max(cursor, maxScroll));
     tl.time(0);
@@ -278,6 +292,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   /* ---------- Frame ---------- */
   let smooth = window.scrollY;
   let lastStep = -1, lastShade = -1, idle = 0, frameCount = 0, introRunning = !reduceMotion, lastTrackP = -1;
+  const hud = $('.hud-target');
   const topbar = $('.topbar'), bar = $('.progress span'), track = $('.track'), trackBar = $('.track__bar span');
   const v3 = new THREE.Vector3(), q = new THREE.Quaternion(), n = new THREE.Vector3();
 
@@ -350,6 +365,15 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     t.abutment.position.y = S.abutY + I.screw * 0.6;
     t.crown.position.y = S.crownY + I.crown;
     t.setParts(S.parts);
+    D.uDiss.value = Math.max(S.diss, I.diss);
+    D.uSpread.value = S.spread + I.diss * 1.3;
+    D.uTime.value = idle * 20;
+    cloud.visible = D.uDiss.value > 0.002;
+    cloud.material.uniforms.uPR.value = quality.dpr;
+    terrain.visible = shadow.visible = S.ground > 0.01;
+    terrain.material.opacity = S.ground;
+    shadow.material.opacity = S.ground * (1 - D.uDiss.value) * clamp01(S.parts + S.jaw);
+    shadow.scale.setScalar(3.2 * sc);
     t.setJaw(S.jaw, S.glow);
     t.enamel.color.lerpColors(YELLOW, WHITE, clamp01(S.white));
     t.enamel.emissiveIntensity = Math.max(0, S.white - 0.85) * 0.5 * (S.parts < 0.5 ? 1 : 0);
@@ -375,8 +399,17 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     const cx = S.sx * I.center, cy = S.sy;
     camera.setViewOffset(W, H, -cx * W, cy * H, W, H);
     camera.updateProjectionMatrix();
-    scene.fog.near = Math.max(1, dist - 2);
-    scene.fog.far = dist + 14;
+    scene.fog.near = Math.max(6, dist + 7);
+    scene.fog.far = dist + 30;
+    sky.position.copy(camera.position);
+    if (hud) {
+      // HUD brackets follow the implant on screen
+      t.crown.getWorldPosition(v3); v3.y -= 0.6 * sc; v3.project(camera);
+      const hx = (v3.x * 0.5 + 0.5) * W, hy = (-v3.y * 0.5 + 0.5) * H;
+      const show = t.pivot.visible && D.uDiss.value < 0.95 && v3.z < 1 && marks.story && smooth < marks.story.s0 + marks.story.len;
+      hud.style.opacity = show ? '1' : '0';
+      hud.style.transform = `translate3d(${hx.toFixed(1)}px, ${hy.toFixed(1)}px, 0)`;
+    }
     if (bloom.enabled) bloom.strength = quality.bloom + S.flash * 1.1;
 
     /* Scanner clipping planes, computed in world space from the crown's frame */
@@ -445,7 +478,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
       .to(I, { dist: 0, fov: 0, roll: 0, duration: 3 }, 0)
       .to(I, { rot: 0, duration: 2.8 }, 0)
       .to(I, { center: 1, duration: 2.6, ease: 'power3.inOut' }, 0.4)
-      .to(I, { crown: 0, screw: 0, duration: 1.8, ease: 'power3.out' }, 0.7)
+      .to(I, { diss: 0, duration: 2.6, ease: 'power2.inOut' }, 0.2)
       .from('.hero2__title span', { yPercent: 105, autoAlpha: 0, duration: 1.4, stagger: 0.12, ease: 'expo.out' }, 0.55)
       .from('.hero2__lead, .hero2__actions, .topbar', { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.08 }, 0.9)
       .add(() => { introRunning = false; quality.settleAt = performance.now() + 500; });
@@ -509,8 +542,8 @@ function makeParticles(count) {
   }
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const m = new THREE.PointsMaterial({
-    size: 0.08, map: dotTexture(), transparent: true, opacity: 0.75,
-    depthWrite: false, blending: THREE.AdditiveBlending, color: 0xa9dcea
+    size: 0.06, map: dotTexture('rgba(255,255,255,.6)'), transparent: true, opacity: 0.55,
+    depthWrite: false, color: 0x7e98a3
   });
   return new THREE.Points(g, m);
 }

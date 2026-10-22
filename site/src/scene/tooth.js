@@ -11,8 +11,8 @@ export function buildTooth() {
     emissive: new THREE.Color(0xffffff), emissiveIntensity: 0,
     clippingPlanes: [planeSolid]
   });
-  const titanium = new THREE.MeshStandardMaterial({ color: 0xc3cdd3, metalness: 1, roughness: 0.22, transparent: true });
-  const titaniumDark = new THREE.MeshStandardMaterial({ color: 0x8f9aa1, metalness: 1, roughness: 0.3, transparent: true });
+  const titanium = new THREE.MeshStandardMaterial({ color: 0xa9b3ba, metalness: 1, roughness: 0.26, transparent: true });
+  const titaniumDark = new THREE.MeshStandardMaterial({ color: 0x6f7a81, metalness: 1, roughness: 0.32, transparent: true });
 
   /* Crown */
   const profile = [
@@ -151,6 +151,7 @@ export function buildTooth() {
 
   return {
     pivot, model, crown, screw, abutment, jaw, enamel, wireMat, scanner, scannerMat, scanRingMat,
+    dissolveMats: [enamel, titanium, titaniumDark], cloudMeshes: [crown, core, apex, thread, ab1, ab2],
     planeSolid, planeWire,
     setParts(v) {
       titanium.opacity = titaniumDark.opacity = v;
