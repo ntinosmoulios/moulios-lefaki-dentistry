@@ -170,7 +170,7 @@ main, .footer { position: relative; z-index: 2; }
 .sticky { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
 .panel { width: min(470px, 100%); }
 .panel .h2 { margin-bottom: .6em; }
-.implant { height: 340vh; }
+.implant { height: 760vh; }
 .whitening { height: 260vh; }
 .tech { height: 240vh; }
 @media (max-width: 760px) {
@@ -329,3 +329,36 @@ main, .footer { position: relative; z-index: 2; }
   .step { opacity: 1; }
   .step p { max-height: none; }
 }
+
+/* ---------- Hero (big type over the 3D implant) ---------- */
+.hero2 { position: relative; min-height: 100vh; min-height: 100svh; display: grid; align-content: space-between; padding: 110px var(--gutter) clamp(36px, 7vh, 80px); max-width: var(--max); margin: 0 auto; }
+.hero2__title { margin: 0; font: 900 min(12.5vw, 13rem)/0.84 Commissioner, var(--sans); letter-spacing: -0.035em; text-transform: uppercase; color: var(--enamel); }
+.hero2__title span { display: block; }
+.hero2__foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 40px; }
+.hero2__lead { max-width: 38ch; margin: 0; font: 500 var(--step-1)/1.4 var(--sans); color: rgba(242, 238, 228, .86); }
+.hero2__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; }
+@media (max-width: 760px) {
+  .hero2 { padding-top: 46vh; align-content: end; gap: 28px; }
+  .hero2__title { font-size: 17vw; }
+  .hero2__lead { font-size: var(--step-0); }
+}
+
+/* ---------- Implant story, one beat at a time ---------- */
+.implant__sticky { position: sticky; top: 0; height: 100vh; height: 100svh; max-width: var(--max); margin: 0 auto; padding: 110px var(--gutter) clamp(36px, 7vh, 80px); display: grid; grid-template-rows: auto 1fr auto; }
+.implant__kicker { margin: 0; font: 500 var(--step--1)/1.2 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--scan); }
+.beats { position: relative; list-style: none; margin: 0; padding: 0; }
+.beat { position: absolute; left: 0; top: 50%; width: min(46%, 660px); translate: 0 -50%; opacity: 0; filter: blur(14px); transform: translateY(60px) scale(.96); transition: opacity .7s cubic-bezier(.2, .7, .2, 1), transform .9s cubic-bezier(.2, .7, .2, 1), filter .7s; pointer-events: none; }
+.beat.is-past { transform: translateY(-70px) scale(1.06); }
+.beat.is-active { opacity: 1; filter: blur(0); transform: none; pointer-events: auto; }
+.beat__n { display: block; margin-bottom: 14px; font: 500 var(--step--1)/1 var(--sans); letter-spacing: .12em; color: rgba(242, 238, 228, .55); }
+.beat__word { margin: 0 0 .3em; font: 900 min(8.5vw, 8.5rem, calc(64vw / var(--len)))/0.88 Commissioner, var(--sans); letter-spacing: -0.03em; color: var(--enamel); text-shadow: 0 10px 60px rgba(0, 0, 0, .45); }
+.beat__text { max-width: 36ch; margin: 0; font: 500 var(--step-1)/1.45 var(--sans); color: rgba(242, 238, 228, .86); }
+.beats__bar { display: flex; gap: 8px; }
+.beats__bar i { width: 34px; height: 3px; border-radius: 3px; background: rgba(242, 238, 228, .18); transition: background .5s; }
+.beats__bar i.on { background: var(--scan); box-shadow: 0 0 12px var(--scan-dim); }
+@media (max-width: 760px) {
+  .beat { top: auto; bottom: 22px; width: 100%; translate: none; }
+  .beat__word { font-size: min(15vw, calc(120vw / var(--len))); }
+  .beat__text { font-size: var(--step-0); }
+}
+@media (prefers-reduced-motion: reduce) { .beat { transition: opacity .2s; transform: none; filter: none; } }

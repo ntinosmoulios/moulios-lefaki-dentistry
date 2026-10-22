@@ -13,8 +13,6 @@ export function buildTooth() {
   });
   const titanium = new THREE.MeshStandardMaterial({ color: 0xc3cdd3, metalness: 1, roughness: 0.22, transparent: true });
   const titaniumDark = new THREE.MeshStandardMaterial({ color: 0x8f9aa1, metalness: 1, roughness: 0.3, transparent: true });
-  const boneMat = new THREE.MeshBasicMaterial({ color: 0x9fd8e6, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
-  const gumMat = new THREE.MeshBasicMaterial({ color: 0xe0857c, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
 
   /* Crown */
   const profile = [
@@ -87,37 +85,64 @@ export function buildTooth() {
   const thread = new THREE.Mesh(new THREE.TubeGeometry(new Helix(), 380, 0.05, 6, false), titanium);
   screw.add(core, apex, thread);
 
-  /* Jaw block */
-  const roundedRect = (w, h, r) => {
-    const s = new THREE.Shape();
-    s.moveTo(-w / 2 + r, -h / 2);
-    s.lineTo(w / 2 - r, -h / 2); s.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-    s.lineTo(w / 2, h / 2 - r); s.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-    s.lineTo(-w / 2 + r, h / 2); s.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-    s.lineTo(-w / 2, -h / 2 + r); s.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+  /* Jaw: a cut-away section, like the models dentists use to explain implants.
+     The front face (z = 0) is the cut: spongy bone inside, the socket channel, gum on top. */
+  const poreTex = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 512;
+    const g = c.getContext('2d');
+    g.fillStyle = '#dccbb0'; g.fillRect(0, 0, 512, 512);
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 900; i++) {
+      const x = rnd() * 512, y = rnd() * 512, r = 2 + rnd() * 9;
+      g.fillStyle = `rgba(${150 + rnd() * 40 | 0},${110 + rnd() * 30 | 0},${80 + rnd() * 20 | 0},${0.25 + rnd() * 0.35})`;
+      g.beginPath(); g.ellipse(x, y, r, r * (0.5 + rnd() * 0.6), rnd() * 3, 0, 7); g.fill();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(0.55, 0.55);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  })();
+  const fade = m => Object.assign(m, { transparent: true, opacity: 0 });
+  const boneCut = fade(new THREE.MeshStandardMaterial({ map: poreTex, roughness: 0.85 }));
+  const boneSide = fade(new THREE.MeshPhysicalMaterial({ color: 0xe3d6bf, roughness: 0.5, clearcoat: 0.3 }));
+  const gumCut = fade(new THREE.MeshStandardMaterial({ color: 0xb3525d, roughness: 0.6 }));
+  const gumSide = fade(new THREE.MeshPhysicalMaterial({ color: 0xe0848a, roughness: 0.32, clearcoat: 0.9, clearcoatRoughness: 0.2, sheen: 1, sheenColor: new THREE.Color(0xffc4c4) }));
+  const jawMats = [boneCut, boneSide, gumCut, gumSide];
+
+  const boneShape = new THREE.Shape();
+  boneShape.moveTo(-1.5, -2.75);
+  boneShape.lineTo(1.5, -2.75);
+  boneShape.lineTo(1.32, -0.55);
+  boneShape.quadraticCurveTo(1.25, -0.05, 0.31, -0.05);
+  boneShape.lineTo(0.21, -2.18);
+  boneShape.quadraticCurveTo(0, -2.36, -0.21, -2.18);   // the drilled socket
+  boneShape.lineTo(-0.31, -0.05);
+  boneShape.quadraticCurveTo(-1.25, -0.05, -1.32, -0.55);
+  boneShape.closePath();
+  const gumShape = side => {
+    const s = new THREE.Shape(), k = side;
+    s.moveTo(1.43 * k, -0.85);
+    s.quadraticCurveTo(1.4 * k, 0.28, 0.34 * k, 0.28);
+    s.lineTo(0.32 * k, -0.05);
+    s.quadraticCurveTo(1.25 * k, -0.05, 1.32 * k, -0.55);
+    s.lineTo(1.345 * k, -0.85);
+    s.closePath();
     return s;
   };
-  const extrude = (shape, depth) => {
-    const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelSize: 0.08, bevelThickness: 0.08, bevelSegments: 4, curveSegments: 12 });
-    g.translate(0, 0, -depth / 2);
+  const section = (shape, depth) => {
+    const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelSize: 0.03, bevelThickness: 0.03, bevelSegments: 3, curveSegments: 24 });
+    g.translate(0, 0, -depth);
     return g;
   };
   const jaw = new THREE.Group();
-  const bone = new THREE.Mesh(extrude(roundedRect(2.6, 2.5, 0.5), 1.5), boneMat);
-  bone.position.y = -1.35;
-  const gum = new THREE.Mesh(extrude(roundedRect(2.7, 0.42, 0.2), 1.62), gumMat);
-  gum.position.y = 0.02;
+  const bone = new THREE.Mesh(section(boneShape, 2.2), [boneCut, boneSide]);
+  const gumL = new THREE.Mesh(section(gumShape(-1), 2.24), [gumCut, gumSide]);
+  const gumR = new THREE.Mesh(section(gumShape(1), 2.24), [gumCut, gumSide]);
+  gumL.position.z = gumR.position.z = 0.02;
   const glowMat = new THREE.MeshBasicMaterial({ color: 0x7cc4d8, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
   const glow = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.36, 2.0, 48, 1, true), glowMat);
   glow.position.y = -1.05;
-  // read as an x-ray: hairline cyan edges over an almost invisible fill
-  const edgeMat = new THREE.LineBasicMaterial({ color: 0xbff4ff, transparent: true, opacity: 0, depthWrite: false });
-  const gumEdgeMat = new THREE.LineBasicMaterial({ color: 0xf2a79c, transparent: true, opacity: 0, depthWrite: false });
-  const boneEdges = new THREE.LineSegments(new THREE.EdgesGeometry(bone.geometry, 25), edgeMat);
-  boneEdges.position.copy(bone.position);
-  const gumEdges = new THREE.LineSegments(new THREE.EdgesGeometry(gum.geometry, 25), gumEdgeMat);
-  gumEdges.position.copy(gum.position);
-  jaw.add(bone, gum, glow, boneEdges, gumEdges);
+  jaw.add(bone, gumL, gumR, glow);
 
   const model = new THREE.Group();
   model.add(jaw, screw, abutment, crown);
@@ -134,11 +159,8 @@ export function buildTooth() {
       titanium.depthWrite = titaniumDark.depthWrite = v > 0.95;
     },
     setJaw(v, g) {
-      boneMat.opacity = 0.006 * v;
-      gumMat.opacity = 0.03 * v;
-      edgeMat.opacity = 0.5 * v;
-      gumEdgeMat.opacity = 0.6 * v;
-      glowMat.opacity = 0.4 * g;
+      for (const m of jawMats) { m.opacity = v; m.depthWrite = v > 0.97; }
+      glowMat.opacity = 0.5 * g;
       jaw.visible = v > 0.01;
       glow.visible = g > 0.01;
     }

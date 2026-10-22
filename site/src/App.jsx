@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { startEngine } from './scene/engine.js';
-import { startFilm } from './scene/film.js';
-import { SCENES, OVERLAYS } from './filmContent.js';
 
 // React Bits components (MIT + Commons Clause, see src/reactbits/LICENSE.md)
 import SplitText from './reactbits/SplitText.jsx';
@@ -40,10 +38,14 @@ const DOCTORS = [
 
 const SHADES = [['A4', '#D9C9A3'], ['A3.5', '#E2D3B0'], ['A3', '#E8DCBE'], ['A2', '#EEE4CC'], ['A1', '#F2EBD8'], ['B1', '#F6F1E4'], ['BL2', '#FAF8F0']];
 
-const STEPS = [
-  ['Τοποθέτηση', <>Μια μικρή βίδα τιτανίου μπαίνει στο οστό της γνάθου, στον αποστειρωμένο χειρουργικό χώρο του ιατρείου. Για ένα δόντι χωρίς ανάγκη οστικού μοσχεύματος, η επέμβαση διαρκεί συνήθως <CountUp from={0} to={20} duration={1.2} /> έως <CountUp from={0} to={40} duration={1.6} /> λεπτά.</>],
-  ['Οστεοενσωμάτωση', 'Τις επόμενες εβδομάδες το οστό «δένει» με τον τιτάνιο. Έτσι το εμφύτευμα γίνεται σταθερή ρίζα, που μεταφέρει τη μάσηση στη γνάθο όπως ένα φυσικό δόντι.'],
-  ['Στεφάνη', 'Πάνω στο εμφύτευμα στερεώνεται το καινούργιο δόντι, φτιαγμένο από ψηφιακό αποτύπωμα του στόματός σας.']
+// The implant story, beat by beat; the 3D scene behind does the same thing at the same time
+const BEATS = [
+  ['ΤΟ ΚΕΝΟ.', 'Λείπει ένα δόντι. Στο οστό, κάτω από το ούλο, ετοιμάζεται μια μικρή υποδοχή.'],
+  ['Η ΒΙΔΑ.', <>Μια βίδα τιτανίου μπαίνει στο οστό, στον αποστειρωμένο χειρουργικό χώρο του ιατρείου. Για ένα δόντι, συνήθως <CountUp from={0} to={20} duration={1.2} /> έως <CountUp from={0} to={40} duration={1.6} /> λεπτά.</>],
+  ['ΔΕΝΕΙ.', 'Τις επόμενες εβδομάδες το οστό «δένει» με τον τιτάνιο. Η βίδα γίνεται σταθερή ρίζα.'],
+  ['ΤΟ ΚΟΛΟΒΩΜΑ.', 'Πάνω στη ρίζα στερεώνεται το κολόβωμα, η βάση για το νέο δόντι.'],
+  ['Η ΣΤΕΦΑΝΗ.', 'Το καινούργιο δόντι, φτιαγμένο από ψηφιακό αποτύπωμα του στόματός σας, μπαίνει στη θέση του.'],
+  ['ΕΜΦΥΤΕΥΜΑ.', 'Σταθερό, φυσικό, και μασάει όπως ένα δικό σας δόντι. Σε κάποιες περιπτώσεις τοποθετείται την ίδια μέρα με την εξαγωγή.']
 ];
 
 const FAQ = [
@@ -64,37 +66,6 @@ function MagnetBtn({ href, children, className = 'btn' }) {
     <Magnet padding={60} magnetStrength={3} wrapperClassName="magnet">
       <a className={className} href={href}>{children}</a>
     </Magnet>
-  );
-}
-
-function Film() {
-  const section = useRef(null), canvas = useRef(null), els = useRef([]);
-  useEffect(() => startFilm({
-    section: section.current, canvas: canvas.current, scenes: SCENES,
-    overlays: OVERLAYS.map((o, i) => ({ ...o, el: els.current[i] }))
-  }), []);
-  return (
-    <section className="film" id="top" ref={section} aria-label="Μπείτε στο ιατρείο">
-      <div className="film__sticky">
-        <canvas ref={canvas} className="film__canvas" aria-hidden="true" />
-        {OVERLAYS.map((o, i) => {
-          const ref = el => { els.current[i] = el; };
-          const cls = `film__ov film__ov--${o.pos}`;
-          if (o.kind === 'mega') {
-            const len = Math.max(...o.lines.map(l => l.length));
-            const Tag = i === 0 ? 'h1' : 'p';
-            return (
-              <Tag key={i} ref={ref} className={`${cls} film__mega`} style={{ '--len': len }} aria-label={i === 0 ? 'Μούλιος & Λεφάκη, Χειρουργοί Οδοντίατροι' : undefined}>
-                {o.lines.map(l => <span key={l}>{l}</span>)}
-              </Tag>
-            );
-          }
-          if (o.kind === 'cta') return <a key={i} ref={ref} className={`${cls} btn film__cta`} href={TEL}>{o.text}</a>;
-          return <p key={i} ref={ref} className={`${cls} film__small`}>{o.text}</p>;
-        })}
-        <div className="film__hint" aria-hidden="true"><span /></div>
-      </div>
-    </section>
   );
 }
 
@@ -150,26 +121,35 @@ export default function App() {
       <div className="progress" aria-hidden="true"><span /></div>
 
       <main id="main">
-        {/* FILM: scroll-driven walk into the clinic, on real photos */}
-        <Film />
+        {/* HERO: big type over the 3D implant */}
+        <section className="hero2" id="top" aria-labelledby="hero-title">
+          <h1 id="hero-title" className="hero2__title" aria-label="Μούλιος & Λεφάκη, Χειρουργοί Οδοντίατροι">
+            <span>ΜΟΥΛΙΟΣ</span><span>&amp; ΛΕΦΑΚΗ</span>
+          </h1>
+          <div className="hero2__foot">
+            <p className="hero2__lead">Χειρουργοί οδοντίατροι στον Μώλο Φθιώτιδας. Εμφυτεύματα, αισθητική οδοντιατρική και λεύκανση.</p>
+            <div className="hero2__actions">
+              <MagnetBtn href={TEL}>Κλείστε ραντεβού</MagnetBtn>
+              <a className="link" href="./tour.html">3D περιήγηση στο ιατρείο</a>
+            </div>
+          </div>
+          <div className="hero__scroll" aria-hidden="true"><span /></div>
+        </section>
 
         {/* IMPLANT STORY */}
         <section className="implant" id="emfytevmata" aria-labelledby="implant-title">
-          <div className="sticky">
-            <div className="panel implant__panel">
-              <h2 id="implant-title" className="h2">
-                <SplitText text="Πώς αντικαθίσταται ένα δόντι με εμφύτευμα" tag="span" splitType="words" delay={70} effect="blur" textAlign="left" />
-              </h2>
-              <ol className="steps">
-                {STEPS.map(([title, body], i) => (
-                  <li key={title} className={`step${i === step ? ' is-active' : ''}${i < step ? ' is-done' : ''}`}>
-                    <h3>{title}</h3>
-                    <p>{body}</p>
-                  </li>
-                ))}
-              </ol>
-              <p className="note">Σε κάποιες περιπτώσεις το εμφύτευμα τοποθετείται την ίδια μέρα με την εξαγωγή. Θα σας εξηγήσουμε στην εξέταση τι ταιριάζει σε εσάς.</p>
-            </div>
+          <div className="implant__sticky">
+            <h2 id="implant-title" className="implant__kicker">Πώς γίνεται ένα εμφύτευμα</h2>
+            <ol className="beats">
+              {BEATS.map(([word, text], i) => (
+                <li key={word} className={`beat${i === step ? ' is-active' : ''}${i < step ? ' is-past' : ''}`} aria-current={i === step ? 'step' : undefined}>
+                  <span className="beat__n">{String(i + 1).padStart(2, '0')} / 06</span>
+                  <p className="beat__word" style={{ '--len': word.length }}>{word}</p>
+                  <p className="beat__text">{text}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="beats__bar" aria-hidden="true">{BEATS.map((b, i) => <i key={i} className={i <= step ? 'on' : ''} />)}</div>
           </div>
         </section>
 
@@ -369,7 +349,7 @@ export default function App() {
       <footer className="footer">
         <div className="wrap footer__row">
           <p>© {new Date().getFullYear()} Μούλιος Μιχάλης – Λεφάκη Μαρία, Χειρουργοί Οδοντίατροι</p>
-          <p>Οι εικόνες της αρχικής ταινίας είναι ενδεικτικές. Ο ιστότοπος δεν χρησιμοποιεί cookies.</p>
+          <p>Ο ιστότοπος δεν χρησιμοποιεί cookies.</p>
         </div>
       </footer>
     </ClickSpark>

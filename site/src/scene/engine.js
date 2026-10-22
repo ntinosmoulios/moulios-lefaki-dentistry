@@ -69,14 +69,14 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     const m = isMobile();
     return m ? {
       hero: { sx: 0, sy: 0.25, scale: 0.6 },
-      story: { sx: 0, sy: 0.25, scale: 0.4 },
+      story: { sx: 0, sy: 0.2, scale: 0.62 },
       about: { sx: 0, sy: 0.3, scale: 0.0001 },
       services: { sx: 0, sy: 0.3, scale: 0.5 },
       white: { sx: 0, sy: 0.25, scale: 0.62 },
       tech: { sx: 0, sy: 0.25, scale: 0.6 }
     } : {
-      hero: { sx: 0.23, sy: 0.02, scale: 1.25 },
-      story: { sx: 0.21, sy: 0, scale: 0.95 },
+      hero: { sx: 0.27, sy: 0.02, scale: 1.15 },
+      story: { sx: 0.24, sy: 0, scale: 0.95 },
       about: { sx: 0.27, sy: -0.02, scale: 0.72 },
       services: { sx: 0, sy: 0.02, scale: 1.15 },
       white: { sx: 0.24, sy: 0, scale: 1.15 },
@@ -103,7 +103,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
   if (renderer) {
     quality.dpr = Math.min(window.devicePixelRatio, isMobile() ? 1.25 : 1.5);
-    quality.bloom = isMobile() ? 0.28 : 0.34;
+    quality.bloom = isMobile() ? 0.2 : 0.24;
     renderer.setPixelRatio(quality.dpr);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -139,7 +139,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), quality.bloom, 0.45, 0.9);
+    bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), quality.bloom, 0.45, 0.93);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     sizeComposer();
@@ -195,31 +195,34 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     const enter = (t, d = vh) => { const s = Math.max(cursor, t - d); const dur = Math.max(1, t - s); cursor = t; return [s, dur]; };
     const io = 'power2.inOut';
 
-    // 1. Hero → implant: the camera swoops up and around while the tooth comes apart
+    // 1. Hero → implant: the tooth comes apart above an empty socket in a cut-away jaw
     const d0 = Math.max(1, imp.t - filmEnd);
-    tl.to(S, { ...P.story, tiltX: 0.08, rotY: -0.2, modelY: 0.15, lookY: 1.15, duration: d0 }, filmEnd)
-      .to(S, { orbit: -0.55, pitch: 0.32, dist: 9.5, roll: -0.05, ease: io, duration: d0 }, filmEnd)
+    tl.to(S, { ...P.story, tiltX: 0.1, rotY: -0.18, modelY: 0.35, lookY: 1.0, duration: d0 }, filmEnd)
+      .to(S, { orbit: -0.22, pitch: 0.16, dist: m ? 15 : 13.5, roll: -0.03, ease: io, duration: d0 }, filmEnd)
       .to(S, { jaw: 1, screwY: 2.7, abutY: 2.85, crownY: 3.35, ease: 'power1.inOut', duration: d0 }, filmEnd);
     cursor = imp.t;
 
-    // 2. Implant story (sticky). Each step gets its own shot.
-    const len = Math.max(1, imp.h - vh), u = len / 3, s0 = imp.t;
-    // step 1: push in on the screw as it drills down, turning
-    tl.to(S, { screwY: 0, spin: TAU * 4, modelY: 0.55, ease: 'power1.inOut', duration: u }, s0)
-      .to(S, { abutY: 1.3, crownY: 2.1, duration: u }, s0)
-      .to(S, { dist: m ? 7.4 : 7.6, orbit: -0.2, pitch: 0.12, roll: 0.06, lookY: -0.3, ease: io, duration: 0.9 * u }, s0)
-    // step 2: swing round into a macro on the bone as it integrates
-      .to(S, { glow: 1, duration: 0.45 * u }, s0 + 1.05 * u)
-      .to(S, { glow: 0.2, duration: 0.45 * u }, s0 + 1.55 * u)
-      .to(S, { rotY: 0.6, duration: u }, s0 + u)
-      .to(S, { dist: m ? 6.8 : 7, orbit: 0.7, pitch: -0.06, roll: -0.05, lookY: -0.5, ease: io, duration: 0.9 * u }, s0 + u)
-    // step 3: pull back fast as the crown drops in; a hit of shake and light on impact
-      .to(S, { dist: 10, orbit: 0.15, pitch: 0.1, roll: 0, lookY: 0.2, ease: io, duration: 0.7 * u }, s0 + 2 * u)
-      .to(S, { abutY: 0.04, ease: 'power2.in', duration: 0.45 * u }, s0 + 2.05 * u)
-      .to(S, { crownY: 0.38, ease: 'power3.in', duration: 0.55 * u }, s0 + 2.35 * u)
-      .to(S, { rotY: -0.3, tiltX: 0.2, duration: 0.6 * u }, s0 + 2.2 * u)
-      .to(S, { shake: 1, flash: 1, duration: 0.02 * u }, s0 + 2.9 * u)
-      .to(S, { shake: 0, flash: 0, ease: 'power2.out', duration: 0.08 * u }, s0 + 2.92 * u);
+    // 2. Implant story (sticky): six beats, each with its own shot. PH marks where each beat starts.
+    const len = Math.max(1, imp.h - vh), s0 = imp.t, at = f => s0 + f * len, dur = f => f * len;
+    // beat 1 - the screw drills in, turning, as the camera pushes in on the socket
+    tl.to(S, { screwY: 0, spin: TAU * 5, ease: 'power1.inOut', duration: dur(0.24) }, at(0.14))
+      .to(S, { abutY: 1.7, crownY: 2.5, duration: dur(0.24) }, at(0.14))
+      .to(S, { dist: m ? 10 : 9.2, lookY: -0.35, orbit: 0.16, pitch: 0.08, roll: 0.04, modelY: 0.45, ease: io, duration: dur(0.22) }, at(0.14))
+    // beat 2 - macro on the bone as it grows onto the titanium
+      .to(S, { dist: m ? 9 : 8, lookY: -0.75, orbit: -0.18, pitch: 0.02, roll: -0.03, ease: io, duration: dur(0.12) }, at(0.39))
+      .to(S, { glow: 1, duration: dur(0.07) }, at(0.41))
+      .to(S, { glow: 0.25, duration: dur(0.07) }, at(0.48))
+    // beat 3 - the abutment clicks in
+      .to(S, { dist: m ? 10 : 9, lookY: 0.15, orbit: 0.22, pitch: 0.12, roll: 0.02, ease: io, duration: dur(0.12) }, at(0.55))
+      .to(S, { abutY: 0.04, ease: 'power2.in', duration: dur(0.1) }, at(0.57))
+      .to(S, { crownY: 1.5, duration: dur(0.12) }, at(0.56))
+    // beat 4 - the crown drops into place: a hit of shake and light on impact
+      .to(S, { dist: m ? 11.5 : 10.5, lookY: 0.4, orbit: -0.05, pitch: 0.1, roll: 0, ease: io, duration: dur(0.14) }, at(0.7))
+      .to(S, { crownY: 0.38, ease: 'power3.in', duration: dur(0.12) }, at(0.72))
+      .to(S, { shake: 1, flash: 1, duration: dur(0.006) }, at(0.84))
+      .to(S, { shake: 0, flash: 0, ease: 'power2.out', duration: dur(0.03) }, at(0.846))
+    // beat 5 - the finished implant, the camera drifts round it
+      .to(S, { orbit: -0.38, rotY: 0.22, dist: m ? 12 : 11, lookY: 0.2, pitch: 0.14, ease: io, duration: dur(0.12) }, at(0.88));
     cursor = s0 + len;
     marks.story = { s0, len };
 
@@ -307,7 +310,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     }
     if (marks.story) {
       const p = (smooth - marks.story.s0) / marks.story.len;
-      const step = p < 0.36 ? 0 : p < 0.68 ? 1 : 2;
+      const step = p < 0.14 ? 0 : p < 0.39 ? 1 : p < 0.55 ? 2 : p < 0.7 ? 3 : p < 0.88 ? 4 : 5;
       if (step !== lastStep) { lastStep = step; onStep?.(step); }
     }
     const shade = Math.round(clamp01(S.white) * 6);
@@ -443,7 +446,8 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
       .to(I, { rot: 0, duration: 2.8 }, 0)
       .to(I, { center: 1, duration: 2.6, ease: 'power3.inOut' }, 0.4)
       .to(I, { crown: 0, screw: 0, duration: 1.8, ease: 'power3.out' }, 0.7)
-      .from('.hero__lead, .hero__actions, .topbar', { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.08 }, 0.8)
+      .from('.hero2__title span', { yPercent: 105, autoAlpha: 0, duration: 1.4, stagger: 0.12, ease: 'expo.out' }, 0.55)
+      .from('.hero2__lead, .hero2__actions, .topbar', { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.08 }, 0.9)
       .add(() => { introRunning = false; quality.settleAt = performance.now() + 500; });
   };
 
