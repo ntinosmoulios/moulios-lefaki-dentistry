@@ -87,6 +87,17 @@ function Scramble({ text }) {
   return <span>{out}</span>;
 }
 
+function Kicker({ n, text }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState('');
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setShown(`${n} / ${text}`); io.disconnect(); } }, { rootMargin: '0px 0px -15% 0px' });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [n, text]);
+  return <p className="kicker" ref={ref} aria-hidden="true">{shown ? <Scramble text={shown} /> : '\u00a0'}</p>;
+}
+
 const HUD_SECTIONS = [['#top', 'ΑΡΧΗ'], ['#emfytevmata', 'ΕΜΦΥΤΕΥΜΑ'], ['.surgery', 'ΧΕΙΡΟΥΡΓΕΙΟ'], ['#iatreio', 'ΤΟ ΙΑΤΡΕΙΟ'], ['#ypiresies', 'ΥΠΗΡΕΣΙΕΣ'], ['#leukansi', 'ΛΕΥΚΑΝΣΗ'], ['#exoplismos', 'ΕΞΟΠΛΙΣΜΟΣ'], ['#erotiseis', 'ΕΡΩΤΗΣΕΙΣ'], ['#epikoinonia', 'ΕΠΙΚΟΙΝΩΝΙΑ']];
 function Hud() {
   const [sec, setSec] = useState(0);
@@ -259,6 +270,7 @@ export default function App() {
 
         <section className="about" id="iatreio" aria-labelledby="about-title">
           <div className="wrap about__inner">
+            <Kicker n="03" text="ΤΟ ΙΑΤΡΕΙΟ" />
             <h2 id="about-title" className="h2">
               <SplitText text="Δύο οδοντίατροι, ένα ιατρείο, και χρόνος για να σας εξηγήσουμε τι κάνουμε." tag="span" splitType="words" delay={40} effect="rise" mask textAlign="left" />
             </h2>
@@ -310,6 +322,7 @@ export default function App() {
         {/* STATEMENT */}
         <section className="statement" aria-label="Η φιλοσοφία μας">
           <div className="wrap">
+            <Kicker n="—" text="Η ΦΙΛΟΣΟΦΙΑ ΜΑΣ" />
             <p className="statement__text">
               <ScrollFloat textClassName="statement__float" animationDuration={1} stagger={0.02}>Ίδια φροντίδα στις 9:00 και στις 17:00.</ScrollFloat>
             </p>
@@ -320,6 +333,7 @@ export default function App() {
         {/* 3D TOUR teaser */}
         <section className="tourcta" aria-labelledby="tour-title">
           <div className="wrap tourcta__inner">
+            <Kicker n="04" text="3D ΠΕΡΙΗΓΗΣΗ" />
             <h2 id="tour-title" className="h2 h2--xl">
               <ScrollFloat textClassName="float-title" animationDuration={1} stagger={0.03}>Μπείτε στο ιατρείο</ScrollFloat>
             </h2>
@@ -337,6 +351,7 @@ export default function App() {
           <div className="sticky sticky--h">
             <div className="track">
               <div className="track__intro">
+                <Kicker n="05" text="ΥΠΗΡΕΣΙΕΣ" />
                 <h2 id="services-title" className="h2 h2--xl">Τι κάνουμε</h2>
                 <p className="muted">Συνεχίστε να κυλάτε για όλες τις θεραπείες.</p>
               </div>
@@ -355,6 +370,7 @@ export default function App() {
         <section className="whitening" id="leukansi" aria-labelledby="whitening-title">
           <div className="sticky">
             <div className="panel">
+              <Kicker n="06" text="ΛΕΥΚΑΝΣΗ" />
               <h2 id="whitening-title" className="h2">
                 <SplitText text="Λεύκανση, με μέτρο" tag="span" splitType="chars" delay={35} effect="skew" textAlign="left" />
               </h2>
@@ -377,6 +393,7 @@ export default function App() {
         <section className="tech" id="exoplismos" aria-labelledby="tech-title">
           <div className="sticky">
             <div className="panel">
+              <Kicker n="07" text="ΕΞΟΠΛΙΣΜΟΣ" />
               <h2 id="tech-title" className="h2">
                 <SplitText text="Ο εξοπλισμός του ιατρείου" tag="span" splitType="words" delay={60} effect="blur" textAlign="left" />
               </h2>
@@ -395,9 +412,12 @@ export default function App() {
         {/* FAQ */}
         <section className="faq" id="erotiseis" aria-labelledby="faq-title">
           <div className="wrap faq__grid">
-            <h2 id="faq-title" className="h2">
-              <ScrollFloat textClassName="float-title" animationDuration={1} stagger={0.03}>Συχνές ερωτήσεις</ScrollFloat>
-            </h2>
+            <div className="faq__head">
+              <Kicker n="08" text="ΕΡΩΤΗΣΕΙΣ" />
+              <h2 id="faq-title" className="h2">
+                <ScrollFloat textClassName="float-title" animationDuration={1} stagger={0.03}>Συχνές ερωτήσεις</ScrollFloat>
+              </h2>
+            </div>
             <div className="faq__list">
               {FAQ.map(([qq, a]) => (
                 <details key={qq}><summary>{qq}</summary><p>{a}</p></details>
@@ -409,6 +429,7 @@ export default function App() {
         {/* CONTACT */}
         <section className="contact" id="epikoinonia" aria-labelledby="contact-title">
           <div className="wrap">
+            <Kicker n="09" text="ΕΠΙΚΟΙΝΩΝΙΑ" />
             <h2 id="contact-title" className="h2 h2--xl">
               <ScrollFloat textClassName="float-title" animationDuration={1} stagger={0.03}>Ελάτε να σας δούμε</ScrollFloat>
             </h2>

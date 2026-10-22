@@ -452,7 +452,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     t.crown.localToWorld(v3.set(0, S.scan, 0));
     t.planeSolid.setFromNormalAndCoplanarPoint(n.clone().negate(), v3);
     t.planeWire.setFromNormalAndCoplanarPoint(n, v3);
-    t.wireMat.opacity = 0.6 * clamp01(1.4 - S.scan);
+    t.wireMat.opacity = 0.6 * clamp01(1.4 - S.scan) * (1 - D.uDiss.value);
     t.scanner.position.y = S.scan;
     t.scanner.visible = S.scanOn > 0.01 && S.scan > -0.2 && S.scan < 1.4;
     t.scannerMat.opacity = 0.35 * S.scanOn;

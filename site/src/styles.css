@@ -28,7 +28,7 @@
   --line: rgba(14, 26, 31, .12);
   --glass: rgba(255, 255, 255, .55);
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --serif: "Noto Serif Display", "Times New Roman", serif;
+  --serif: "Commissioner", system-ui, sans-serif;   /* the frost theme is all sans + mono */
   --sans: "Commissioner", system-ui, sans-serif;
   --step--1: clamp(.86rem, .83rem + .15vw, .94rem);
   --step-0: clamp(1rem, .96rem + .2vw, 1.125rem);
@@ -64,7 +64,7 @@ p { margin: 0 0 1em; }
 .skip { position: absolute; left: -999px; top: 8px; background: var(--enamel); color: var(--night); padding: 8px 12px; z-index: 200; }
 .skip:focus { left: 8px; }
 
-.h2 { font-family: var(--serif); font-size: var(--step-2); line-height: 1.12; letter-spacing: -.01em; max-width: 22ch; }
+.h2 { font: 800 clamp(2.1rem, 1.1rem + 3.2vw, 4.2rem)/0.98 var(--sans); letter-spacing: -.035em; max-width: 18ch; }
 .h2--xl { font: 900 var(--step-3)/0.9 var(--sans); letter-spacing: -.045em; text-transform: uppercase; max-width: none; }
 .h2--xl .scroll-float { font: inherit; margin: 0; }
 .split-parent { display: inline !important; }
@@ -166,11 +166,11 @@ main, .footer { position: relative; z-index: 2; }
 }
 
 /* ---------- Statement ---------- */
-.statement { background: #EBC9C3; color: #142B2E; padding: clamp(110px, 20vh, 220px) 0; position: relative; z-index: 3; }
+.statement { background: #0E1A1F; color: #EEF3F5; padding: clamp(110px, 20vh, 220px) 0; position: relative; z-index: 3; }
 .statement__text { margin: 0; font: 900 clamp(2.8rem, 1rem + 8vw, 9rem)/0.9 var(--sans); letter-spacing: -0.04em; text-transform: uppercase; max-width: 14ch; }
 .statement .scroll-float { font: inherit; margin: 0; }
 .statement__float.scroll-float-text { font: inherit; text-align: left; }
-.statement__sub { margin: 1.4em 0 0; max-width: 40ch; font-size: var(--step-1); line-height: 1.4; color: #3b4a4c; }
+.statement__sub { margin: 1.4em 0 0; max-width: 40ch; font-size: var(--step-1); line-height: 1.4; color: #9fb2b9; }
 
 /* ---------- Sticky story sections ---------- */
 .sticky { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
@@ -279,7 +279,8 @@ main, .footer { position: relative; z-index: 2; }
 /* ---------- FAQ ---------- */
 .faq { padding: clamp(100px, 16vh, 180px) 0; }
 .faq__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: clamp(24px, 5vw, 80px); align-items: start; }
-.faq__grid .h2 { position: sticky; top: 110px; }
+.faq__head { position: sticky; top: 110px; align-self: start; }
+.h2 .scroll-float, .h2 .float-title { font: inherit; margin: 0; }
 .scroll-float { margin: 0; }
 .scroll-float-text.float-title { font: inherit; font-size: inherit; line-height: inherit; text-align: left; }
 .faq details { border-top: 1px solid var(--line); }
@@ -290,7 +291,7 @@ main, .footer { position: relative; z-index: 2; }
 .faq summary::after { content: "+"; position: absolute; right: 4px; top: 50%; translate: 0 -50%; font: 300 1.6rem/1 var(--sans); color: var(--scan); transition: rotate .3s; }
 .faq details[open] summary::after { rotate: 45deg; }
 .faq details p { color: var(--mist); max-width: 60ch; padding-bottom: 1.1em; margin: 0; }
-@media (max-width: 800px) { .faq__grid { grid-template-columns: 1fr; } .faq__grid .h2 { position: static; } }
+@media (max-width: 800px) { .faq__grid { grid-template-columns: 1fr; } .faq__head { position: static; } }
 
 /* ---------- Contact ---------- */
 .contact { padding: 0 0 clamp(80px, 12vh, 140px); }
@@ -420,3 +421,8 @@ main, .footer { position: relative; z-index: 2; }
   .surgery__word { font-size: 17vw; }
   .surgery__text { left: var(--gutter); right: var(--gutter); bottom: 22px; font-size: var(--step--1); }
 }
+
+/* mono section kickers that decode on entry */
+.kicker { display: flex; gap: 14px; align-items: center; margin: 0 0 22px; font: 500 11px/1 var(--mono); letter-spacing: .14em; color: var(--scan); text-transform: uppercase; }
+.kicker::before { content: ""; width: 28px; height: 1px; background: currentColor; }
+.statement .kicker { color: #8FD6EA; }
