@@ -13,8 +13,8 @@ export function buildTooth() {
   });
   const titanium = new THREE.MeshStandardMaterial({ color: 0xc3cdd3, metalness: 1, roughness: 0.22, transparent: true });
   const titaniumDark = new THREE.MeshStandardMaterial({ color: 0x8f9aa1, metalness: 1, roughness: 0.3, transparent: true });
-  const boneMat = new THREE.MeshPhysicalMaterial({ color: 0xe8ecea, roughness: 0.7, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
-  const gumMat = new THREE.MeshPhysicalMaterial({ color: 0xe0857c, roughness: 0.4, clearcoat: 0.6, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+  const boneMat = new THREE.MeshBasicMaterial({ color: 0x9fd8e6, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+  const gumMat = new THREE.MeshBasicMaterial({ color: 0xe0857c, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
 
   /* Crown */
   const profile = [
@@ -134,8 +134,8 @@ export function buildTooth() {
       titanium.depthWrite = titaniumDark.depthWrite = v > 0.95;
     },
     setJaw(v, g) {
-      boneMat.opacity = 0.035 * v;
-      gumMat.opacity = 0.16 * v;
+      boneMat.opacity = 0.006 * v;
+      gumMat.opacity = 0.03 * v;
       edgeMat.opacity = 0.5 * v;
       gumEdgeMat.opacity = 0.6 * v;
       glowMat.opacity = 0.4 * g;
