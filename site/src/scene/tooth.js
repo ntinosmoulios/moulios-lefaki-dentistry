@@ -90,11 +90,11 @@ export function buildTooth() {
   const poreTex = (() => {
     const c = document.createElement('canvas'); c.width = c.height = 512;
     const g = c.getContext('2d');
-    g.fillStyle = '#dccbb0'; g.fillRect(0, 0, 512, 512);
+    g.fillStyle = '#d2bd98'; g.fillRect(0, 0, 512, 512);
     let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     for (let i = 0; i < 900; i++) {
       const x = rnd() * 512, y = rnd() * 512, r = 2 + rnd() * 9;
-      g.fillStyle = `rgba(${150 + rnd() * 40 | 0},${110 + rnd() * 30 | 0},${80 + rnd() * 20 | 0},${0.25 + rnd() * 0.35})`;
+      g.fillStyle = `rgba(${120 + rnd() * 40 | 0},${84 + rnd() * 30 | 0},${58 + rnd() * 20 | 0},${0.35 + rnd() * 0.4})`;
       g.beginPath(); g.ellipse(x, y, r, r * (0.5 + rnd() * 0.6), rnd() * 3, 0, 7); g.fill();
     }
     const t = new THREE.CanvasTexture(c);
@@ -104,9 +104,9 @@ export function buildTooth() {
   })();
   const fade = m => Object.assign(m, { transparent: true, opacity: 0 });
   const boneCut = fade(new THREE.MeshStandardMaterial({ map: poreTex, roughness: 0.85 }));
-  const boneSide = fade(new THREE.MeshPhysicalMaterial({ color: 0xe3d6bf, roughness: 0.5, clearcoat: 0.3 }));
-  const gumCut = fade(new THREE.MeshStandardMaterial({ color: 0xb3525d, roughness: 0.6 }));
-  const gumSide = fade(new THREE.MeshPhysicalMaterial({ color: 0xe0848a, roughness: 0.32, clearcoat: 0.9, clearcoatRoughness: 0.2, sheen: 1, sheenColor: new THREE.Color(0xffc4c4) }));
+  const boneSide = fade(new THREE.MeshPhysicalMaterial({ color: 0xd8c7a6, roughness: 0.55, clearcoat: 0.25 }));
+  const gumCut = fade(new THREE.MeshStandardMaterial({ color: 0xa8414e, roughness: 0.6 }));
+  const gumSide = fade(new THREE.MeshPhysicalMaterial({ color: 0xd56a74, roughness: 0.32, clearcoat: 0.9, clearcoatRoughness: 0.2, sheen: 1, sheenColor: new THREE.Color(0xffc4c4) }));
   const jawMats = [boneCut, boneSide, gumCut, gumSide];
 
   const boneShape = new THREE.Shape();
@@ -139,7 +139,7 @@ export function buildTooth() {
   const gumL = new THREE.Mesh(section(gumShape(-1), 2.24), [gumCut, gumSide]);
   const gumR = new THREE.Mesh(section(gumShape(1), 2.24), [gumCut, gumSide]);
   gumL.position.z = gumR.position.z = 0.02;
-  const glowMat = new THREE.MeshBasicMaterial({ color: 0x7cc4d8, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+  const glowMat = new THREE.MeshBasicMaterial({ color: 0x4aa6c2, transparent: true, opacity: 0, depthWrite: false });
   const glow = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.36, 2.0, 48, 1, true), glowMat);
   glow.position.y = -1.05;
   jaw.add(bone, gumL, gumR, glow);
@@ -155,13 +155,14 @@ export function buildTooth() {
     planeSolid, planeWire,
     setParts(v) {
       titanium.opacity = titaniumDark.opacity = v;
+      titanium.transparent = titaniumDark.transparent = v < 0.999;   // opaque when solid, so ice can refract it
       const vis = v > 0.02;
       screw.visible = abutment.visible = vis;
       titanium.depthWrite = titaniumDark.depthWrite = v > 0.95;
     },
     setJaw(v, g) {
       for (const m of jawMats) { m.opacity = v; m.depthWrite = v > 0.97; }
-      glowMat.opacity = 0.5 * g;
+      glowMat.opacity = 0.32 * g;
       jaw.visible = v > 0.01;
       glow.visible = g > 0.01;
     }

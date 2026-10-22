@@ -87,7 +87,7 @@ function Scramble({ text }) {
   return <span>{out}</span>;
 }
 
-const HUD_SECTIONS = [['#top', 'ΑΡΧΗ'], ['#emfytevmata', 'ΕΜΦΥΤΕΥΜΑ'], ['#iatreio', 'ΤΟ ΙΑΤΡΕΙΟ'], ['#ypiresies', 'ΥΠΗΡΕΣΙΕΣ'], ['#leukansi', 'ΛΕΥΚΑΝΣΗ'], ['#exoplismos', 'ΕΞΟΠΛΙΣΜΟΣ'], ['#erotiseis', 'ΕΡΩΤΗΣΕΙΣ'], ['#epikoinonia', 'ΕΠΙΚΟΙΝΩΝΙΑ']];
+const HUD_SECTIONS = [['#top', 'ΑΡΧΗ'], ['#emfytevmata', 'ΕΜΦΥΤΕΥΜΑ'], ['.surgery', 'ΧΕΙΡΟΥΡΓΕΙΟ'], ['#iatreio', 'ΤΟ ΙΑΤΡΕΙΟ'], ['#ypiresies', 'ΥΠΗΡΕΣΙΕΣ'], ['#leukansi', 'ΛΕΥΚΑΝΣΗ'], ['#exoplismos', 'ΕΞΟΠΛΙΣΜΟΣ'], ['#erotiseis', 'ΕΡΩΤΗΣΕΙΣ'], ['#epikoinonia', 'ΕΠΙΚΟΙΝΩΝΙΑ']];
 function Hud() {
   const [sec, setSec] = useState(0);
   useEffect(() => {
@@ -101,9 +101,71 @@ function Hud() {
   return (
     <div className="hud" aria-hidden="true">
       <div className="hud-target"><i /><i /><i /><i /><span>ΕΜΦΥΤΕΥΜΑ / ΤΙΤΑΝΙΟ</span></div>
+      <div className="xlabel xlabel--crown"><b>ΣΤΕΦΑΝΗ</b><em>το καινούργιο δόντι</em></div>
+      <div className="xlabel xlabel--abutment"><b>ΚΟΛΟΒΩΜΑ</b><em>η βάση της στεφάνης</em></div>
+      <div className="xlabel xlabel--screw"><b>ΒΙΔΑ ΤΙΤΑΝΙΟΥ</b><em>η νέα ρίζα</em></div>
       <p className="hud__bl">38.8041° Β · 22.6525° Α<br />ΜΩΛΟΣ ΦΘΙΩΤΙΔΑΣ</p>
       <p className="hud__br"><Scramble text={`${String(sec + 1).padStart(2, '0')} — ${HUD_SECTIONS[sec][1]}`} /></p>
     </div>
+  );
+}
+
+
+// Real footage: an orbit around the surgical chair, scrubbed by the scroll inside a portrait "viewfinder"
+const SURGERY_FRAMES = 36;
+function Surgery() {
+  const section = useRef(null), canvas = useRef(null), left = useRef(null), right = useRef(null), tc = useRef(null), panel = useRef(null);
+  useEffect(() => {
+    const imgs = Array.from({ length: SURGERY_FRAMES }, (_, i) => { const im = new Image(); im.decoding = 'async'; im.src = `./images/surgery/${String(i + 1).padStart(2, '0')}.webp`; return im; });
+    const ctx = canvas.current.getContext('2d');
+    let raf, last = -1, lastW = 0;
+    const draw = k => {
+      const c = canvas.current, r = c.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+      const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
+      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+      let im = imgs[k]; for (let j = k; j >= 0 && !(im && im.complete && im.naturalWidth); j--) im = imgs[j];
+      if (!im || !im.naturalWidth) return;
+      const s = Math.max(w / im.naturalWidth, h / im.naturalHeight);
+      ctx.drawImage(im, (w - im.naturalWidth * s) / 2, (h - im.naturalHeight * s) / 2, im.naturalWidth * s, im.naturalHeight * s);
+    };
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      const el = section.current; if (!el) return;
+      const r = el.getBoundingClientRect(), vh = innerHeight;
+      if (r.bottom < 0 || r.top > vh) return;
+      const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)));
+      const k = Math.round(p * (SURGERY_FRAMES - 1));
+      if (k !== last || innerWidth !== lastW) { draw(k); last = k; lastW = innerWidth; }
+      const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+      left.current.style.transform = `translate3d(${(-30 + e * 34).toFixed(2)}vw, 0, 0)`;
+      right.current.style.transform = `translate3d(${(30 - e * 34).toFixed(2)}vw, 0, 0)`;
+      panel.current.style.transform = `scale(${(0.86 + 0.14 * Math.sin(Math.PI * Math.min(1, p * 1.2))).toFixed(4)}) rotate(${((0.5 - p) * 3).toFixed(2)}deg)`;
+      const secs = p * 5.97;
+      tc.current.textContent = `00:00:${String(Math.floor(secs)).padStart(2, '0')}:${String(Math.floor((secs % 1) * 30)).padStart(2, '0')}`;
+    };
+    imgs[0].onload = () => { last = -1; };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return (
+    <section className="surgery" ref={section} aria-labelledby="surgery-title">
+      <div className="surgery__sticky">
+        <h2 id="surgery-title" className="surgery__title">
+          <span ref={left} className="surgery__word surgery__word--l">ΧΕΙΡΟΥΡΓΙΚΟΣ</span>
+          <span ref={right} className="surgery__word surgery__word--r">ΧΩΡΟΣ.</span>
+        </h2>
+        <figure className="surgery__panel" ref={panel}>
+          <canvas ref={canvas} aria-label="Βίντεο: ο χειρουργικός χώρος του ιατρείου, με τη μαύρη χειρουργική έδρα" role="img" />
+          <i /><i /><i /><i />
+          <figcaption className="surgery__hud">
+            <span className="surgery__rec">● REC</span>
+            <span ref={tc}>00:00:00:00</span>
+          </figcaption>
+          <span className="surgery__hud surgery__hud--b">ΠΡΑΓΜΑΤΙΚΟ ΒΙΝΤΕΟ · ΜΩΛΟΣ</span>
+        </figure>
+        <p className="surgery__text">Ξεχωριστή αίθουσα για εμφυτεύματα, με αποστειρωμένο εξοπλισμό. Προσωπικό και ασθενείς φορούν ειδικό αποστειρωμένο ρουχισμό.</p>
+      </div>
+    </section>
   );
 }
 
@@ -193,6 +255,8 @@ export default function App() {
         </section>
 
         {/* ABOUT */}
+        <Surgery />
+
         <section className="about" id="iatreio" aria-labelledby="about-title">
           <div className="wrap about__inner">
             <h2 id="about-title" className="h2">

@@ -8,6 +8,8 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { LensShader, makeSnow, makeIce, makeDebris, makeWave } from './fx.js';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
@@ -70,13 +72,13 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     const m = isMobile();
     return m ? {
       hero: { sx: 0, sy: 0.17, scale: 0.6 },
-      story: { sx: 0, sy: 0.2, scale: 0.62 },
+      story: { sx: 0, sy: 0.15, scale: 0.55 },
       about: { sx: 0, sy: 0.3, scale: 0.0001 },
       services: { sx: 0, sy: 0.3, scale: 0.5 },
       white: { sx: 0, sy: 0.25, scale: 0.62 },
       tech: { sx: 0, sy: 0.25, scale: 0.6 }
     } : {
-      hero: { sx: 0.31, sy: 0.02, scale: 1.1 },
+      hero: { sx: 0.31, sy: 0.06, scale: 0.92 },
       story: { sx: 0.24, sy: 0, scale: 0.95 },
       about: { sx: 0.27, sy: -0.02, scale: 0.72 },
       services: { sx: 0, sy: 0.02, scale: 1.15 },
@@ -86,9 +88,9 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   }
   const base = () => ({
     ...poses().hero, modelY: 0.4, tiltX: 0.25, rotY: -0.5, lookY: 0.2,
-    dist: 11, orbit: 0, pitch: 0.04, roll: 0, fov: 32,
+    dist: 11, orbit: 0, pitch: 0.15, roll: 0, fov: 32,
     screwY: 0, abutY: 0.04, crownY: 0.38, spin: 0,
-    jaw: 0, glow: 0, parts: 1, white: 1, scan: 5, scanOn: 0, diss: 0, spread: 0, ground: 1,
+    jaw: 0, glow: 0, parts: 1, white: 1, scan: 5, scanOn: 0, diss: 0, spread: 0, ground: 1, ice: 0, drill: 0, wave: 0, labels: 0,
     sparkle: 0, shake: 0, flash: 0
   });
   Object.assign(S, base());
@@ -96,10 +98,11 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   // Intro overlay, applied on top of the scroll state: a macro shot that pulls back
   const I = reduceMotion
     ? { scale: 1, rot: 0, crown: 0, screw: 0, dist: 0, roll: 0, center: 1, fov: 0 }
-    : { scale: 1, rot: -1.4, crown: 0, screw: 0, dist: -4.5, roll: 0.2, center: 0, fov: 12, diss: 1 };
-  if (reduceMotion) I.diss = 0;
+    : { scale: 1, rot: -1.4, crown: 0, screw: 0, dist: -4.5, roll: 0.2, center: 0, fov: 12, diss: 1, ice: 1 };
+  if (reduceMotion) { I.diss = 0; I.ice = 0; }
 
-  let tooth, composer, bloom, scene, camera, particles, sparkles, sky, terrain, shadow, cloud;
+  let tooth, composer, bloom, scene, camera, particles, sparkles, sky, terrain, shadow, cloud, ice, debris, wave, lens;
+  let lastSmooth = 0, vel = 0;
   const D = { uDiss: { value: 0 }, uSpread: { value: 0 }, uTime: { value: 0 }, uEdge: { value: new THREE.Color('#7fd8f0') } };
   const quality = { dpr: 1, level: 0, samples: [], settleAt: 0, bloom: 0.34 };
   const pointer = { x: 0, y: 0 }, target = { x: 0, y: 0 };
@@ -111,7 +114,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = 0.92;
     renderer.localClippingEnabled = true;
 
     scene = new THREE.Scene();
@@ -119,7 +122,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     scene.fog = new THREE.Fog(BG, 9, 22);
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environmentIntensity = 0.38;
+    scene.environmentIntensity = 0.22;
 
     camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.05, 80);
 
@@ -131,7 +134,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     rim2.position.set(5, -2, -3);
     scene.add(key, rim, rim2);
 
-    scene.add(new THREE.HemisphereLight(0xf4f9fb, 0x8d9ca3, 0.55));
+    scene.add(new THREE.HemisphereLight(0xf4f9fb, 0x7d8d95, 0.3));
     sky = makeSky(); scene.add(sky);
     terrain = makeTerrain(); terrain.position.y = -2.75; scene.add(terrain);
     shadow = makeContactShadow(); shadow.position.y = -2.7; scene.add(shadow);
@@ -148,14 +151,22 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     sparkles = makeSparkles(70);
     tooth.crown.add(sparkles);
 
-    particles = makeParticles(isMobile() ? 380 : 900);
+    particles = makeSnow(isMobile() ? 700 : 1800);
     scene.add(particles);
+    ice = makeIce(isMobile());
+    tooth.model.add(ice.group);
+    debris = makeDebris(isMobile() ? 160 : 320);
+    tooth.model.add(debris);
+    wave = makeWave();
+    tooth.model.add(wave.mesh);
 
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
     bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), quality.bloom, 0.4, 0.97);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
+    lens = new ShaderPass(LensShader);
+    composer.addPass(lens);
     sizeComposer();
   }
 
@@ -196,6 +207,8 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     const film = sec('.film');
     const filmEnd = film.h ? film.t + film.h - vh : 0;
     marks.filmCover = film.h ? film.t + (film.h - vh) * 0.96 : -1;
+    const sg = sec('.surgery');
+    marks.cover = sg.h ? [sg.t + vh * 0.05, sg.t + sg.h - vh * 1.05] : null;
     const imp = sec('.implant'), ab = sec('.about'), sv = sec('.services'), wh = sec('.whitening'), te = sec('.tech'), fq = sec('.faq');
     marks = { ...marks, imp, ab, sv, wh, te, fq, maxScroll };
 
@@ -211,6 +224,8 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
 
     // 1. Hero → implant: the tooth comes apart above an empty socket in a cut-away jaw
     const d0 = Math.max(1, imp.t - filmEnd);
+    tl.to(S, { ice: 1, ease: 'power2.in', duration: d0 * 0.5 }, filmEnd)
+      .to(S, { labels: 1, duration: d0 * 0.2 }, filmEnd + d0 * 0.8);
     tl.to(S, { ...P.story, tiltX: 0.1, rotY: -0.18, modelY: 0.35, lookY: 1.0, duration: d0 }, filmEnd)
       .to(S, { orbit: -0.22, pitch: 0.16, dist: m ? 15 : 13.5, roll: -0.03, ease: io, duration: d0 }, filmEnd)
       .to(S, { jaw: 1, screwY: 2.7, abutY: 2.85, crownY: 3.35, ease: 'power1.inOut', duration: d0 }, filmEnd);
@@ -219,6 +234,9 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     // 2. Implant story (sticky): six beats, each with its own shot. PH marks where each beat starts.
     const len = Math.max(1, imp.h - vh), s0 = imp.t, at = f => s0 + f * len, dur = f => f * len;
     // beat 1 - the screw drills in, turning, as the camera pushes in on the socket
+    tl.to(S, { labels: 0, duration: dur(0.03) }, at(0.11))
+      .to(S, { drill: 1, duration: dur(0.02) }, at(0.2))
+      .to(S, { drill: 0, duration: dur(0.04) }, at(0.35));
     tl.to(S, { screwY: 0, spin: TAU * 5, ease: 'power1.inOut', duration: dur(0.24) }, at(0.14))
       .to(S, { abutY: 1.7, crownY: 2.5, duration: dur(0.24) }, at(0.14))
       .to(S, { dist: m ? 10 : 9.2, lookY: -0.35, orbit: 0.16, pitch: 0.08, roll: 0.04, modelY: 0.45, ease: io, duration: dur(0.22) }, at(0.14))
@@ -234,6 +252,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
       .to(S, { dist: m ? 11.5 : 10.5, lookY: 0.4, orbit: -0.05, pitch: 0.1, roll: 0, ease: io, duration: dur(0.14) }, at(0.7))
       .to(S, { crownY: 0.38, ease: 'power3.in', duration: dur(0.12) }, at(0.72))
       .to(S, { shake: 1, flash: 1, duration: dur(0.006) }, at(0.84))
+      .to(S, { wave: 1, ease: 'power2.out', duration: dur(0.07) }, at(0.84))
       .to(S, { shake: 0, flash: 0, ease: 'power2.out', duration: dur(0.03) }, at(0.846))
     // beat 5 - the finished implant, the camera drifts round it
       .to(S, { orbit: -0.38, rotY: 0.22, dist: m ? 12 : 11, lookY: 0.2, pitch: 0.14, ease: io, duration: dur(0.12) }, at(0.88));
@@ -293,6 +312,8 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
   let smooth = window.scrollY;
   let lastStep = -1, lastShade = -1, idle = 0, frameCount = 0, introRunning = !reduceMotion, lastTrackP = -1;
   const hud = $('.hud-target');
+  const xlabels = tooth ? [['crown', tooth.crown, 0.55], ['abutment', tooth.abutment, 0.2], ['screw', tooth.screw, -1.0]]
+    .map(([k, obj, dy]) => ({ el: document.querySelector(`.xlabel--${k}`), obj, dy })).filter(L => L.el) : [];
   const topbar = $('.topbar'), bar = $('.progress span'), track = $('.track'), trackBar = $('.track__bar span');
   const v3 = new THREE.Vector3(), q = new THREE.Quaternion(), n = new THREE.Vector3();
 
@@ -346,6 +367,11 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     // Nothing visible is moving: skip or halve the GPU work
     const moving = Math.abs(y - smooth) > 0.5 || Math.abs(target.x - pointer.x) > 0.002 || Math.abs(target.y - pointer.y) > 0.002;
     if (marks.filmCover > 0 && smooth < marks.filmCover) return; // the film covers the 3D scene
+    if (marks.cover && smooth > marks.cover[0] && smooth < marks.cover[1]) { // a full-bleed section covers the 3D scene
+      if (hud) hud.style.opacity = '0';
+      for (const L of xlabels) L.el.style.opacity = '0';
+      return;
+    }
     if (!moving && !introRunning && !(tooth.pivot.visible || particles.visible)) return;
     if (!moving && !introRunning && S.sparkle < 0.05 && (frameCount++ & 1)) return;
 
@@ -365,6 +391,13 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     t.abutment.position.y = S.abutY + I.screw * 0.6;
     t.crown.position.y = S.crownY + I.crown;
     t.setParts(S.parts);
+    ice.set(Math.max(S.ice, I.ice));
+    debris.material.uniforms.uTime.value = idle * 4;
+    debris.material.uniforms.uAmt.value = S.drill;
+    debris.material.uniforms.uPR.value = quality.dpr;
+    debris.visible = S.drill > 0.01;
+    wave.set(S.wave);
+    terrain.material.transparent = S.ground < 0.999;
     D.uDiss.value = Math.max(S.diss, I.diss);
     D.uSpread.value = S.spread + I.diss * 1.3;
     D.uTime.value = idle * 20;
@@ -425,8 +458,27 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     t.scannerMat.opacity = 0.35 * S.scanOn;
     t.scanRingMat.opacity = 0.9 * S.scanOn;
 
-    particles.rotation.y = idle * 0.25 + smooth * 0.00008;
-    particles.position.y = smooth * 0.0012;
+    particles.material.uniforms.uTime.value = idle * 6;
+    particles.material.uniforms.uScroll.value = smooth * 0.004;
+    particles.material.uniforms.uPR.value = quality.dpr;
+    particles.position.set(camera.position.x * 0.5, 0, camera.position.z * 0.5);
+    // lens: chromatic aberration + squeeze that grow with scroll speed
+    const v = Math.min(1, Math.abs(smooth - lastSmooth) / Math.max(1, (dtMs || 16)) / 4);
+    lastSmooth = smooth;
+    vel += (v - vel) * 0.12;
+    lens.uniforms.uVel.value = reduceMotion ? 0 : vel;
+    lens.uniforms.uTime.value = idle * 10;
+    lens.uniforms.uAspect.value = W / H;
+    // exploded-view labels on the parts
+    if (xlabels.length) {
+      const on = S.labels > 0.01 && t.pivot.visible;
+      for (const L of xlabels) {
+        if (!on) { if (L.el.style.opacity !== '0') L.el.style.opacity = '0'; continue; }
+        L.obj.getWorldPosition(v3); v3.y += L.dy * sc; v3.project(camera);
+        L.el.style.opacity = S.labels.toFixed(3);
+        L.el.style.transform = `translate3d(${((v3.x * 0.5 + 0.5) * W).toFixed(1)}px, ${((-v3.y * 0.5 + 0.5) * H).toFixed(1)}px, 0)`;
+      }
+    }
 
     composer.render();
   }
@@ -479,6 +531,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
       .to(I, { rot: 0, duration: 2.8 }, 0)
       .to(I, { center: 1, duration: 2.6, ease: 'power3.inOut' }, 0.4)
       .to(I, { diss: 0, duration: 2.6, ease: 'power2.inOut' }, 0.2)
+      .to(I, { ice: 0, duration: 2.2, ease: 'power3.out' }, 0.9)
       .from('.hero2__title span', { yPercent: 105, autoAlpha: 0, duration: 1.4, stagger: 0.12, ease: 'expo.out' }, 0.55)
       .from('.hero2__lead, .hero2__actions, .topbar', { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.08 }, 0.9)
       .add(() => { introRunning = false; quality.settleAt = performance.now() + 500; });

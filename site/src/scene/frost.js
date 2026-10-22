@@ -46,15 +46,23 @@ export function makeTerrain() {
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i), z = p.getZ(i);
     const r = Math.hypot(x, z * 1.2);
-    const clearing = THREE.MathUtils.smoothstep(r, 15, 28);   // wide flat clearing: the camera never ends up inside a hill
+    const clearing = THREE.MathUtils.smoothstep(r, 13, 24);   // wide flat clearing: the camera never ends up inside a hill
     const ridge = Math.pow(Math.abs(fbm(x * 0.09 + 3, z * 0.09) - 0.5) * 2, 1.6);
-    const h = (fbm(x * 0.16, z * 0.16) * 2.2 + ridge * 4.2) * clearing + fbm(x * 0.9, z * 0.9) * 0.12;
+    const sastrugi = Math.sin(x * 1.1 + z * 0.35 + fbm(x * 0.3, z * 0.3) * 6.0) * 0.11 * (0.4 + fbm(x * 0.5, z * 0.5));
+    const h = (fbm(x * 0.16, z * 0.16) * 3.0 + ridge * 6.0) * clearing + fbm(x * 0.9, z * 0.9) * 0.22 + sastrugi + fbm(x * 2.6, z * 2.6) * 0.05;
     p.setY(i, h);
-    const shade = 0.9 + 0.1 * fbm(x * 0.5 + 9, z * 0.5);
-    col[i * 3] = shade * 0.97; col[i * 3 + 1] = shade * 0.985; col[i * 3 + 2] = shade;
+  }
+  geo.computeVertexNormals();
+  const nrm = geo.attributes.normal;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), z = p.getZ(i);
+    // wind-blown snow: faces turned away from the light pick up a cold blue-grey
+    const lit = Math.pow(Math.max(0, nrm.getY(i)), 6) * 0.6 + 0.4 * Math.max(0, nrm.getX(i) * 0.6 + nrm.getY(i) * 0.8);
+    const grain = 0.94 + 0.06 * fbm(x * 0.7 + 9, z * 0.7);
+    const k = (0.72 + 0.28 * lit) * grain;
+    col[i * 3] = k * 0.93; col[i * 3 + 1] = k * 0.965; col[i * 3 + 2] = k;
   }
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  geo.computeVertexNormals();
   const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: 0.95, metalness: 0, transparent: true, opacity: 1 });
   const m = new THREE.Mesh(geo, mat);
   m.renderOrder = -5;
