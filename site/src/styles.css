@@ -134,7 +134,7 @@ main, .footer { position: relative; z-index: 2; }
 }
 
 /* ---------- Film (scroll-driven walk-in) ---------- */
-.film { height: 880vh; position: relative; z-index: 3; }
+.film { height: 990vh; position: relative; z-index: 3; }
 .film__sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 .film__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; background: var(--night); }
 .film__ov { position: absolute; margin: 0; visibility: hidden; will-change: transform, opacity; }
@@ -154,7 +154,7 @@ main, .footer { position: relative; z-index: 2; }
 .film__hint { position: absolute; left: 50%; bottom: 28px; width: 1px; height: 56px; background: rgba(255, 255, 255, .25); overflow: hidden; translate: -50% 0; }
 .film__hint span { position: absolute; left: 0; width: 1px; height: 20px; background: #fff; animation: drip 2.2s cubic-bezier(.6, 0, .3, 1) infinite; }
 @media (max-width: 760px) {
-  .film { height: 780vh; }
+  .film { height: 880vh; }
   .film__ov--left, .film__ov--right, .film__ov--center { top: 18%; }
   .film__small { font-size: var(--step-0); max-width: 28ch; }
 }

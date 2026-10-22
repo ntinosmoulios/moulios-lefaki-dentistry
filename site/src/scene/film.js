@@ -10,7 +10,27 @@ const clamp01 = v => Math.min(1, Math.max(0, v));
 export function startFilm({ section, canvas, overlays, scenes }) {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ctx = canvas.getContext('2d', { alpha: false });
-  const imgs = scenes.map(s => { const i = new Image(); i.decoding = 'async'; i.src = s.src; return i; });
+  const mk = src => { const i = new Image(); i.decoding = 'async'; i.src = src; return i; };
+  // a scene is either one photo (src) or a frame sequence cut from a real video (frames),
+  // which is scrubbed by the scroll. Only the first frame loads up front; the rest load
+  // when the viewer gets close to that scene.
+  const frameSrc = (s, k) => `${s.frames.base}${String(k + 1).padStart(2, '0')}.webp`;
+  const seqs = scenes.map(s => (s.frames ? Array.from({ length: s.frames.count }, () => null) : null));
+  const imgs = scenes.map((s, i) => { if (!s.frames) return mk(s.src); const f = mk(frameSrc(s, 0)); seqs[i][0] = f; return f; });
+  function warm(i) {
+    const q = seqs[i];
+    if (!q || q.warm) return;
+    q.warm = true;
+    for (let k = 1; k < q.length; k++) { const f = mk(frameSrc(scenes[i], k)); f.onload = () => { last = -1; }; q[k] = f; }
+  }
+  // the frame for scene i at scene-time u (0..1), falling back to the nearest loaded one
+  function pick(i, u) {
+    const q = seqs[i];
+    if (!q) return imgs[i];
+    let k = Math.round(clamp01(u) * (q.length - 1));
+    for (; k > 0; k--) if (q[k] && q[k].complete && q[k].naturalWidth) return q[k];
+    return q[0];
+  }
   let W = 0, H = 0, dpr = 1;
   const resize = () => {
     dpr = Math.min(window.devicePixelRatio || 1, 1.75);
@@ -48,6 +68,7 @@ export function startFilm({ section, canvas, overlays, scenes }) {
     g.putImageData(d, 0, 0);
   }
   let grainPattern = null;
+  const THROUGH_FOR = sc => (sc.reverse ? 0.8 : 0.68);
   const N = scenes.length;
   let target = 0, smooth = 0, last = -1;
 
@@ -56,6 +77,8 @@ export function startFilm({ section, canvas, overlays, scenes }) {
     const i = Math.min(N - 1, Math.floor(seg));
     const t = seg - i;
     const sc = scenes[i], next = scenes[i + 1];
+    for (let j = Math.max(0, i - 1); j <= Math.min(N - 1, i + 2); j++) warm(j);
+    const cur = pick(i, t / THROUGH_FOR(sc));
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#0F1C1F';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -65,21 +88,21 @@ export function startFilm({ section, canvas, overlays, scenes }) {
     if (sc.reverse) {
       // pull back: start close on the focus and reveal the whole frame
       const z = 2.3 - 1.28 * ease(clamp01(t / 0.8));
-      draw(imgs[i], Math.max(1.02, z), sc.fx, sc.fy);
+      draw(cur, Math.max(1.02, z), sc.fx, sc.fy);
     } else if (t < THROUGH || !next) {
       const z = z0 + (z1 - z0) * ease(clamp01(t / THROUGH));
-      draw(imgs[i], z, sc.fx, sc.fy);
+      draw(cur, z, sc.fx, sc.fy);
     } else {
       const u = (t - THROUGH) / (1 - THROUGH);          // 0..1 through phase
       const e = u * u * (3 - 2 * u);
       // the next room grows out of the hole we're diving into
       const [n0] = next.zoom || [1.04];
-      draw(imgs[i + 1], 0.75 + (n0 - 0.75) * e, next.fx, next.fy, clamp01(e * 1.6));
+      draw(pick(i + 1, 0), 0.75 + (n0 - 0.75) * e, next.fx, next.fy, clamp01(e * 1.6));
       const z = z1 * (1 + e * 3.2);
       const a = 1 - clamp01((u - 0.25) / 0.75);
-      draw(imgs[i], z, sc.fx, sc.fy, a);
+      draw(cur, z, sc.fx, sc.fy, a);
       // zoom blur: ghosted copies while moving fast
-      if (u > 0.1 && u < 0.9) { draw(imgs[i], z * 1.06, sc.fx, sc.fy, a * 0.3); draw(imgs[i], z * 1.13, sc.fx, sc.fy, a * 0.15); }
+      if (u > 0.1 && u < 0.9) { draw(cur, z * 1.06, sc.fx, sc.fy, a * 0.3); draw(cur, z * 1.13, sc.fx, sc.fy, a * 0.15); }
     }
     // cinematic grade: vignette and a dark fade at the very end of the film
     ctx.globalAlpha = 1;
