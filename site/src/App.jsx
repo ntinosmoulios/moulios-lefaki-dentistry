@@ -421,7 +421,7 @@ export default function App() {
                   <li><span>Ιατρείο</span><a href={TEL}>{PHONE}</a></li>
                   <li><span>Δεύτερη γραμμή</span><a href="tel:+302235041073">22350 41073</a></li>
                   <li><span>Κινητό</span><a href="tel:+306978361763">697 836 1763</a></li>
-                  <li><span>Email</span><a href="mailto:info@moulios-lefaki.gr">info@moulios-lefaki.gr</a></li>
+                  <li><span>Email</span><a href="mailto:mihmoulios@gmail.com">mihmoulios@gmail.com</a></li>
                 </ul>
                 <table className="hours">
                   <caption>Ωράριο, μόνο με ραντεβού</caption>
