@@ -208,7 +208,7 @@ export function startEngine({ onStep, onShade, onIntroDone }) {
     const filmEnd = film.h ? film.t + film.h - vh : 0;
     marks.filmCover = film.h ? film.t + (film.h - vh) * 0.96 : -1;
     const sg = sec('.surgery');
-    marks.cover = sg.h ? [sg.t + vh * 0.05, sg.t + sg.h - vh * 1.05] : null;
+    marks.cover = sg.h ? [sg.t, sg.t + sg.h - vh] : null;
     const imp = sec('.implant'), ab = sec('.about'), sv = sec('.services'), wh = sec('.whitening'), te = sec('.tech'), fq = sec('.faq');
     marks = { ...marks, imp, ab, sv, wh, te, fq, maxScroll };
 

@@ -122,60 +122,47 @@ function Hud() {
 }
 
 
-// Real footage: an orbit around the surgical chair, scrubbed by the scroll inside a portrait "viewfinder"
-const SURGERY_FRAMES = 36;
+// Real footage of the surgical room as a looping background, with the type over it
 function Surgery() {
-  const section = useRef(null), canvas = useRef(null), left = useRef(null), right = useRef(null), tc = useRef(null), panel = useRef(null);
+  const section = useRef(null), media = useRef(null), video = useRef(null);
   useEffect(() => {
-    const imgs = Array.from({ length: SURGERY_FRAMES }, (_, i) => { const im = new Image(); im.decoding = 'async'; im.src = `./images/surgery/${String(i + 1).padStart(2, '0')}.webp`; return im; });
-    const ctx = canvas.current.getContext('2d');
-    let raf, last = -1, lastW = 0;
-    const draw = k => {
-      const c = canvas.current, r = c.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-      const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
-      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
-      let im = imgs[k]; for (let j = k; j >= 0 && !(im && im.complete && im.naturalWidth); j--) im = imgs[j];
-      if (!im || !im.naturalWidth) return;
-      const s = Math.max(w / im.naturalWidth, h / im.naturalHeight);
-      ctx.drawImage(im, (w - im.naturalWidth * s) / 2, (h - im.naturalHeight * s) / 2, im.naturalWidth * s, im.naturalHeight * s);
-    };
+    const v = video.current, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // only play while on screen
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting && !reduce) v.play().catch(() => {}); else v.pause(); }, { threshold: 0.05 });
+    io.observe(section.current);
+    let raf;
     const loop = () => {
       raf = requestAnimationFrame(loop);
-      const el = section.current; if (!el) return;
-      const r = el.getBoundingClientRect(), vh = innerHeight;
+      const r = section.current.getBoundingClientRect(), vh = innerHeight;
       if (r.bottom < 0 || r.top > vh) return;
-      const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)));
-      const k = Math.round(p * (SURGERY_FRAMES - 1));
-      if (k !== last || innerWidth !== lastW) { draw(k); last = k; lastW = innerWidth; }
-      const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-      left.current.style.transform = `translate3d(${(-30 + e * 34).toFixed(2)}vw, 0, 0)`;
-      right.current.style.transform = `translate3d(${(30 - e * 34).toFixed(2)}vw, 0, 0)`;
-      panel.current.style.transform = `scale(${(0.86 + 0.14 * Math.sin(Math.PI * Math.min(1, p * 1.2))).toFixed(4)}) rotate(${((0.5 - p) * 3).toFixed(2)}deg)`;
-      const secs = p * 5.97;
-      tc.current.textContent = `00:00:${String(Math.floor(secs)).padStart(2, '0')}:${String(Math.floor((secs % 1) * 30)).padStart(2, '0')}`;
+      const p = (vh - r.top) / (vh + r.height); // 0 entering .. 1 leaving
+      if (!reduce) media.current.style.transform = `translate3d(0, ${((p - 0.5) * -12).toFixed(2)}%, 0) scale(${(1.08 - 0.06 * p).toFixed(4)})`;
     };
-    imgs[0].onload = () => { last = -1; };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
   }, []);
   return (
     <section className="surgery" ref={section} aria-labelledby="surgery-title">
-      <div className="surgery__sticky">
-        <h2 id="surgery-title" className="surgery__title">
-          <span ref={left} className="surgery__word surgery__word--l">ΧΕΙΡΟΥΡΓΙΚΟΣ</span>
-          <span ref={right} className="surgery__word surgery__word--r">ΧΩΡΟΣ.</span>
-        </h2>
-        <figure className="surgery__panel" ref={panel}>
-          <canvas ref={canvas} aria-label="Βίντεο: ο χειρουργικός χώρος του ιατρείου, με τη μαύρη χειρουργική έδρα" role="img" />
-          <i /><i /><i /><i />
-          <figcaption className="surgery__hud">
-            <span className="surgery__rec">● REC</span>
-            <span ref={tc}>00:00:00:00</span>
-          </figcaption>
-          <span className="surgery__hud surgery__hud--b">ΠΡΑΓΜΑΤΙΚΟ ΒΙΝΤΕΟ · ΜΩΛΟΣ</span>
-        </figure>
-        <p className="surgery__text">Ξεχωριστή αίθουσα για εμφυτεύματα, με αποστειρωμένο εξοπλισμό. Προσωπικό και ασθενείς φορούν ειδικό αποστειρωμένο ρουχισμό.</p>
+      <div className="surgery__media" ref={media} aria-hidden="true">
+        <video ref={video} muted loop playsInline preload="metadata" poster="./video/surgery-poster.jpg">
+          <source src="./video/surgery-tall.mp4" type="video/mp4" media="(max-aspect-ratio: 3/4)" />
+          <source src="./video/surgery-wide.mp4" type="video/mp4" />
+        </video>
       </div>
+      <div className="surgery__shade" aria-hidden="true" />
+      <div className="surgery__content wrap">
+        <Kicker n="02" text="ΧΕΙΡΟΥΡΓΙΚΟΣ ΧΩΡΟΣ" />
+        <h2 id="surgery-title" className="surgery__title">ΧΕΙΡΟΥΡΓΕΙΟ.</h2>
+        <div className="surgery__row">
+          <p className="surgery__text">Ξεχωριστή αίθουσα για εμφυτεύματα, με αποστειρωμένο εξοπλισμό. Προσωπικό και ασθενείς φορούν ειδικό αποστειρωμένο ρουχισμό.</p>
+          <ul className="surgery__facts">
+            <li><b>20–40′</b><span>ένα εμφύτευμα, συνήθως</span></li>
+            <li><b>100%</b><span>αποστείρωση μετά από κάθε χρήση</span></li>
+            <li><b>PRP</b><span>για ταχύτερη επούλωση</span></li>
+          </ul>
+        </div>
+      </div>
+      <span className="surgery__tag" aria-hidden="true"><i />ΠΡΑΓΜΑΤΙΚΟ ΒΙΝΤΕΟ · ΤΟ ΙΑΤΡΕΙΟ ΜΑΣ ΣΤΟΝ ΜΩΛΟ</span>
     </section>
   );
 }

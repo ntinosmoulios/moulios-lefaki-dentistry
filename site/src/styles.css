@@ -397,29 +397,29 @@ main, .footer { position: relative; z-index: 2; }
 .xlabel::after { content: ""; position: absolute; left: 4px; top: -3px; width: 7px; height: 7px; border-radius: 50%; border: 1px solid rgba(14, 26, 31, .7); background: var(--night); }
 @media (max-width: 760px) { .xlabel b, .xlabel em { margin-left: 52px; } .xlabel::before { width: 36px; } }
 
-/* ---------- Surgical room: real footage in a viewfinder ---------- */
-.surgery { position: relative; z-index: 3; height: 340vh; background: var(--night); }
-.surgery__sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: grid; place-items: center; }
-.surgery__title { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; pointer-events: none; }
-.surgery__word { grid-area: 1 / 1; font: 900 min(13vw, 14rem)/0.85 Commissioner, var(--sans); letter-spacing: -0.04em; color: var(--enamel); will-change: transform; white-space: nowrap; }
-.surgery__word--l { translate: 0 -0.55em; }
-.surgery__word--r { translate: 0 0.55em; color: transparent; -webkit-text-stroke: 1.5px var(--enamel); }
-.surgery__panel { position: relative; margin: 0; height: min(78vh, 900px); aspect-ratio: 9 / 16; border-radius: 22px; overflow: hidden; background: #cfd8dd; box-shadow: 0 40px 120px -30px rgba(14, 26, 31, .45), 0 0 0 1px rgba(255, 255, 255, .6) inset; will-change: transform; z-index: 1; }
-.surgery__panel canvas { width: 100%; height: 100%; display: block; }
-.surgery__panel i { position: absolute; width: 22px; height: 22px; border: 1.5px solid rgba(255, 255, 255, .9); }
-.surgery__panel i:nth-of-type(1) { left: 14px; top: 14px; border-right: 0; border-bottom: 0; }
-.surgery__panel i:nth-of-type(2) { right: 14px; top: 14px; border-left: 0; border-bottom: 0; }
-.surgery__panel i:nth-of-type(3) { left: 14px; bottom: 14px; border-right: 0; border-top: 0; }
-.surgery__panel i:nth-of-type(4) { right: 14px; bottom: 14px; border-left: 0; border-top: 0; }
-.surgery__hud { position: absolute; left: 44px; right: 44px; top: 20px; display: flex; justify-content: space-between; font: 500 11px/1 var(--mono); letter-spacing: .1em; color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, .35); }
-.surgery__hud--b { top: auto; bottom: 20px; }
-.surgery__rec { color: #ff5a4e; animation: rec 1.2s steps(2) infinite; }
+/* ---------- Surgical room: real footage as a full-bleed background ---------- */
+.surgery { position: relative; z-index: 3; min-height: 110vh; min-height: 110svh; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; background: #0e1a1f; color: #fff; }
+.surgery__media { position: absolute; inset: -8% 0; will-change: transform; }
+.surgery__media video { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(.9) contrast(1.05); }
+.surgery__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14, 26, 31, .55) 0%, rgba(14, 26, 31, .05) 30%, rgba(14, 26, 31, .25) 55%, rgba(14, 26, 31, .88) 100%); }
+.surgery__content { position: relative; width: 100%; padding-top: 140px; padding-bottom: clamp(48px, 9vh, 110px); }
+.surgery .kicker { color: #bfe9f5; }
+.surgery__title { margin: 0 0 .2em; font: 900 min(11rem, calc((100vw - 2 * var(--gutter)) / 7.4))/0.85 Commissioner, var(--sans); letter-spacing: -0.045em; color: #fff; text-shadow: 0 20px 80px rgba(0, 0, 0, .35); }
+.surgery__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 28px 48px; }
+.surgery__text { max-width: 36ch; margin: 0; font: 500 var(--step-1)/1.4 var(--sans); color: rgba(255, 255, 255, .88); }
+.surgery__facts { display: flex; gap: clamp(20px, 4vw, 56px); list-style: none; margin: 0; padding: 0; }
+.surgery__facts li { display: grid; gap: 6px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .35); min-width: 120px; }
+.surgery__facts b { font: 800 clamp(1.6rem, 1rem + 2vw, 2.6rem)/1 var(--sans); letter-spacing: -.02em; }
+.surgery__facts span { max-width: 16ch; font: 500 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .7); }
+.surgery__tag { position: absolute; right: var(--gutter); top: 96px; display: flex; align-items: center; gap: 10px; font: 500 11px/1 var(--mono); letter-spacing: .12em; color: rgba(255, 255, 255, .85); }
+.surgery__tag i { width: 8px; height: 8px; border-radius: 50%; background: #ff5a4e; box-shadow: 0 0 10px #ff5a4e; animation: rec 1.4s steps(2) infinite; }
 @keyframes rec { 50% { opacity: .25; } }
-.surgery__text { position: absolute; right: var(--gutter); bottom: clamp(36px, 8vh, 80px); max-width: 30ch; margin: 0; font: 500 var(--step-0)/1.45 var(--sans); color: var(--mist); }
 @media (max-width: 760px) {
-  .surgery__panel { height: 70vh; }
-  .surgery__word { font-size: 17vw; }
-  .surgery__text { left: var(--gutter); right: var(--gutter); bottom: 22px; font-size: var(--step--1); }
+  .surgery { min-height: 100svh; }
+  .surgery__text { font-size: var(--step-0); }
+  .surgery__facts { width: 100%; gap: 14px; }
+  .surgery__facts li { min-width: 0; flex: 1; }
+  .surgery__tag { left: var(--gutter); right: auto; top: 80px; font-size: 9.5px; }
 }
 
 /* mono section kickers that decode on entry */
