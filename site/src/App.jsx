@@ -13,6 +13,7 @@ import ClickSpark from './reactbits/ClickSpark.jsx';
 import StarBorder from './reactbits/StarBorder.jsx';
 import SpotlightCard from './reactbits/SpotlightCard.jsx';
 import TiltedCard from './reactbits/TiltedCard.jsx';
+import Fairy from './fairy/Fairy.jsx';
 
 const PHONE = '22350 51834';
 const TEL = 'tel:+302235051834';
@@ -217,6 +218,7 @@ export default function App() {
 
       <canvas id="scene" aria-hidden="true" />
       <Hud />
+      <Fairy />
       <div className="progress" aria-hidden="true"><span /></div>
 
       <main id="main">
