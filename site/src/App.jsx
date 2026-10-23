@@ -6,7 +6,6 @@ import SplitText from './reactbits/SplitText.jsx';
 import ScrollReveal from './reactbits/ScrollReveal.jsx';
 import ScrollFloat from './reactbits/ScrollFloat.jsx';
 import ShinyText from './reactbits/ShinyText.jsx';
-import ScrollVelocity from './reactbits/ScrollVelocity.jsx';
 import CountUp from './reactbits/CountUp.jsx';
 import Magnet from './reactbits/Magnet.jsx';
 import ClickSpark from './reactbits/ClickSpark.jsx';
@@ -296,15 +295,6 @@ export default function App() {
                 Στόχος μας είναι μια θεραπεία ανώδυνη και ποιοτική, προσαρμοσμένη σε κάθε άνθρωπο. Δεχόμαστε με ραντεβού, και για επείγοντα περιστατικά συνεννοούμαστε τηλεφωνικά για να σας δούμε το συντομότερο.
               </ScrollReveal>
             </div>
-          </div>
-          <div className="marquee" aria-hidden="true">
-            <ScrollVelocity
-              texts={['Εμφυτεύματα ✦ Όψεις ✦ Λεύκανση ✦ Bonding ✦ ', 'Παιδιά ✦ Πρόληψη ✦ Ορθοδοντική ✦ Laser ✦ ']}
-              velocity={60}
-              className="marquee__text"
-              skewWithVelocity={6}
-              outlineAlternate
-            />
           </div>
         </section>
 
