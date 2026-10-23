@@ -122,38 +122,36 @@ function Hud() {
 }
 
 
-// Real footage of the surgical room as a looping background, with the type over it
+// Real footage of the surgical room. Phones: full-bleed. Wide screens: the vertical clip stays
+// sharp in a tall frame, and a blurred copy of it fills the background.
 function Surgery() {
-  const section = useRef(null), media = useRef(null), video = useRef(null);
+  const section = useRef(null), frame = useRef(null), bg = useRef(null), fg = useRef(null);
   useEffect(() => {
-    const v = video.current, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // only play while on screen
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting && !reduce) v.play().catch(() => {}); else v.pause(); }, { threshold: 0.05 });
+    const vids = [bg.current, fg.current], reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const io = new IntersectionObserver(([e]) => {
+      for (const v of vids) { if (e.isIntersecting && !reduce) v.play().catch(() => {}); else v.pause(); }
+    }, { threshold: 0.05 });
     io.observe(section.current);
     let raf;
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const r = section.current.getBoundingClientRect(), vh = innerHeight;
-      if (r.bottom < 0 || r.top > vh) return;
-      const p = (vh - r.top) / (vh + r.height); // 0 entering .. 1 leaving
-      if (!reduce) media.current.style.transform = `translate3d(0, ${((p - 0.5) * -12).toFixed(2)}%, 0) scale(${(1.08 - 0.06 * p).toFixed(4)})`;
+      if (r.bottom < 0 || r.top > vh || reduce) return;
+      const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+      const e = Math.sin(Math.PI * p);
+      frame.current.style.transform = `translate3d(0, ${((0.5 - p) * 60).toFixed(1)}px, 0) rotate(${((0.5 - p) * 4).toFixed(2)}deg) scale(${(0.9 + 0.1 * e).toFixed(4)})`;
     };
     raf = requestAnimationFrame(loop);
     return () => { io.disconnect(); cancelAnimationFrame(raf); };
   }, []);
   return (
     <section className="surgery" ref={section} aria-labelledby="surgery-title">
-      <div className="surgery__media" ref={media} aria-hidden="true">
-        <video ref={video} muted loop playsInline preload="metadata" poster="./video/surgery-poster.jpg">
-          <source src="./video/surgery-tall.mp4" type="video/mp4" media="(max-aspect-ratio: 3/4)" />
-          <source src="./video/surgery-wide.mp4" type="video/mp4" />
-        </video>
-      </div>
+      <video ref={bg} className="surgery__bg" muted loop playsInline preload="metadata" aria-hidden="true" poster="./video/surgery-poster.jpg" src="./video/surgery-blur.mp4" />
       <div className="surgery__shade" aria-hidden="true" />
-      <div className="surgery__content wrap">
-        <Kicker n="02" text="ΧΕΙΡΟΥΡΓΙΚΟΣ ΧΩΡΟΣ" />
-        <h2 id="surgery-title" className="surgery__title">ΧΕΙΡΟΥΡΓΕΙΟ.</h2>
-        <div className="surgery__row">
+      <div className="surgery__grid wrap">
+        <div className="surgery__content">
+          <Kicker n="02" text="ΧΕΙΡΟΥΡΓΙΚΟΣ ΧΩΡΟΣ" />
+          <h2 id="surgery-title" className="surgery__title">ΧΕΙΡΟΥΡΓΕΙΟ.</h2>
           <p className="surgery__text">Ξεχωριστή αίθουσα για εμφυτεύματα, με αποστειρωμένο εξοπλισμό. Προσωπικό και ασθενείς φορούν ειδικό αποστειρωμένο ρουχισμό.</p>
           <ul className="surgery__facts">
             <li><b>20–40′</b><span>ένα εμφύτευμα, συνήθως</span></li>
@@ -161,8 +159,12 @@ function Surgery() {
             <li><b>PRP</b><span>για ταχύτερη επούλωση</span></li>
           </ul>
         </div>
+        <figure className="surgery__frame" ref={frame}>
+          <video ref={fg} muted loop playsInline preload="metadata" poster="./video/surgery-poster.jpg" src="./video/surgery-tall.mp4"
+            aria-label="Βίντεο: ο χειρουργικός χώρος του ιατρείου, με τη μαύρη χειρουργική έδρα" />
+          <figcaption className="surgery__tag"><i />ΠΡΑΓΜΑΤΙΚΟ ΒΙΝΤΕΟ · ΜΩΛΟΣ</figcaption>
+        </figure>
       </div>
-      <span className="surgery__tag" aria-hidden="true"><i />ΠΡΑΓΜΑΤΙΚΟ ΒΙΝΤΕΟ · ΤΟ ΙΑΤΡΕΙΟ ΜΑΣ ΣΤΟΝ ΜΩΛΟ</span>
     </section>
   );
 }
