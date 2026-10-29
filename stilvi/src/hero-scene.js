@@ -1,10 +1,10 @@
-import { WebGLRenderer, Scene, OrthographicCamera, Mesh, PlaneGeometry, ShaderMaterial, Vector2, TextureLoader, SRGBColorSpace, LinearFilter } from 'three'
+import { WebGLRenderer, Scene, OrthographicCamera, Mesh, PlaneGeometry, ShaderMaterial, Vector2, TextureLoader, SRGBColorSpace, LinearMipmapLinearFilter } from 'three'
 
 // The night photo of the deck, brought to life in a fragment shader: the sea
 // below the horizon ripples (stronger close to the shore), the moon path
 // glitters, the lanterns flicker and a few stars twinkle. `zoom` dollies in
-// as the hero is scrolled. Image-space coordinates below are measured from
-// the top-left of the 1536×864 render.
+// as the hero is scrolled. Image-space coordinates below are fractions of
+// the image, measured from its top-left corner.
 const frag = /* glsl */ `
 precision highp float;
 uniform sampler2D uTex;
@@ -30,7 +30,7 @@ void main(){
   vec2 uv = gl_FragCoord.xy / uRes;
   float sa = uRes.x / uRes.y;
   vec2 span = sa > uImgAspect ? vec2(1., uImgAspect / sa) : vec2(sa / uImgAspect, 1.);
-  float z = 1.06 + uZoom * 0.2;
+  float z = 1.03 + uZoom * 0.2;
   span /= z;
   vec2 focal = vec2(uFocalX, .5) + uMouse * vec2(.012, .008);
   focal = clamp(focal, span * .5, 1. - span * .5);
@@ -99,8 +99,8 @@ export function createHeroScene(canvas, img) {
   let ready = false
   new TextureLoader().load(img.currentSrc || img.src, (tex) => {
     tex.colorSpace = SRGBColorSpace
-    tex.minFilter = LinearFilter
-    tex.generateMipmaps = false
+    tex.minFilter = LinearMipmapLinearFilter
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy()
     uniforms.uTex.value = tex
     uniforms.uImgAspect.value = tex.image.width / tex.image.height
     ready = true
@@ -110,7 +110,7 @@ export function createHeroScene(canvas, img) {
   const mouse = new Vector2()
   const resize = () => {
     const w = canvas.clientWidth, h = canvas.clientHeight
-    const dpr = Math.min(window.devicePixelRatio, w < 800 ? 1.5 : 1.75)
+    const dpr = Math.min(window.devicePixelRatio, 2)
     renderer.setPixelRatio(dpr)
     renderer.setSize(w, h, false)
     uniforms.uRes.value.set(w * dpr, h * dpr)

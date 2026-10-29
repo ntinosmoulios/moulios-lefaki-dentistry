@@ -13,6 +13,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import Lenis from 'lenis'
 import { createHeroScene } from './hero-scene.js'
+import { createKitchenScene } from './kitchen-scene.js'
 import { menu, wines, findItem, dishCount, wineCount } from './menu-data.js'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
@@ -24,48 +25,50 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
 /* ── Content ─────────────────────────────────────────── */
 
-const pageItems = (names) => names.map((n) => {
-  const it = findItem(n)
-  return `<li class="pg__item"><span class="pg__name">${esc(it.name)}${it.frozen ? '*' : ''}</span><span class="pg__price">${it.price}</span>${it.desc ? `<span class="pg__desc">${esc(it.desc)}</span>` : ''}</li>`
-}).join('')
+const cat = (id) => menu.find((c) => c.id === id)
+const pageRow = (it) => `<li class="pg__item"><span class="pg__name">${esc(it.name)}${it.frozen ? '*' : ''}</span><span class="pg__price">${it.price}</span>${it.desc ? `<span class="pg__desc">${esc(it.desc)}</span>` : ''}</li>`
+const pageFoot = (n) => `<div class="pg__foot"><span>στίλβη</span><span>${String(n).padStart(2, '0')}</span></div>`
+const listPage = (kicker, title, items, extra = '') => ({
+  density: items.length > 8 ? 'pg--xdense' : items.length > 5 ? 'pg--dense' : '',
+  html: `<p class="pg__kicker">${kicker}</p><h3 class="pg__title">${title}</h3><ul class="pg__list">${items.map(pageRow).join('')}</ul>${extra}`,
+})
+const wineRows = (g) => g.items.map((w) => ({ name: w.name, price: w.price, desc: `${w.origin} · ${w.grape}` }))
 
-const pageFoot = (n) => `<div class="pg__foot"><span>στίλβη</span><span>${n}</span></div>`
-
-const pages = {
-  welcome: `
-    <p class="pg__kicker">Καλώς ήρθατε</p>
-    <h3 class="pg__title">Στο τραπέζι,<br/><em>δίπλα στο κύμα</em></h3>
-    <p class="pg__welcome">Μαγειρεύουμε με ό,τι φέρνει η θάλασσα και η εποχή, ψήνουμε στα κάρβουνα και διαλέγουμε κρασιά από τη Φθιώτιδα και όλη την Ελλάδα.</p>
-    <figure class="pg__photo"><img src="/img/menu-sunset.webp" alt="" loading="lazy" /></figure>
-    ${pageFoot('01')}`,
-  orektika: `
-    <p class="pg__kicker">Για αρχή</p>
-    <h3 class="pg__title">Ορεκτικά &amp; <em>Σαλάτες</em></h3>
-    <ul class="pg__list">${pageItems(['Ντάκος κρητικός', 'Φέτα Π.Ο.Π. σε φύλλο', 'Ταλαγάνι ψητό', 'Μανιτάρια πλευρώτους στη σχάρα', 'Σαλάτα «Στίλβη»', 'Χωριάτικη σαλάτα'])}</ul>
-    ${pageFoot('02')}`,
-  thalassa: `
-    <p class="pg__kicker">Από τον Ευβοϊκό</p>
-    <h3 class="pg__title">Από τη <em>Θάλασσα</em></h3>
-    <ul class="pg__list">${pageItems(['Καλαμάρι τηγανητό', 'Χταπόδι σχάρας', 'Γαρίδες σαγανάκι', 'Μυδοπίλαφο', 'Σαρδέλα ψητή', 'Πρώτα ψάρια'])}</ul>
-    ${pageFoot('03')}`,
-  sxara: `
-    <p class="pg__kicker">Στα κάρβουνα</p>
-    <h3 class="pg__title">Από τη <em>Σχάρα</em></h3>
-    <ul class="pg__list">${pageItems(['Σταβλίσια μπριζόλα μόσχου', 'Ταλιάτα Striploin', 'Ψαρονέφρι', 'Χοιρινή μπριζόλα', 'Μπιφτέκι'])}</ul>
-    ${pageFoot('04')}`,
-  kyriws: `
-    <p class="pg__kicker">Της κουζίνας</p>
-    <h3 class="pg__title">Κυρίως <em>Πιάτα</em></h3>
-    <ul class="pg__list">${pageItems(['Ψαρονέφρι μαυροδάφνης', 'Φιλετίνια χοιρινά', 'Μπιφτέκι γεμιστό', 'Φιλέτο κοτόπουλο', 'Φρέσκο ραβιόλι γεμιστό'])}</ul>
-    ${pageFoot('05')}`,
-  base: `
-    <p class="pg__kicker">Για το τέλος</p>
-    <h3 class="pg__title"><em>Γλυκά</em></h3>
-    <ul class="pg__list">${pageItems(['Σοκολατόπιτα με παγωτό', 'Πορτοκαλόπιτα με παγωτό', 'Τραγανά φύλλα'])}</ul>
-    <div class="pg__seal"><div><span>στίλβη</span><small>Τα λέμε στο τραπέζι</small></div></div>
-    ${pageFoot('06')}`,
+// Every dish and wine from the restaurant's menu, in menu order, two pages per spread.
+const bookPages = [
+  { density: '', html: `<p class="pg__kicker">Καλώς ήρθατε</p><h3 class="pg__title">Στο τραπέζι,<br/><em>δίπλα στο κύμα</em></h3><p class="pg__welcome">Μαγειρεύουμε με ό,τι φέρνει η θάλασσα και η εποχή, ψήνουμε στα κάρβουνα και διαλέγουμε κρασιά από τη Φθιώτιδα και όλη την Ελλάδα.</p><figure class="pg__photo"><img src="/img/menu-sunset.webp" alt="" loading="lazy" /></figure>` },
+  listPage('Για αρχή', '<em>Ορεκτικά</em>', cat('orektika').items.slice(0, 5)),
+  listPage('Για αρχή', '<em>Ορεκτικά</em> <small>συνέχεια</small>', cat('orektika').items.slice(5)),
+  listPage('Από τον κήπο', '<em>Σαλάτες</em>', cat('salates').items),
+  listPage('Χειροποίητα', 'Ζυμαρικά – <em>Ρύζι</em>', cat('zymarika').items),
+  listPage('Της κουζίνας', 'Κυρίως <em>Πιάτα</em>', cat('kyriws').items.slice(0, 6)),
+  listPage('Της κουζίνας', 'Κυρίως <em>Πιάτα</em> <small>συνέχεια</small>', cat('kyriws').items.slice(6)),
+  listPage('Στα κάρβουνα', 'Από τη <em>Σχάρα</em>', cat('sxara').items),
+  listPage('Από τον Ευβοϊκό', 'Από τη <em>Θάλασσα</em>', cat('thalassa').items, '<p class="pg__note">* Κατεψυγμένο</p>'),
+  listPage('Για το τέλος', '<em>Γλυκά</em>', cat('glyka').items, '<div class="pg__seal"><div><span>στίλβη</span><small>Τα λέμε στο τραπέζι</small></div></div>'),
+  listPage('Η κάβα μας', '<em>Λευκά</em> Κρασιά', wineRows(wines[0])),
+  listPage('Η κάβα μας', '<em>Ροζέ</em> &amp; <em>Κόκκινα</em>', [...wineRows(wines[1]), ...wineRows(wines[2])]),
+]
+const pageEl = (p, n, side) => `<div class="${side} page ${p.density}">${p.html}${pageFoot(n)}</div>`
+const cover = `<div class="face face--front cover">
+    <div class="cover__frame">
+      <svg class="cover__waves" viewBox="0 0 120 30" aria-hidden="true"><path d="M0 8 Q15 0 30 8 T60 8 T90 8 T120 8" /><path d="M0 16 Q15 8 30 16 T60 16 T90 16 T120 16" /><path d="M0 24 Q15 16 30 24 T60 24 T90 24 T120 24" /></svg>
+      <span class="cover__ribbon mono">seaside restaurant</span>
+      <span class="cover__word">στίλβη</span>
+      <span class="cover__est mono">Καμμένα Βούρλα</span>
+    </div>
+  </div>`
+// leaf 0: cover / page 1; leaf k: page 2k / page 2k+1; the last page lies on the base board
+const leafCount = bookPages.length / 2
+let bookHtml = pageEl(bookPages[bookPages.length - 1], bookPages.length, 'page--base')
+for (let k = 0; k < leafCount; k++) {
+  const front = k === 0 ? cover : pageEl(bookPages[2 * k - 1], 2 * k, 'face face--front')
+  const back = pageEl(bookPages[2 * k], 2 * k + 1, 'face face--back')
+  bookHtml += `<div class="leaf" data-leaf="${k}">${front}${back}</div>`
 }
-$$('[data-page]').forEach((el) => { el.innerHTML = pages[el.dataset.page] })
+$('.book').innerHTML = bookHtml
+const chapterNames = ['Εξώφυλλο', 'Ορεκτικά', 'Σαλάτες', 'Ζυμαρικά & Κυρίως', 'Κυρίως & Σχάρα', 'Θάλασσα & Γλυκά', 'Κρασιά']
+$('.menu3d__chapters').innerHTML = chapterNames.map((c) => `<span>${c}</span>`).join('')
 
 const signatures = [
   { img: 'calamari', tag: 'Από τη θάλασσα', item: 'Καλαμάρι τηγανητό', desc: 'Τραγανό, χρυσαφένιο, με μισό λεμόνι. Το πιάτο που παραγγέλνει όλη η παραλία.' },
@@ -226,33 +229,33 @@ const applyLeaves = () => {
 }
 applyLeaves()
 const chapters = $$('.menu3d__chapters span')
-const setChapter = (p) => {
-  const idx = p < 0.36 ? 0 : p < 0.56 ? 1 : p < 0.81 ? 2 : 3
+// the open spread is the number of leaves already turned past halfway
+const setChapter = () => {
+  const idx = leafState.filter((l) => l.a < -90).length
   chapters.forEach((c, i) => c.classList.toggle('is-on', i === idx))
 }
+setChapter()
 
 if (reduceMotion) {
   leafState[0].a = -180
   applyLeaves()
-  setChapter(0.4)
+  setChapter()
 } else {
+  const FLIP_GAP = 1.25
   gsap.set('.book-rig', { rotateX: 58, rotateZ: -14, yPercent: 8, scale: 0.6, xPercent: -25 })
   const tl = gsap.timeline({
     defaults: { ease: 'power2.inOut' },
     scrollTrigger: {
-      trigger: '.menu3d__pin', start: 'top top', end: '+=420%', pin: true, scrub: 1,
-      onUpdate: (st) => setChapter(st.progress),
+      trigger: '.menu3d__pin', start: 'top top', end: `+=${180 + leaves.length * 95}%`, pin: true, scrub: 1,
     },
-    onUpdate: applyLeaves,
+    onUpdate: () => { applyLeaves(); setChapter() },
   })
   tl.to('.book-rig', { rotateX: 6, rotateZ: 0, yPercent: 0, scale: 0.92, duration: 1 })
     .to('.plinth', { opacity: 0, y: 80, duration: 0.8 }, 0.2)
     .to('.menu3d__glow', { scale: 1.6, opacity: 0.5, duration: 1 }, 0)
     .to('.book-rig', { rotateX: 0, scale: 1, xPercent: 0, duration: 1 }, 1.1)
-    .to(leafState[0], { a: -180, duration: 1 }, 1.1)
-    .to(leafState[1], { a: -180, duration: 1 }, 2.4)
-    .to(leafState[2], { a: -180, duration: 1 }, 3.7)
-    .to('.book-rig', { scale: 0.96, duration: 0.5 }, 4.7)
+  leafState.forEach((st, i) => tl.to(st, { a: -180, duration: 1 }, 1.1 + i * FLIP_GAP))
+  tl.to('.book-rig', { scale: 0.96, duration: 0.5 }, 1.1 + leaves.length * FLIP_GAP)
 }
 
 /* ── Signature coverflow ─────────────────────────────── */
@@ -283,6 +286,34 @@ if (reduceMotion) {
   })
   coverflow()
   window.addEventListener('resize', coverflow)
+}
+
+/* ── Kitchen shots ───────────────────────────────────── */
+
+const shotImgs = $$('.kouzina__shots img')
+const captions = $$('.kouzina__captions span')
+const countEl = $('.kouzina__count b')
+const kitchen = reduceMotion ? null : createKitchenScene($('.kouzina__canvas'), shotImgs)
+if (kitchen) gsap.ticker.add(kitchen.tick)
+let activeShot = 0
+const showShot = (i) => {
+  if (i === activeShot) return
+  activeShot = i
+  captions.forEach((c, k) => c.classList.toggle('is-on', k === i))
+  shotImgs.forEach((img, k) => img.classList.toggle('is-on', k === i))
+  countEl.textContent = String(i + 1).padStart(2, '0')
+}
+if (!reduceMotion) {
+  const shotState = { s: 0 }
+  const last = shotImgs.length - 1
+  const tl = gsap.timeline({
+    scrollTrigger: { trigger: '.kouzina__pin', start: 'top top', end: `+=${110 * shotImgs.length}%`, pin: true, scrub: 1 },
+    onUpdate: () => { kitchen?.setShot(shotState.s); showShot(Math.round(shotState.s)) },
+  })
+  tl.to({}, { duration: 0.35 })
+  for (let k = 1; k <= last; k++) tl.to(shotState, { s: k, duration: 1, ease: 'power1.inOut' }).to({}, { duration: 0.45 })
+  tl.fromTo('.kouzina__bar span', { height: '0%' }, { height: '100%', ease: 'none', duration: tl.duration() }, 0)
+  gsap.from('.kouzina__word', { opacity: 0, y: 40, filter: 'blur(12px)', duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.kouzina', start: 'top 60%', once: true } })
 }
 
 /* ── Nav, scrubber, section labels ──────────────────── */

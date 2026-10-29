@@ -109,7 +109,7 @@ h1, h2, h3, p { margin: 0; }
 
 /* ── Hero ───────────────────────────────────────────── */
 .hero { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; }
-.hero__img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 56% 50%; transform: scale(1.06); transform-origin: 56% 50%; }
+.hero__img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 56% 50%; transform: scale(1.03); transform-origin: 56% 50%; }
 .hero__sea { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s var(--ease); }
 .hero__sea.is-ready { opacity: 1; }
 .hero__shade { position: absolute; inset: 0; pointer-events: none; z-index: 1;
@@ -218,17 +218,28 @@ h1, h2, h3, p { margin: 0; }
     linear-gradient(270deg, rgba(0, 0, 0, .12), transparent 8%),
     var(--paper); }
 .page--base { box-shadow: 0 30px 60px rgba(0, 0, 0, .5), inset 0 0 40px rgba(120, 90, 40, .12); }
-.pg__kicker { font-family: var(--mono); font-size: 2.2cqi; letter-spacing: .3em; color: #9a7438; text-transform: uppercase; }
-.pg__title { font-family: var(--serif); font-size: 8.4cqi; line-height: 1.05; margin: 1.2cqi 0 3.4cqi; color: var(--paper-ink); font-weight: 500; }
+.pg__kicker { font-family: var(--mono); font-size: 2.8cqi; letter-spacing: .3em; color: #9a7438; text-transform: uppercase; }
+.pg__title { font-family: var(--serif); font-size: 10cqi; line-height: 1.05; margin: 1.2cqi 0 3.4cqi; color: var(--paper-ink); font-weight: 500; }
 .pg__title em { color: #9a7438; }
-.pg__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 3.2cqi; }
+.pg__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 5.6cqi; }
 .pg__item { display: grid; grid-template-columns: 1fr auto; column-gap: 2cqi; align-items: baseline; }
-.pg__name { font-family: var(--serif); font-size: 4.7cqi; font-weight: 500; line-height: 1.15; display: flex; align-items: baseline; gap: 1.6cqi; }
+.pg__name { font-family: var(--serif); font-size: 6.6cqi; font-weight: 500; line-height: 1.15; display: flex; align-items: baseline; gap: 1.6cqi; }
 .pg__name::after { content: ''; flex: 1; border-bottom: 1px dotted rgba(26, 34, 53, .35); transform: translateY(-.25em); min-width: 3cqi; }
-.pg__price { font-family: var(--mono); font-size: 3.2cqi; color: #9a7438; letter-spacing: .02em; }
-.pg__desc { grid-column: 1 / -1; font-size: 3cqi; line-height: 1.35; color: rgba(26, 34, 53, .66); margin-top: .5cqi; }
+.pg__price { font-family: var(--mono); font-size: 4.3cqi; color: #9a7438; letter-spacing: .02em; }
+.pg__desc { grid-column: 1 / -1; font-size: 4.1cqi; line-height: 1.35; color: rgba(26, 34, 53, .66); margin-top: .5cqi; }
+.pg__title small { font-size: .45em; font-style: italic; color: rgba(26, 34, 53, .5); font-weight: 400; }
+.pg--dense .pg__title, .pg--xdense .pg__title { font-size: 9.4cqi; margin-bottom: 3.6cqi; }
+.pg--dense .pg__list { gap: 4.2cqi; }
+.pg--dense .pg__name { font-size: 6.1cqi; }
+.pg--dense .pg__price { font-size: 4.1cqi; }
+.pg--dense .pg__desc { font-size: 3.8cqi; }
+.pg--xdense .pg__list { gap: 3.3cqi; }
+.pg--xdense .pg__name { font-size: 6cqi; }
+.pg--xdense .pg__price { font-size: 4cqi; }
+.pg--xdense .pg__desc { font-size: 3.7cqi; }
+.pg__note { font-family: var(--mono); font-size: 2.7cqi; letter-spacing: .12em; color: rgba(26, 34, 53, .55); margin-top: 2.4cqi; text-transform: uppercase; }
 .pg__foot { margin-top: auto; padding-top: 3cqi; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 2cqi; letter-spacing: .2em; color: rgba(26, 34, 53, .5); text-transform: uppercase; }
-.pg__welcome { font-family: var(--serif); font-size: 4.8cqi; line-height: 1.45; color: rgba(26, 34, 53, .82); }
+.pg__welcome { font-family: var(--serif); font-size: 5.8cqi; line-height: 1.45; color: rgba(26, 34, 53, .82); }
 .pg__photo { margin: 4cqi 0 0; border-radius: 3px; overflow: hidden; aspect-ratio: 16 / 10; }
 .pg__photo img { width: 100%; height: 100%; object-fit: cover; }
 .pg__sign { font-family: var(--serif); font-style: italic; font-size: 9cqi; color: #9a7438; margin-top: 3cqi; line-height: 1; }
@@ -258,7 +269,31 @@ h1, h2, h3, p { margin: 0; }
 .dish__price { font-family: var(--mono); color: var(--gold-hi); font-size: 14px; white-space: nowrap; }
 .dish__desc { color: var(--cream-dim); font-size: 14px; margin-top: 14px; min-height: 3em; }
 
-/* ── 04 Full menu ──────────────────────────────────── */
+/* ── 04 Kitchen shots ───────────────────────────────── */
+.kouzina { position: relative; background: #000; }
+.kouzina__pin { height: 100vh; height: 100svh; position: relative; overflow: hidden; }
+.kouzina__shots img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 50% 50%; opacity: 0; transition: opacity 1s var(--ease); filter: brightness(.88); }
+.kouzina__shots img.is-on { opacity: 1; }
+.kouzina__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1s var(--ease); }
+.kouzina__canvas.is-ready { opacity: 1; }
+.kouzina::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 55% 45% at 50% 50%, rgba(0, 0, 0, .45), transparent 75%); }
+.kouzina__kicker { position: absolute; top: 104px; left: calc(var(--pad) + 36px); z-index: 3; margin: 0; }
+.kouzina__center { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 var(--pad); pointer-events: none; }
+.kouzina__word { font-family: var(--serif); font-style: italic; font-size: clamp(84px, 13vw, 200px); line-height: .9; color: #fff6e6; text-shadow: 0 6px 40px rgba(0, 0, 0, .45); }
+.kouzina__rule { width: 56px; height: 1px; background: rgba(255, 246, 230, .6); margin: 26px 0 22px; }
+.kouzina__captions { display: grid; color: #fff6e6; letter-spacing: .38em; font-size: 11px; text-shadow: 0 2px 14px rgba(0, 0, 0, .8); }
+.kouzina__captions b { font-weight: 500; color: var(--gold-hi); }
+.kouzina__captions i { font-style: normal; }
+.kouzina__captions span { grid-area: 1 / 1; opacity: 0; transform: translateY(10px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.kouzina__captions span.is-on { opacity: 1; transform: none; }
+.kouzina__count { position: absolute; z-index: 3; right: calc(var(--pad) + 36px); top: 104px; color: rgba(255, 246, 230, .7); }
+.kouzina__count b { color: var(--gold-hi); font-weight: 500; }
+.kouzina__bar { position: absolute; z-index: 3; left: 50%; bottom: 84px; width: 1px; height: 64px; background: rgba(255, 246, 230, .2); }
+.kouzina__bar span { position: absolute; inset: 0 0 auto; height: 0; background: var(--gold-hi); }
+@media (max-width: 600px) { .kouzina__captions { letter-spacing: .22em; font-size: 10px; max-width: 30ch; line-height: 1.8; } .kouzina__captions b { display: block; } .kouzina__captions i { display: none; } }
+@media (max-aspect-ratio: 1/1) { .kouzina__shots img { object-position: 40% 50%; } }
+
+/* ── 05 Full menu ──────────────────────────────────── */
 .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: clamp(40px, 6vw, 72px) 0 40px; }
 .tab { appearance: none; border: 1px solid var(--line); background: transparent; color: var(--cream-dim); padding: 10px 18px; border-radius: 999px; font: 500 14px var(--sans); cursor: pointer; transition: all .35s var(--ease); }
 .tab:hover { color: var(--cream); border-color: rgba(241, 232, 214, .35); }
@@ -275,7 +310,7 @@ h1, h2, h3, p { margin: 0; }
 .note { color: var(--cream-dim); margin-top: 40px; font-size: 10px; line-height: 1.8; }
 @media (max-width: 760px) { .tabpanel { grid-template-columns: 1fr; } }
 
-/* ── 05 Reservations ────────────────────────────────── */
+/* ── 06 Reservations ────────────────────────────────── */
 .kratisi { background: linear-gradient(180deg, var(--ink), var(--ink-2)); }
 .kratisi__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: start; }
 .kratisi__info .lead { color: var(--cream-dim); margin-top: 28px; }

@@ -28,8 +28,9 @@
       <a href="#akti"><span class="mono">01</span> Η Ακτή</a>
       <a href="#menou"><span class="mono">02</span> Μενού</a>
       <a href="#ypografes"><span class="mono">03</span> Υπογραφές</a>
-      <a href="#katalogos"><span class="mono">04</span> Κατάλογος</a>
-      <a href="#kratisi"><span class="mono">05</span> Κρατήσεις</a>
+      <a href="#kouzina"><span class="mono">04</span> Κουζίνα</a>
+      <a href="#katalogos"><span class="mono">05</span> Κατάλογος</a>
+      <a href="#kratisi"><span class="mono">06</span> Κρατήσεις</a>
     </nav>
     <a href="tel:+302235042080" class="btn btn--gold nav__cta" aria-label="Κλήση για κράτηση στο 22350 42080">22350 42080</a>
   </header>
@@ -98,33 +99,10 @@
           <div class="menu3d__glow" aria-hidden="true"></div>
           <div class="plinth" aria-hidden="true"></div>
           <div class="book-rig">
-            <div class="book" aria-label="Μενού της Στίλβης σε μορφή βιβλίου">
-              <div class="page page--base" data-page="base"></div>
-              <div class="leaf" data-leaf="0">
-                <div class="face face--front cover">
-                  <div class="cover__frame">
-                    <svg class="cover__waves" viewBox="0 0 120 30" aria-hidden="true"><path d="M0 8 Q15 0 30 8 T60 8 T90 8 T120 8" /><path d="M0 16 Q15 8 30 16 T60 16 T90 16 T120 16" /><path d="M0 24 Q15 16 30 24 T60 24 T90 24 T120 24" /></svg>
-                    <span class="cover__ribbon mono">seaside restaurant</span>
-                    <span class="cover__word">στίλβη</span>
-                    <span class="cover__est mono">Καμμένα Βούρλα</span>
-                  </div>
-                </div>
-                <div class="face face--back page" data-page="welcome"></div>
-              </div>
-              <div class="leaf" data-leaf="1">
-                <div class="face face--front page" data-page="orektika"></div>
-                <div class="face face--back page" data-page="thalassa"></div>
-              </div>
-              <div class="leaf" data-leaf="2">
-                <div class="face face--front page" data-page="sxara"></div>
-                <div class="face face--back page" data-page="kyriws"></div>
-              </div>
-            </div>
+            <div class="book" aria-label="Το μενού της Στίλβης σε μορφή βιβλίου"></div>
           </div>
         </div>
-        <div class="menu3d__chapters mono" aria-hidden="true">
-          <span>Εξώφυλλο</span><span>Ορεκτικά</span><span>Θάλασσα & Σχάρα</span><span>Κυρίως & Γλυκά</span>
-        </div>
+        <div class="menu3d__chapters mono" aria-hidden="true"></div>
       </div>
     </section>
 
@@ -141,10 +119,35 @@
       </div>
     </section>
 
-    <!-- 04 · ΚΑΤΑΛΟΓΟΣ -->
+    <!-- 04 · Η ΚΟΥΖΙΝΑ (cinematic shots) -->
+    <section class="kouzina" id="kouzina" data-label="Η Κουζίνα">
+      <div class="kouzina__pin">
+        <div class="kouzina__shots">
+          <img src="/img/kitchen-grill.webp" alt="Μπριζόλα στα κάρβουνα με φλόγες" class="is-on" />
+          <img src="/img/kitchen-calamari.webp" alt="Καλαμαράκια με λεμόνι" />
+          <img src="/img/kitchen-rose.webp" alt="Ροζέ κρασί στη βεράντα δίπλα στη θάλασσα" />
+        </div>
+        <canvas class="kouzina__canvas" aria-hidden="true"></canvas>
+        <div class="hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <p class="kicker mono kouzina__kicker">// 04. Η ΚΟΥΖΙΝΑ</p>
+        <div class="kouzina__center">
+          <p class="kouzina__word">στίλβη</p>
+          <span class="kouzina__rule" aria-hidden="true"></span>
+          <div class="kouzina__captions mono" aria-live="polite">
+            <span class="is-on"><b>Στα κάρβουνα</b><i> · </i>σταβλίσιες μπριζόλες στη φλόγα</span>
+            <span><b>Από τη θάλασσα</b><i> · </i>καλαμαράκια, λεμόνι, αλάτι</span>
+            <span><b>Στο ποτήρι</b><i> · </i>ροζέ από τη Φθιώτιδα, με θέα τον κόλπο</span>
+          </div>
+        </div>
+        <div class="kouzina__count mono" aria-hidden="true"><b>01</b> / 03</div>
+        <div class="kouzina__bar" aria-hidden="true"><span></span></div>
+      </div>
+    </section>
+
+    <!-- 05 · ΚΑΤΑΛΟΓΟΣ -->
     <section class="katalogos section" id="katalogos" data-label="Κατάλογος">
       <div class="wrap">
-        <p class="kicker mono">// 04. Ο ΚΑΤΑΛΟΓΟΣ</p>
+        <p class="kicker mono">// 05. Ο ΚΑΤΑΛΟΓΟΣ</p>
         <h2 class="display split">Όλο το μενού, με μια&nbsp;ματιά.</h2>
         <div class="tabs" role="tablist" aria-label="Κατηγορίες μενού"></div>
         <div class="tabpanels"></div>
@@ -152,11 +155,11 @@
       </div>
     </section>
 
-    <!-- 05 · ΚΡΑΤΗΣΕΙΣ -->
+    <!-- 06 · ΚΡΑΤΗΣΕΙΣ -->
     <section class="kratisi section" id="kratisi" data-label="Κρατήσεις">
       <div class="wrap kratisi__grid">
         <div class="kratisi__info">
-          <p class="kicker mono">// 05. ΚΡΑΤΗΣΕΙΣ</p>
+          <p class="kicker mono">// 06. ΚΡΑΤΗΣΕΙΣ</p>
           <h2 class="display split">Κρατήστε το τραπέζι σας δίπλα στο&nbsp;κύμα.</h2>
           <p class="lead fade-up">Οι κρατήσεις γίνονται μόνο τηλεφωνικά. Για τα τραπέζια της πρώτης γραμμής στο ηλιοβασίλεμα, καλέστε μας νωρίτερα.</p>
           <ul class="info fade-up">
@@ -166,7 +169,7 @@
             <li><span class="mono">Οδηγίες</span><a href="https://www.google.com/maps/search/?api=1&amp;query=%CE%A3%CF%84%CE%AF%CE%BB%CE%B2%CE%B7%20seaside%20restaurant%20%CE%9A%CE%B1%CE%BC%CE%BC%CE%AD%CE%BD%CE%B1%20%CE%92%CE%BF%CF%8D%CF%81%CE%BB%CE%B1" target="_blank" rel="noopener">Άνοιγμα στους Χάρτες Google ↗</a></li>
           </ul>
           <figure class="kratisi__img reveal-img">
-            <img src="/img/terrace-lanterns.webp" alt="Η βεράντα της Στίλβης με αναμμένα φανάρια το σούρουπο" loading="lazy" />
+            <img src="/img/sunset-deck.webp" alt="Το κατάστρωμα της Στίλβης δίπλα στο κύμα στο σούρουπο" loading="lazy" style="object-position: 50% 62%" />
           </figure>
         </div>
         <div class="call fade-up">
@@ -197,7 +200,7 @@
   <div class="scrubber" aria-hidden="true">
     <span class="scrubber__brand mono">ΣΤΙΛΒΗ / SEASIDE</span>
     <div class="scrubber__track"><span class="scrubber__dot"></span></div>
-    <span class="scrubber__label mono"><b class="scrubber__idx">00</b> / 05 · <span class="scrubber__name">Αρχή</span></span>
+    <span class="scrubber__label mono"><b class="scrubber__idx">00</b> / 06 · <span class="scrubber__name">Αρχή</span></span>
   </div>
 
   <script type="module" src="/src/main.js"></script>
