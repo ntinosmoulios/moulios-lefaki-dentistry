@@ -12,7 +12,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import Lenis from 'lenis'
-import { createSea } from './sea.js'
+import { createHeroScene } from './hero-scene.js'
 import { menu, wines, findItem, dishCount, wineCount } from './menu-data.js'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
@@ -73,7 +73,6 @@ const signatures = [
   { img: 'greek-salad-rose', tag: 'Σαλάτες', item: 'Χωριάτικη σαλάτα', desc: 'Με κρητικό κρίθινο παξιμάδι, φέτα Π.Ο.Π. και ρίγανη. Καλύτερη με ένα δροσερό ροζέ.' },
   { img: 'salad-ham', tag: 'Σαλάτες', item: 'Δροσερή σαλάτα', desc: 'Τραγανό μπέικον στη σχάρα πάνω σε δροσερά φύλλα με dressing γιαουρτιού.' },
   { img: 'salad-stilvi', tag: 'Σαλάτες', name: 'Σαλάτες εποχής', price: 'από 9,50', desc: 'Επτά δημιουργικές σαλάτες, από την Αγροτική με ξινότυρο Μυκόνου ως τη Mesclun με τραγανό κοτόπουλο.' },
-  { img: 'calamari-2', tag: 'Από τη θάλασσα', name: 'Θαλασσινά για το τραπέζι', price: 'από 9,00', desc: 'Γαρίδες, μύδια, γαύρος, σαρδέλα και ψάρια της ημέρας, για να μοιραστούν με θέα τον κόλπο.' },
 ]
 $('.sig__track').innerHTML = signatures.map((s) => {
   const it = s.item ? findItem(s.item) : { name: s.name, price: s.price }
@@ -86,18 +85,6 @@ $('.sig__track').innerHTML = signatures.map((s) => {
     <p class="dish__desc">${esc(s.desc)}</p>
   </article>`
 }).join('')
-
-const ringPhotos = [
-  ['sunset-deck', 'Το κατάστρωμα της Στίλβης στο σούρουπο'],
-  ['terrace-lanterns', 'Φανάρια στη βεράντα'],
-  ['sunset-table', 'Τραπέζι στο ηλιοβασίλεμα'],
-  ['terrace-night', 'Η βεράντα το βράδυ'],
-  ['menu-sunset', 'Ο κατάλογος της Στίλβης με θέα τον κόλπο'],
-  ['sea-view', 'Θέα στη θάλασσα'],
-  ['greek-salad-rose', 'Χωριάτικη και ροζέ κρασί'],
-  ['interior', 'Ο εσωτερικός χώρος'],
-]
-$('.ring').innerHTML = ringPhotos.map(([src, alt]) => `<figure class="ring__panel" style="margin:0"><img src="/img/${src}.webp" alt="${alt}" loading="lazy" /></figure>`).join('')
 
 // full menu tabs
 const tabs = [...menu.map((c) => ({ id: c.id, title: c.title })), { id: 'krasia', title: 'Κρασιά' }]
@@ -142,8 +129,8 @@ if (lenis) {
   lenis.stop()
 }
 
-const sea = createSea($('.hero__sea'))
-gsap.ticker.add(sea.tick)
+const hero = createHeroScene($('.hero__sea'), $('.hero__img'))
+gsap.ticker.add(hero.tick)
 
 /* ── Loader ──────────────────────────────────────────── */
 
@@ -209,20 +196,13 @@ $$('.stat__num').forEach((el) => {
   })
 })
 
-/* ── Hero: sunset → night ────────────────────────────── */
+/* ── Hero: dolly into the night scene ─────────────────── */
 
-const phase = $('.hero__phase')
-if (reduceMotion) {
-  sea.setProgress(0.25)
-} else {
-  const heroState = { p: 0 }
-  gsap.timeline({
-    scrollTrigger: {
-      trigger: '.hero', start: 'top top', end: '+=130%', pin: true, scrub: 1,
-      onUpdate: (st) => { phase.textContent = st.progress > 0.5 ? 'ΦΑΝΑΡΙΑ ΑΝΑΜΜΕΝΑ' : 'ΗΛΙΟΒΑΣΙΛΕΜΑ' },
-    },
-  })
-    .to(heroState, { p: 1, ease: 'none', duration: 1, onUpdate: () => sea.setProgress(heroState.p) }, 0)
+if (!reduceMotion) {
+  const heroState = { z: 0 }
+  gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=110%', pin: true, scrub: 1 } })
+    .to(heroState, { z: 1, ease: 'none', duration: 1, onUpdate: () => hero.setZoom(heroState.z) }, 0)
+    .to('.hero__img', { scale: 1.2, ease: 'none', duration: 1 }, 0)
     .to('.hero__title', { scale: 0.62, yPercent: -26, ease: 'power1.inOut', duration: 0.7 }, 0)
     .to(['.hero__eyebrow', '.hero__cue'], { opacity: 0, duration: 0.25 }, 0)
     .to('.hero__lead', { yPercent: -160, duration: 0.7, ease: 'power1.inOut' }, 0)
@@ -305,36 +285,6 @@ if (reduceMotion) {
   window.addEventListener('resize', coverflow)
 }
 
-/* ── Evening ring ────────────────────────────────────── */
-
-const ring = $('.ring')
-const panels = $$('.ring__panel')
-const step = 360 / panels.length
-const ringState = { r: 0 }
-let radius = 0
-const layoutRing = () => {
-  const w = ring.offsetWidth
-  radius = Math.round(w / 2 / Math.tan(Math.PI / panels.length) + w * 0.12)
-  panels.forEach((p, i) => { p.style.transform = `rotateY(${i * step}deg) translateZ(${radius}px)` })
-  applyRing()
-}
-const applyRing = () => {
-  ring.style.transform = `translateZ(${-radius}px) rotateX(-4deg) rotateY(${ringState.r}deg)`
-  panels.forEach((p, i) => {
-    const ang = ((i * step + ringState.r) % 360 + 360) % 360
-    const facing = Math.cos((ang * Math.PI) / 180)
-    p.style.setProperty('--dim', ((1 - facing) / 2 * 0.85).toFixed(3))
-  })
-}
-layoutRing()
-window.addEventListener('resize', layoutRing)
-if (!reduceMotion) {
-  gsap.to(ringState, {
-    r: -(360 - step), ease: 'none', onUpdate: applyRing,
-    scrollTrigger: { trigger: '.vradi__pin', start: 'top top', end: '+=260%', pin: true, scrub: 1 },
-  })
-}
-
 /* ── Nav, scrubber, section labels ──────────────────── */
 
 const nav = $('.nav')
@@ -359,13 +309,22 @@ $$('[data-label]').forEach((sec, i) => {
 })
 ScrollTrigger.create({ trigger: '.hero', start: 'top top', end: 'bottom 55%', onEnterBack: () => { idxEl.textContent = '00'; nameEl.textContent = 'Αρχή' } })
 
-/* ── Jotform auto-height ─────────────────────────────── */
+/* ── Copy phone number ───────────────────────────────── */
 
-if ($('#JotFormIFrame-263015935846059')) {
-  const jf = document.createElement('script')
-  jf.src = 'https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js'
-  jf.onload = () => window.jotformEmbedHandler?.("iframe[id='JotFormIFrame-263015935846059']", 'https://form.jotform.com/')
-  document.body.appendChild(jf)
-}
+const copyBtn = $('#copy-phone')
+copyBtn?.addEventListener('click', async () => {
+  const label = copyBtn.textContent
+  try {
+    await navigator.clipboard.writeText(copyBtn.dataset.phone)
+    copyBtn.textContent = 'Αντιγράφηκε'
+  } catch {
+    const range = document.createRange()
+    range.selectNodeContents($('.call__num'))
+    getSelection().removeAllRanges()
+    getSelection().addRange(range)
+    copyBtn.textContent = 'Επιλέχθηκε'
+  }
+  setTimeout(() => { copyBtn.textContent = label }, 1800)
+})
 
 window.addEventListener('load', () => ScrollTrigger.refresh())
