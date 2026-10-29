@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Στίλβη · Seaside Restaurant · Καμμένα Βούρλα</title>
+  <meta name="description" content="Στίλβη Seaside Restaurant στα Καμμένα Βούρλα. Θαλασσινά, μπριζόλες στη σχάρα και ελληνικά κρασιά, με τραπέζια δίπλα στο κύμα και βραδιές κάτω από τα φανάρια." />
+  <meta name="theme-color" content="#070b14" />
+  <meta property="og:title" content="Στίλβη · Seaside Restaurant" />
+  <meta property="og:description" content="Τραπέζια δίπλα στο κύμα, στα Καμμένα Βούρλα." />
+  <meta property="og:image" content="/img/sunset-table.webp" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div class="loader" aria-hidden="true">
+    <div class="loader__mark">στίλβη</div>
+    <div class="loader__bar"><span></span></div>
+    <div class="loader__count mono">000</div>
+  </div>
+
+  <header class="nav">
+    <a href="#top" class="nav__brand" aria-label="Στίλβη, αρχή σελίδας">
+      <span class="nav__word">στίλβη</span>
+      <span class="nav__sub mono">seaside restaurant</span>
+    </a>
+    <nav class="nav__links" aria-label="Κύρια πλοήγηση">
+      <a href="#akti"><span class="mono">01</span> Η Ακτή</a>
+      <a href="#menou"><span class="mono">02</span> Μενού</a>
+      <a href="#ypografes"><span class="mono">03</span> Υπογραφές</a>
+      <a href="#vradi"><span class="mono">04</span> Το Βράδυ</a>
+      <a href="#katalogos"><span class="mono">05</span> Κατάλογος</a>
+    </nav>
+    <a href="#kratisi" class="btn btn--gold nav__cta">Κράτηση</a>
+  </header>
+
+  <main>
+    <!-- 00 · HERO -->
+    <section class="hero" id="top">
+      <canvas class="hero__sea" aria-hidden="true"></canvas>
+      <div class="hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="hero__meta mono" aria-hidden="true">
+        <span>38°46′N · 22°47′E</span>
+        <span class="hero__phase">ΗΛΙΟΒΑΣΙΛΕΜΑ</span>
+      </div>
+      <div class="hero__inner">
+        <p class="eyebrow mono hero__eyebrow">Καμμένα Βούρλα · Φθιώτιδα</p>
+        <h1 class="hero__title" aria-label="Στίλβη">
+          <span class="hero__word">στίλβη</span>
+        </h1>
+        <p class="hero__lead">Seaside Restaurant</p>
+        <p class="hero__night">Όταν πέφτει ο ήλιος, ανάβουν τα φανάρια.<br />Θαλασσινά, μπριζόλες και κρασί, δίπλα στο κύμα.</p>
+        <div class="hero__ctas">
+          <a href="#kratisi" class="btn btn--gold">Κλείστε τραπέζι</a>
+          <a href="#menou" class="btn btn--ghost">Δείτε το μενού</a>
+        </div>
+      </div>
+      <div class="hero__cue mono" aria-hidden="true">Κυλήστε · ο ήλιος δύει <span></span></div>
+    </section>
+
+    <!-- 01 · Η ΑΚΤΗ -->
+    <section class="akti section" id="akti" data-label="Η Ακτή">
+      <div class="wrap">
+        <p class="kicker mono">// 01. Η ΑΚΤΗ</p>
+        <h2 class="display split">Τραπέζια πάνω στο κύμα. Πιάτα με&nbsp;χαρακτήρα.</h2>
+        <div class="akti__grid">
+          <figure class="akti__img akti__img--a reveal-img">
+            <img src="/img/sunset-table.webp" alt="Τραπέζι της Στίλβης με θέα τη θάλασσα στο ηλιοβασίλεμα" loading="lazy" />
+          </figure>
+          <div class="akti__text">
+            <p class="lead fade-up">Στην παραλία των Καμμένων Βούρλων, λίγα βήματα από το νερό, η Στίλβη στρώνει τα τραπέζια της κάτω από τα πεύκα. Θέα στον κόλπο και στα βουνά της Εύβοιας απέναντι.</p>
+            <p class="fade-up">Φρέσκα θαλασσινά, σταβλίσιες μπριζόλες στη σχάρα, δημιουργικές σαλάτες και ετικέτες από αμπελώνες της Φθιώτιδας και όλης της Ελλάδας. Μεσημέρι με το μπλε του Ευβοϊκού, βράδυ με τα φανάρια αναμμένα.</p>
+            <figure class="akti__img akti__img--b reveal-img">
+              <img src="/img/beach-day.webp" alt="Θέα στην παραλία από τη βεράντα της Στίλβης μέρα" loading="lazy" />
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats wrap" aria-label="Η Στίλβη σε αριθμούς">
+        <div class="stat"><span class="stat__num" data-count="0">0</span><span class="stat__unit">μ.</span><p class="mono">Απόσταση από το κύμα</p></div>
+        <div class="stat"><span class="stat__num" data-count="56">0</span><p class="mono">Πιάτα στο μενού</p></div>
+        <div class="stat"><span class="stat__num" data-count="10">0</span><p class="mono">Ετικέτες κρασιού</p></div>
+        <div class="stat"><span class="stat__num" data-count="1">0</span><p class="mono">Ηλιοβασίλεμα, κάθε βράδυ</p></div>
+      </div>
+    </section>
+
+    <!-- 02 · ΤΟ ΜΕΝΟΥ (3D βιβλίο) -->
+    <section class="menu3d" id="menou" data-label="Μενού">
+      <div class="menu3d__pin">
+        <div class="menu3d__head wrap">
+          <p class="kicker mono">// 02. ΤΟ ΜΕΝΟΥ</p>
+          <p class="menu3d__hint mono">Κυλήστε για να ξεφυλλίσετε</p>
+        </div>
+        <div class="menu3d__stage">
+          <div class="menu3d__glow" aria-hidden="true"></div>
+          <div class="plinth" aria-hidden="true"></div>
+          <div class="book-rig">
+            <div class="book" aria-label="Μενού της Στίλβης σε μορφή βιβλίου">
+              <div class="page page--base" data-page="base"></div>
+              <div class="leaf" data-leaf="0">
+                <div class="face face--front cover">
+                  <div class="cover__frame">
+                    <svg class="cover__waves" viewBox="0 0 120 30" aria-hidden="true"><path d="M0 8 Q15 0 30 8 T60 8 T90 8 T120 8" /><path d="M0 16 Q15 8 30 16 T60 16 T90 16 T120 16" /><path d="M0 24 Q15 16 30 24 T60 24 T90 24 T120 24" /></svg>
+                    <span class="cover__ribbon mono">seaside restaurant</span>
+                    <span class="cover__word">στίλβη</span>
+                    <span class="cover__est mono">Καμμένα Βούρλα</span>
+                  </div>
+                </div>
+                <div class="face face--back page" data-page="welcome"></div>
+              </div>
+              <div class="leaf" data-leaf="1">
+                <div class="face face--front page" data-page="orektika"></div>
+                <div class="face face--back page" data-page="thalassa"></div>
+              </div>
+              <div class="leaf" data-leaf="2">
+                <div class="face face--front page" data-page="sxara"></div>
+                <div class="face face--back page" data-page="kyriws"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="menu3d__chapters mono" aria-hidden="true">
+          <span>Εξώφυλλο</span><span>Ορεκτικά</span><span>Θάλασσα & Σχάρα</span><span>Κυρίως & Γλυκά</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 · ΥΠΟΓΡΑΦΕΣ (coverflow) -->
+    <section class="sig" id="ypografes" data-label="Υπογραφές">
+      <div class="sig__pin">
+        <div class="wrap sig__head">
+          <p class="kicker mono">// 03. ΟΙ ΥΠΟΓΡΑΦΕΣ ΜΑΣ</p>
+          <h2 class="display split">Από τη θάλασσα και τη&nbsp;σχάρα.</h2>
+        </div>
+        <div class="sig__viewport">
+          <div class="sig__track"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 · ΤΟ ΒΡΑΔΥ (3D ring) -->
+    <section class="vradi" id="vradi" data-label="Το Βράδυ">
+      <div class="vradi__pin">
+        <div class="vradi__head wrap">
+          <p class="kicker mono">// 04. ΤΟ ΒΡΑΔΥ</p>
+          <h2 class="display split">Όταν σβήνει ο ήλιος, ανάβει η&nbsp;Στίλβη.</h2>
+        </div>
+        <div class="ring-stage">
+          <div class="ring"></div>
+        </div>
+        <p class="vradi__foot mono">Φανάρια στα πεύκα · Ροζέ στο ποτήρι · Το κύμα δύο βήματα μακριά</p>
+      </div>
+    </section>
+
+    <!-- 05 · ΚΑΤΑΛΟΓΟΣ -->
+    <section class="katalogos section" id="katalogos" data-label="Κατάλογος">
+      <div class="wrap">
+        <p class="kicker mono">// 05. Ο ΚΑΤΑΛΟΓΟΣ</p>
+        <h2 class="display split">Όλο το μενού, με μια&nbsp;ματιά.</h2>
+        <div class="tabs" role="tablist" aria-label="Κατηγορίες μενού"></div>
+        <div class="tabpanels"></div>
+        <p class="note mono">* Κατεψυγμένο · Οι τιμές είναι σε ευρώ και ενδέχεται να μεταβληθούν. Ενημερώστε μας για τυχόν αλλεργίες.</p>
+      </div>
+    </section>
+
+    <!-- 06 · ΚΡΑΤΗΣΗ -->
+    <section class="kratisi section" id="kratisi" data-label="Κράτηση">
+      <div class="wrap kratisi__grid">
+        <div class="kratisi__info">
+          <p class="kicker mono">// 06. ΚΡΑΤΗΣΗ</p>
+          <h2 class="display split">Κρατήστε το τραπέζι σας δίπλα στο&nbsp;κύμα.</h2>
+          <p class="lead fade-up">Στείλτε μας το αίτημά σας και θα επικοινωνήσουμε μαζί σας για επιβεβαίωση. Για τα τραπέζια της πρώτης γραμμής στο ηλιοβασίλεμα, προτιμήστε να κλείσετε νωρίτερα.</p>
+          <ul class="info fade-up">
+            <li><span class="mono">Τοποθεσία</span>Παραλία Καμμένων Βούρλων, Φθιώτιδα</li>
+            <li><span class="mono">Ώρες</span>Μεσημεριανό &amp; δείπνο</li>
+            <li><span class="mono">Οδηγίες</span><a href="https://www.google.com/maps/search/?api=1&amp;query=%CE%A3%CF%84%CE%AF%CE%BB%CE%B2%CE%B7%20seaside%20restaurant%20%CE%9A%CE%B1%CE%BC%CE%BC%CE%AD%CE%BD%CE%B1%20%CE%92%CE%BF%CF%8D%CF%81%CE%BB%CE%B1" target="_blank" rel="noopener">Άνοιγμα στους Χάρτες Google ↗</a></li>
+          </ul>
+          <figure class="kratisi__img reveal-img">
+            <img src="/img/terrace-lanterns.webp" alt="Η βεράντα της Στίλβης με αναμμένα φανάρια το σούρουπο" loading="lazy" />
+          </figure>
+        </div>
+        <div class="kratisi__form fade-up">
+          <iframe id="JotFormIFrame-263015935846059" title="Κράτηση τραπεζιού στη Στίλβη" src="https://form.jotform.com/263015935846059" loading="lazy" allow="geolocation; microphone; camera; fullscreen" scrolling="no"></iframe>
+          <a class="kratisi__fallback mono" href="https://form.jotform.com/263015935846059" target="_blank" rel="noopener">Η φόρμα δεν φορτώνει; Ανοίξτε τη σε νέα καρτέλα ↗</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div class="footer__word">στίλβη</div>
+      <p class="footer__tag">Τα λέμε στο τραπέζι.</p>
+      <div class="footer__row mono">
+        <span>Seaside Restaurant · Καμμένα Βούρλα</span>
+        <span>© <span class="year"></span> Στίλβη</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="scrubber" aria-hidden="true">
+    <span class="scrubber__brand mono">ΣΤΙΛΒΗ / SEASIDE</span>
+    <div class="scrubber__track"><span class="scrubber__dot"></span></div>
+    <span class="scrubber__label mono"><b class="scrubber__idx">00</b> / 06 · <span class="scrubber__name">Αρχή</span></span>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
