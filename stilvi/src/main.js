@@ -361,9 +361,11 @@ ScrollTrigger.create({ trigger: '.hero', start: 'top top', end: 'bottom 55%', on
 
 /* ── Jotform auto-height ─────────────────────────────── */
 
-const jf = document.createElement('script')
-jf.src = 'https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js'
-jf.onload = () => window.jotformEmbedHandler?.("iframe[id='JotFormIFrame-263015935846059']", 'https://form.jotform.com/')
-document.body.appendChild(jf)
+if ($('#JotFormIFrame-263015935846059')) {
+  const jf = document.createElement('script')
+  jf.src = 'https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js'
+  jf.onload = () => window.jotformEmbedHandler?.("iframe[id='JotFormIFrame-263015935846059']", 'https://form.jotform.com/')
+  document.body.appendChild(jf)
+}
 
 window.addEventListener('load', () => ScrollTrigger.refresh())
