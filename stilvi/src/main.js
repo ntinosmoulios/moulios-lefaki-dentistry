@@ -13,7 +13,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import Lenis from 'lenis'
 import { createHeroScene } from './hero-scene.js'
-import { createKitchenScene } from './kitchen-scene.js'
 import { menu, wines, findItem, dishCount, wineCount } from './menu-data.js'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
@@ -288,32 +287,14 @@ if (reduceMotion) {
   window.addEventListener('resize', coverflow)
 }
 
-/* ── Kitchen shots ───────────────────────────────────── */
+/* ── Interlude: slow push-in on the rosé ────────────── */
 
-const shotImgs = $$('.kouzina__shots img')
-const captions = $$('.kouzina__captions span')
-const countEl = $('.kouzina__count b')
-const kitchen = reduceMotion ? null : createKitchenScene($('.kouzina__canvas'), shotImgs)
-if (kitchen) gsap.ticker.add(kitchen.tick)
-let activeShot = 0
-const showShot = (i) => {
-  if (i === activeShot) return
-  activeShot = i
-  captions.forEach((c, k) => c.classList.toggle('is-on', k === i))
-  shotImgs.forEach((img, k) => img.classList.toggle('is-on', k === i))
-  countEl.textContent = String(i + 1).padStart(2, '0')
-}
 if (!reduceMotion) {
-  const shotState = { s: 0 }
-  const last = shotImgs.length - 1
-  const tl = gsap.timeline({
-    scrollTrigger: { trigger: '.kouzina__pin', start: 'top top', end: `+=${110 * shotImgs.length}%`, pin: true, scrub: 1 },
-    onUpdate: () => { kitchen?.setShot(shotState.s); showShot(Math.round(shotState.s)) },
+  gsap.fromTo('.glass__frame img', { scale: 1.12 }, {
+    scale: 1, ease: 'none',
+    scrollTrigger: { trigger: '.glass', start: 'top bottom', end: 'bottom top', scrub: true },
   })
-  tl.to({}, { duration: 0.35 })
-  for (let k = 1; k <= last; k++) tl.to(shotState, { s: k, duration: 1, ease: 'power1.inOut' }).to({}, { duration: 0.45 })
-  tl.fromTo('.kouzina__bar span', { height: '0%' }, { height: '100%', ease: 'none', duration: tl.duration() }, 0)
-  gsap.from('.kouzina__word', { opacity: 0, y: 40, filter: 'blur(12px)', duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.kouzina', start: 'top 60%', once: true } })
+  gsap.from('.glass__word', { opacity: 0, y: 40, filter: 'blur(12px)', duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.glass', start: 'top 60%', once: true } })
 }
 
 /* ── Nav, scrubber, section labels ──────────────────── */

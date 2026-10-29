@@ -9,6 +9,18 @@
   <meta property="og:title" content="Στίλβη · Seaside Restaurant" />
   <meta property="og:description" content="Τραπέζια δίπλα στο κύμα, στα Καμμένα Βούρλα." />
   <meta property="og:image" content="/img/sunset-table.webp" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Στίλβη Seaside Restaurant",
+    "telephone": "+30 2235042080",
+    "servesCuisine": ["Ελληνική", "Θαλασσινά", "Σχάρα"],
+    "priceRange": "€€",
+    "acceptsReservations": "Τηλεφωνικά",
+    "address": { "@type": "PostalAddress", "addressLocality": "Καμμένα Βούρλα", "addressRegion": "Φθιώτιδα", "postalCode": "35008", "addressCountry": "GR" }
+  }
+  </script>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
@@ -28,9 +40,8 @@
       <a href="#akti"><span class="mono">01</span> Η Ακτή</a>
       <a href="#menou"><span class="mono">02</span> Μενού</a>
       <a href="#ypografes"><span class="mono">03</span> Υπογραφές</a>
-      <a href="#kouzina"><span class="mono">04</span> Κουζίνα</a>
-      <a href="#katalogos"><span class="mono">05</span> Κατάλογος</a>
-      <a href="#kratisi"><span class="mono">06</span> Κρατήσεις</a>
+      <a href="#katalogos"><span class="mono">04</span> Κατάλογος</a>
+      <a href="#kratisi"><span class="mono">05</span> Κρατήσεις</a>
     </nav>
     <a href="tel:+302235042080" class="btn btn--gold nav__cta" aria-label="Κλήση για κράτηση στο 22350 42080">22350 42080</a>
   </header>
@@ -119,35 +130,23 @@
       </div>
     </section>
 
-    <!-- 04 · Η ΚΟΥΖΙΝΑ (cinematic shots) -->
-    <section class="kouzina" id="kouzina" data-label="Η Κουζίνα">
-      <div class="kouzina__pin">
-        <div class="kouzina__shots">
-          <img src="/img/kitchen-grill.webp" alt="Μπριζόλα στα κάρβουνα με φλόγες" class="is-on" />
-          <img src="/img/kitchen-calamari.webp" alt="Καλαμαράκια με λεμόνι" />
-          <img src="/img/kitchen-rose.webp" alt="Ροζέ κρασί στη βεράντα δίπλα στη θάλασσα" />
-        </div>
-        <canvas class="kouzina__canvas" aria-hidden="true"></canvas>
-        <div class="hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-        <p class="kicker mono kouzina__kicker">// 04. Η ΚΟΥΖΙΝΑ</p>
-        <div class="kouzina__center">
-          <p class="kouzina__word">στίλβη</p>
-          <span class="kouzina__rule" aria-hidden="true"></span>
-          <div class="kouzina__captions mono" aria-live="polite">
-            <span class="is-on"><b>Στα κάρβουνα</b><i> · </i>σταβλίσιες μπριζόλες στη φλόγα</span>
-            <span><b>Από τη θάλασσα</b><i> · </i>καλαμαράκια, λεμόνι, αλάτι</span>
-            <span><b>Στο ποτήρι</b><i> · </i>ροζέ από τη Φθιώτιδα, με θέα τον κόλπο</span>
-          </div>
-        </div>
-        <div class="kouzina__count mono" aria-hidden="true"><b>01</b> / 03</div>
-        <div class="kouzina__bar" aria-hidden="true"><span></span></div>
+    <!-- Interlude · rosé on the deck -->
+    <section class="glass" aria-label="Ροζέ στη βεράντα">
+      <div class="glass__frame">
+        <img src="/img/kitchen-rose.webp" alt="Ροζέ κρασί στη βεράντα δίπλα στη θάλασσα" loading="lazy" />
+      </div>
+      <div class="hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="glass__center">
+        <p class="glass__word">στίλβη</p>
+        <span class="glass__rule" aria-hidden="true"></span>
+        <p class="glass__caption mono"><b>Στο ποτήρι</b><i> · </i>ροζέ από τη Φθιώτιδα, με θέα τον κόλπο</p>
       </div>
     </section>
 
-    <!-- 05 · ΚΑΤΑΛΟΓΟΣ -->
+    <!-- 04 · ΚΑΤΑΛΟΓΟΣ -->
     <section class="katalogos section" id="katalogos" data-label="Κατάλογος">
       <div class="wrap">
-        <p class="kicker mono">// 05. Ο ΚΑΤΑΛΟΓΟΣ</p>
+        <p class="kicker mono">// 04. Ο ΚΑΤΑΛΟΓΟΣ</p>
         <h2 class="display split">Όλο το μενού, με μια&nbsp;ματιά.</h2>
         <div class="tabs" role="tablist" aria-label="Κατηγορίες μενού"></div>
         <div class="tabpanels"></div>
@@ -155,11 +154,11 @@
       </div>
     </section>
 
-    <!-- 06 · ΚΡΑΤΗΣΕΙΣ -->
+    <!-- 05 · ΚΡΑΤΗΣΕΙΣ -->
     <section class="kratisi section" id="kratisi" data-label="Κρατήσεις">
       <div class="wrap kratisi__grid">
         <div class="kratisi__info">
-          <p class="kicker mono">// 06. ΚΡΑΤΗΣΕΙΣ</p>
+          <p class="kicker mono">// 05. ΚΡΑΤΗΣΕΙΣ</p>
           <h2 class="display split">Κρατήστε το τραπέζι σας δίπλα στο&nbsp;κύμα.</h2>
           <p class="lead fade-up">Οι κρατήσεις γίνονται μόνο τηλεφωνικά. Για τα τραπέζια της πρώτης γραμμής στο ηλιοβασίλεμα, καλέστε μας νωρίτερα.</p>
           <ul class="info fade-up">
@@ -200,7 +199,7 @@
   <div class="scrubber" aria-hidden="true">
     <span class="scrubber__brand mono">ΣΤΙΛΒΗ / SEASIDE</span>
     <div class="scrubber__track"><span class="scrubber__dot"></span></div>
-    <span class="scrubber__label mono"><b class="scrubber__idx">00</b> / 06 · <span class="scrubber__name">Αρχή</span></span>
+    <span class="scrubber__label mono"><b class="scrubber__idx">00</b> / 05 · <span class="scrubber__name">Αρχή</span></span>
   </div>
 
   <script type="module" src="/src/main.js"></script>
