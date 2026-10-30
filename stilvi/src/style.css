@@ -163,29 +163,6 @@ h1, h2, h3, p { margin: 0; }
   .stat:nth-child(n+3) { border-top: 1px solid var(--line); margin-top: 24px; }
 }
 
-/* ── Interlude: a day at Stilvi (3D fly-through) ───── */
-.walk { position: relative; --dusk: 0;
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 52%, rgb(calc(40 + var(--dusk) * 30) calc(70 - var(--dusk) * 40) calc(100 - var(--dusk) * 60) / .55), transparent 70%),
-    var(--ink); }
-.walk__pin { height: 100vh; height: 100svh; overflow: hidden; position: relative; display: flex; flex-direction: column; padding-top: 104px; }
-.walk__head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; position: relative; z-index: 2; }
-.walk__head .kicker { margin-bottom: 0; }
-.walk__clock { color: var(--cream-dim); font-size: 12px; }
-.walk__clock b { font-family: var(--serif); font-size: clamp(30px, 4vw, 48px); font-weight: 400; letter-spacing: 0; color: var(--gold-hi); margin-right: 6px; font-variant-numeric: tabular-nums; }
-.walk__stage { flex: 1; position: relative; perspective: 900px; perspective-origin: 50% 45%; overflow: hidden; }
-.walk__world { position: absolute; inset: 0; transform-style: preserve-3d; }
-.walk__shot { position: absolute; left: 50%; top: 50%; margin: 0; width: min(34vw, 420px); will-change: transform, opacity; }
-.walk__shot img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 6px; box-shadow: 0 40px 80px rgba(0, 0, 0, .6); }
-.walk__shot figcaption { margin-top: 14px; font-family: var(--serif); font-size: clamp(18px, 1.6vw, 22px); display: flex; gap: 12px; align-items: baseline; }
-.walk__shot figcaption .mono { color: var(--gold); font-size: 10px; }
-.walk__hint { text-align: center; color: var(--cream-dim); padding: 0 var(--pad) 84px; position: relative; z-index: 2; }
-@media (max-width: 700px) { .walk__shot { width: 62vw; } .walk__shot figcaption { font-size: 16px; } }
-.walk--static .walk__pin { height: auto; }
-.walk--static .walk__stage { perspective: none; }
-.walk--static .walk__world { position: static; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; padding: 40px var(--pad); }
-.walk--static .walk__shot { position: static; width: auto; transform: none !important; opacity: 1 !important; visibility: visible !important; }
-
 /* ── 02 Menu book ───────────────────────────────────── */
 .menu3d { position: relative; background: radial-gradient(ellipse at 50% 60%, #1a2236 0%, var(--ink) 65%); }
 .menu3d__pin { height: 100vh; height: 100svh; position: relative; overflow: hidden; display: flex; flex-direction: column; }

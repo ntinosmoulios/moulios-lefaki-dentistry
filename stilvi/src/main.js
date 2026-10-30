@@ -220,59 +220,6 @@ if (!reduceMotion) {
     .to('.hero__ctas', { yPercent: -20, duration: 0.7, ease: 'power1.inOut' }, 0)
 }
 
-/* ── A day at Stilvi: camera flies through the photos ── */
-
-const walkShots = [
-  ['beach-day', '12:30', 'Μεσημέρι', 'Το μπλε του Ευβοϊκού από τη βεράντα'],
-  ['greek-salad', '13:15', 'Μεσημέρι', 'Χωριάτικη με θέα το νερό'],
-  ['calamari', '14:00', 'Μεσημέρι', 'Καλαμαράκια με λεμόνι'],
-  ['sea-view', '17:40', 'Απόγευμα', 'Ο κόλπος ηρεμεί'],
-  ['greek-salad-rose', '19:10', 'Σούρουπο', 'Ροζέ και δροσιά'],
-  ['sunset-table', '20:05', 'Ηλιοβασίλεμα', 'Το τραπέζι δίπλα στο κύμα'],
-  ['steak', '21:00', 'Βράδυ', 'Μπριζόλα από τα κάρβουνα'],
-  ['sunset-deck', '21:30', 'Βράδυ', 'Τα φώτα ανάβουν στο κατάστρωμα'],
-]
-const walkWorld = $('.walk__world')
-walkWorld.innerHTML = walkShots.map(([img, time, , cap], i) => `<figure class="walk__shot" data-side="${i % 2 ? 'r' : 'l'}">
-    <img src="/img/${img}.webp" alt="${esc(cap)}" loading="lazy" />
-    <figcaption><span class="mono">${time}</span>${esc(cap)}</figcaption>
-  </figure>`).join('')
-const walkEls = $$('.walk__shot')
-const clockTime = $('.walk__clock b')
-const clockPart = $('.walk__clock span')
-const WALK_GAP = 1100
-const walkState = { z: 0 }
-const layoutWalk = () => {
-  const narrow = window.innerWidth < 700
-  const spread = narrow ? window.innerWidth * 0.09 : Math.min(window.innerWidth * 0.2, 300)
-  let current = 0
-  walkEls.forEach((el, i) => {
-    const z = -i * WALK_GAP + walkState.z - 700
-    const x = (el.dataset.side === 'r' ? 1 : -1) * spread
-    const y = (i % 3 - 1) * (narrow ? 20 : 40)
-    // fade in out of the dark far away, fade out just before passing the camera
-    const far = gsap.utils.clamp(0, 1, (z + 3600) / 1600)
-    const near = gsap.utils.clamp(0, 1, (520 - z) / 380)
-    el.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px) rotateY(${-x / spread * 8}deg)`
-    el.style.opacity = (far * near).toFixed(3)
-    el.style.visibility = far * near < 0.01 ? 'hidden' : 'visible'
-    if (z > -WALK_GAP * 0.5) current = i
-  })
-  clockTime.textContent = walkShots[current][1]
-  clockPart.textContent = walkShots[current][2]
-  $('.walk').style.setProperty('--dusk', (current / (walkShots.length - 1)).toFixed(3))
-}
-layoutWalk()
-window.addEventListener('resize', layoutWalk)
-if (reduceMotion) {
-  $('.walk').classList.add('walk--static')
-} else {
-  gsap.to(walkState, {
-    z: (walkShots.length - 1) * WALK_GAP + 1000, ease: 'none', onUpdate: layoutWalk,
-    scrollTrigger: { trigger: '.walk__pin', start: 'top top', end: `+=${walkShots.length * 70}%`, pin: true, scrub: 1 },
-  })
-}
-
 /* ── 3D menu book ────────────────────────────────────── */
 
 const leaves = $$('.leaf')
