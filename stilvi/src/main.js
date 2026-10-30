@@ -14,6 +14,7 @@ import { SplitText } from 'gsap/SplitText'
 import Lenis from 'lenis'
 import { createHeroScene } from './hero-scene.js'
 import { menu, wines, findItem, dishCount, wineCount } from './menu-data.js'
+import { applyStatic, t, isEn, trItem, trWine, catTitles, wineTitles } from './i18n.js'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
@@ -21,32 +22,33 @@ const $ = (s, el = document) => el.querySelector(s)
 const $$ = (s, el = document) => [...el.querySelectorAll(s)]
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+applyStatic()
 
 /* ── Content ─────────────────────────────────────────── */
 
 const cat = (id) => menu.find((c) => c.id === id)
-const pageRow = (it) => `<li class="pg__item"><span class="pg__name">${esc(it.name)}${it.frozen ? '*' : ''}</span><span class="pg__price">${it.price}</span>${it.desc ? `<span class="pg__desc">${esc(it.desc)}</span>` : ''}</li>`
+const pageRow = (raw) => { const it = trItem(raw); return `<li class="pg__item"><span class="pg__name">${esc(it.name)}${it.frozen ? '*' : ''}</span><span class="pg__price">${it.price}</span>${it.desc ? `<span class="pg__desc">${esc(it.desc)}</span>` : ''}</li>` }
 const pageFoot = (n) => `<div class="pg__foot"><span>στίλβη</span><span>${String(n).padStart(2, '0')}</span></div>`
 const listPage = (kicker, title, items, extra = '') => ({
   density: items.length > 8 ? 'pg--xdense' : items.length > 5 ? 'pg--dense' : '',
   html: `<p class="pg__kicker">${kicker}</p><h3 class="pg__title">${title}</h3><ul class="pg__list">${items.map(pageRow).join('')}</ul>${extra}`,
 })
-const wineRows = (g) => g.items.map((w) => ({ name: w.name, price: w.price, desc: `${w.origin} · ${w.grape}` }))
+const wineRows = (g) => g.items.map(trWine).map((w) => ({ name: w.name, price: w.price, desc: `${w.origin} · ${w.grape}` }))
 
 // Every dish and wine from the restaurant's menu, in menu order, two pages per spread.
 const bookPages = [
-  { density: '', html: `<p class="pg__kicker">Καλώς ήρθατε</p><h3 class="pg__title">Στο τραπέζι,<br/><em>δίπλα στο κύμα</em></h3><p class="pg__welcome">Μαγειρεύουμε με ό,τι φέρνει η θάλασσα και η εποχή, ψήνουμε στα κάρβουνα και διαλέγουμε κρασιά από τη Φθιώτιδα και όλη την Ελλάδα.</p><figure class="pg__photo"><img src="/img/menu-sunset.webp" alt="" loading="lazy" /></figure>` },
-  listPage('Για αρχή', '<em>Ορεκτικά</em>', cat('orektika').items.slice(0, 5)),
-  listPage('Για αρχή', '<em>Ορεκτικά</em> <small>συνέχεια</small>', cat('orektika').items.slice(5)),
-  listPage('Από τον κήπο', '<em>Σαλάτες</em>', cat('salates').items),
-  listPage('Χειροποίητα', 'Ζυμαρικά – <em>Ρύζι</em>', cat('zymarika').items),
-  listPage('Της κουζίνας', 'Κυρίως <em>Πιάτα</em>', cat('kyriws').items.slice(0, 6)),
-  listPage('Της κουζίνας', 'Κυρίως <em>Πιάτα</em> <small>συνέχεια</small>', cat('kyriws').items.slice(6)),
-  listPage('Στα κάρβουνα', 'Από τη <em>Σχάρα</em>', cat('sxara').items),
-  listPage('Από τον Ευβοϊκό', 'Από τη <em>Θάλασσα</em>', cat('thalassa').items, '<p class="pg__note">* Κατεψυγμένο</p>'),
-  listPage('Για το τέλος', '<em>Γλυκά</em>', cat('glyka').items, '<div class="pg__seal"><div><span>στίλβη</span><small>Τα λέμε στο τραπέζι</small></div></div>'),
-  listPage('Η κάβα μας', '<em>Λευκά</em> Κρασιά', wineRows(wines[0])),
-  listPage('Η κάβα μας', '<em>Ροζέ</em> &amp; <em>Κόκκινα</em>', [...wineRows(wines[1]), ...wineRows(wines[2])]),
+  { density: '', html: `<p class="pg__kicker">${t('Καλώς ήρθατε', 'Welcome')}</p><h3 class="pg__title">${t('Στο τραπέζι,<br/><em>δίπλα στο κύμα</em>', 'At the table,<br/><em>by the waves</em>')}</h3><p class="pg__welcome">${t('Μαγειρεύουμε με ό,τι φέρνει η θάλασσα και η εποχή, ψήνουμε στα κάρβουνα και διαλέγουμε κρασιά από τη Φθιώτιδα και όλη την Ελλάδα.', 'We cook with what the sea and the season bring, grill over charcoal and pick wines from Fthiotida and all over Greece.')}</p><figure class="pg__photo"><img src="/img/menu-sunset.webp" alt="" loading="lazy" /></figure>` },
+  listPage(t('Για αρχή', 'To begin'), t('<em>Ορεκτικά</em>', '<em>Starters</em>'), cat('orektika').items.slice(0, 5)),
+  listPage(t('Για αρχή', 'To begin'), t('<em>Ορεκτικά</em> <small>συνέχεια</small>', '<em>Starters</em> <small>continued</small>'), cat('orektika').items.slice(5)),
+  listPage(t('Από τον κήπο', 'From the garden'), t('<em>Σαλάτες</em>', '<em>Salads</em>'), cat('salates').items),
+  listPage(t('Χειροποίητα', 'Handmade'), t('Ζυμαρικά – <em>Ρύζι</em>', 'Pasta – <em>Rice</em>'), cat('zymarika').items),
+  listPage(t('Της κουζίνας', 'From the kitchen'), t('Κυρίως <em>Πιάτα</em>', 'Main <em>Courses</em>'), cat('kyriws').items.slice(0, 6)),
+  listPage(t('Της κουζίνας', 'From the kitchen'), t('Κυρίως <em>Πιάτα</em> <small>συνέχεια</small>', 'Main <em>Courses</em> <small>continued</small>'), cat('kyriws').items.slice(6)),
+  listPage(t('Στα κάρβουνα', 'Over charcoal'), t('Από τη <em>Σχάρα</em>', 'From the <em>Grill</em>'), cat('sxara').items),
+  listPage(t('Από τον Ευβοϊκό', 'From the gulf'), t('Από τη <em>Θάλασσα</em>', 'From the <em>Sea</em>'), cat('thalassa').items, `<p class="pg__note">${t('* Κατεψυγμένο', '* Frozen')}</p>`),
+  listPage(t('Για το τέλος', 'To finish'), t('<em>Γλυκά</em>', '<em>Desserts</em>'), cat('glyka').items, `<div class="pg__seal"><div><span>στίλβη</span><small>${t('Τα λέμε στο τραπέζι', 'See you at the table')}</small></div></div>`),
+  listPage(t('Η κάβα μας', 'Our cellar'), t('<em>Λευκά</em> Κρασιά', '<em>White</em> Wines'), wineRows(wines[0])),
+  listPage(t('Η κάβα μας', 'Our cellar'), t('<em>Ροζέ</em> &amp; <em>Κόκκινα</em>', '<em>Rosé</em> &amp; <em>Red</em>'), [...wineRows(wines[1]), ...wineRows(wines[2])]),
 ]
 const pageEl = (p, n, side) => `<div class="${side} page ${p.density}">${p.html}${pageFoot(n)}</div>`
 const corner = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M2 38V8a6 6 0 0 1 6-6h30" /><path d="M8 38V14a6 6 0 0 1 6-6h24" /><circle cx="8" cy="8" r="2.2" /><path d="M14 20c4-1 6-3 7-7" /></svg>'
@@ -58,7 +60,7 @@ const cover = `<div class="cover__board" style="--d:-1px"></div><div class="cove
       <svg class="cover__waves" viewBox="0 0 120 30" aria-hidden="true"><path d="M0 8 Q15 0 30 8 T60 8 T90 8 T120 8" /><path d="M0 16 Q15 8 30 16 T60 16 T90 16 T120 16" /><path d="M0 24 Q15 16 30 24 T60 24 T90 24 T120 24" /></svg>
       <span class="cover__ribbon mono">seaside restaurant</span>
       <span class="cover__word">στίλβη</span>
-      <span class="cover__est mono">Καμμένα Βούρλα</span>
+      <span class="cover__est mono">${t('Καμμένα Βούρλα', 'Kammena Vourla')}</span>
     </div>
   </div>`
 // leaf 0: cover / page 1; leaf k: page 2k / page 2k+1; the last page lies on the base board
@@ -74,18 +76,18 @@ for (let k = 0; k < leafCount; k++) {
   bookHtml += `<div class="leaf" data-leaf="${k}">${front}${back}</div>`
 }
 $('.book').innerHTML = bookHtml
-const chapterNames = ['Εξώφυλλο', 'Ορεκτικά', 'Σαλάτες', 'Ζυμαρικά & Κυρίως', 'Κυρίως & Σχάρα', 'Θάλασσα & Γλυκά', 'Κρασιά']
+const chapterNames = isEn ? ['Cover', 'Starters', 'Salads', 'Pasta & Mains', 'Mains & Grill', 'Sea & Desserts', 'Wines'] : ['Εξώφυλλο', 'Ορεκτικά', 'Σαλάτες', 'Ζυμαρικά & Κυρίως', 'Κυρίως & Σχάρα', 'Θάλασσα & Γλυκά', 'Κρασιά']
 $('.menu3d__chapters').innerHTML = chapterNames.map((c) => `<span>${c}</span>`).join('')
 
 const signatures = [
-  { img: 'calamari', tag: 'Από τη θάλασσα', item: 'Καλαμάρι τηγανητό', desc: 'Τραγανό, χρυσαφένιο, με μισό λεμόνι. Το πιάτο που παραγγέλνει όλη η παραλία.' },
-  { img: 'steak', tag: 'Από τη σχάρα', item: 'Σταβλίσια μπριζόλα μόσχου', desc: 'Ψημένη στα κάρβουνα, με φρέσκες τηγανητές πατάτες και ρόκα.' },
-  { img: 'greek-salad-rose', tag: 'Σαλάτες', item: 'Χωριάτικη σαλάτα', desc: 'Με κρητικό κρίθινο παξιμάδι, φέτα Π.Ο.Π. και ρίγανη. Καλύτερη με ένα δροσερό ροζέ.' },
-  { img: 'salad-ham', tag: 'Σαλάτες', item: 'Δροσερή σαλάτα', desc: 'Τραγανό μπέικον στη σχάρα πάνω σε δροσερά φύλλα με dressing γιαουρτιού.' },
-  { img: 'salad-stilvi', tag: 'Σαλάτες', name: 'Σαλάτες εποχής', price: 'από 9,50', desc: 'Επτά δημιουργικές σαλάτες, από την Αγροτική με ξινότυρο Μυκόνου ως τη Mesclun με τραγανό κοτόπουλο.' },
+  { img: 'calamari', tag: t('Από τη θάλασσα', 'From the sea'), item: 'Καλαμάρι τηγανητό', desc: t('Τραγανό, χρυσαφένιο, με μισό λεμόνι. Το πιάτο που παραγγέλνει όλη η παραλία.', 'Crisp and golden, with half a lemon. The dish the whole beach orders.') },
+  { img: 'steak', tag: t('Από τη σχάρα', 'From the grill'), item: 'Σταβλίσια μπριζόλα μόσχου', desc: t('Ψημένη στα κάρβουνα, με φρέσκες τηγανητές πατάτες και ρόκα.', 'Cooked over charcoal, with fresh fries and rocket.') },
+  { img: 'greek-salad-rose', tag: t('Σαλάτες', 'Salads'), item: 'Χωριάτικη σαλάτα', desc: t('Με κρητικό κρίθινο παξιμάδι, φέτα Π.Ο.Π. και ρίγανη. Καλύτερη με ένα δροσερό ροζέ.', 'With Cretan barley rusk, feta P.D.O. and oregano. Best with a chilled rosé.') },
+  { img: 'salad-ham', tag: t('Σαλάτες', 'Salads'), item: 'Δροσερή σαλάτα', desc: t('Τραγανό μπέικον στη σχάρα πάνω σε δροσερά φύλλα με dressing γιαουρτιού.', 'Grilled crispy bacon on fresh leaves with a yoghurt dressing.') },
+  { img: 'salad-stilvi', tag: t('Σαλάτες', 'Salads'), name: t('Σαλάτες εποχής', 'Seasonal salads'), price: t('από 9,50', 'from 9,50'), desc: t('Επτά δημιουργικές σαλάτες, από την Αγροτική με ξινότυρο Μυκόνου ως τη Mesclun με τραγανό κοτόπουλο.', 'Seven creative salads, from the Farmer\'s with Mykonos xinotyri to the Mesclun with crispy chicken.') },
 ]
 $('.sig__track').innerHTML = signatures.map((s) => {
-  const it = s.item ? findItem(s.item) : { name: s.name, price: s.price }
+  const it = s.item ? trItem(findItem(s.item)) : { name: s.name, price: s.price }
   return `<article class="dish">
     <div class="dish__img">
       <span class="dish__tag mono">${s.tag}</span>
@@ -97,12 +99,12 @@ $('.sig__track').innerHTML = signatures.map((s) => {
 }).join('')
 
 // full menu tabs
-const tabs = [...menu.map((c) => ({ id: c.id, title: c.title })), { id: 'krasia', title: 'Κρασιά' }]
+const tabs = [...menu.map((c) => ({ id: c.id, title: t(c.title, catTitles[c.id]) })), { id: 'krasia', title: t('Κρασιά', 'Wines') }]
 $('.tabs').innerHTML = tabs.map((t, i) => `<button class="tab" role="tab" id="tab-${t.id}" aria-controls="panel-${t.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${t.title}</button>`).join('')
-const menuRow = (it) => `<div class="mi"><span class="mi__name">${esc(it.name)}${it.frozen ? '<sup>*</sup>' : ''}</span><span class="mi__price">${it.price} €</span>${it.desc ? `<span class="mi__desc">${esc(it.desc)}</span>` : ''}</div>`
+const menuRow = (raw) => { const it = raw.wine ? raw : trItem(raw); return `<div class="mi"><span class="mi__name">${esc(it.name)}${it.frozen ? '<sup>*</sup>' : ''}</span><span class="mi__price">${it.price} €</span>${it.desc ? `<span class="mi__desc">${esc(it.desc)}</span>` : ''}</div>` }
 $('.tabpanels').innerHTML =
   menu.map((c, i) => `<div class="tabpanel" role="tabpanel" id="panel-${c.id}" aria-labelledby="tab-${c.id}" ${i ? 'hidden' : ''}>${c.items.map(menuRow).join('')}</div>`).join('') +
-  `<div class="tabpanel" role="tabpanel" id="panel-krasia" aria-labelledby="tab-krasia" hidden>${wines.map((g) => `<p class="wine-group">${g.title}</p>${g.items.map((w) => menuRow({ name: w.name, price: w.price, desc: `${w.origin} · ${w.grape}` })).join('')}`).join('')}</div>`
+  `<div class="tabpanel" role="tabpanel" id="panel-krasia" aria-labelledby="tab-krasia" hidden>${wines.map((g) => `<p class="wine-group">${t(g.title, wineTitles[g.title])}</p>${g.items.map(trWine).map((w) => menuRow({ wine: true, name: w.name, price: w.price, desc: `${w.origin} · ${w.grape}` })).join('')}`).join('')}</div>`
 
 const tabEls = $$('.tab')
 const selectTab = (tab, focus) => {
@@ -349,7 +351,7 @@ $$('[data-label]').forEach((sec, i) => {
     },
   })
 })
-ScrollTrigger.create({ trigger: '.hero', start: 'top top', end: 'bottom 55%', onEnterBack: () => { idxEl.textContent = '00'; nameEl.textContent = 'Αρχή' } })
+ScrollTrigger.create({ trigger: '.hero', start: 'top top', end: 'bottom 55%', onEnterBack: () => { idxEl.textContent = '00'; nameEl.textContent = t('Αρχή', 'Start') } })
 
 /* ── Copy phone number ───────────────────────────────── */
 
@@ -358,13 +360,13 @@ copyBtn?.addEventListener('click', async () => {
   const label = copyBtn.textContent
   try {
     await navigator.clipboard.writeText(copyBtn.dataset.phone)
-    copyBtn.textContent = 'Αντιγράφηκε'
+    copyBtn.textContent = t('Αντιγράφηκε', 'Copied')
   } catch {
     const range = document.createRange()
     range.selectNodeContents($('.call__num'))
     getSelection().removeAllRanges()
     getSelection().addRange(range)
-    copyBtn.textContent = 'Επιλέχθηκε'
+    copyBtn.textContent = t('Επιλέχθηκε', 'Selected')
   }
   setTimeout(() => { copyBtn.textContent = label }, 1800)
 })
