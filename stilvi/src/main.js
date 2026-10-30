@@ -49,7 +49,11 @@ const bookPages = [
   listPage('Η κάβα μας', '<em>Ροζέ</em> &amp; <em>Κόκκινα</em>', [...wineRows(wines[1]), ...wineRows(wines[2])]),
 ]
 const pageEl = (p, n, side) => `<div class="${side} page ${p.density}">${p.html}${pageFoot(n)}</div>`
-const cover = `<div class="face face--front cover">
+const corner = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M2 38V8a6 6 0 0 1 6-6h30" /><path d="M8 38V14a6 6 0 0 1 6-6h24" /><circle cx="8" cy="8" r="2.2" /><path d="M14 20c4-1 6-3 7-7" /></svg>'
+const cover = `<div class="cover__board" style="--d:-1px"></div><div class="cover__board" style="--d:-2px"></div><div class="cover__board" style="--d:-3px"></div>
+  <div class="face face--front cover">
+    <span class="cover__sheen" aria-hidden="true"></span>
+    ${[1, 2, 3, 4].map((n) => `<span class="cover__corner cover__corner--${n}">${corner}</span>`).join('')}
     <div class="cover__frame">
       <svg class="cover__waves" viewBox="0 0 120 30" aria-hidden="true"><path d="M0 8 Q15 0 30 8 T60 8 T90 8 T120 8" /><path d="M0 16 Q15 8 30 16 T60 16 T90 16 T120 16" /><path d="M0 24 Q15 16 30 24 T60 24 T90 24 T120 24" /></svg>
       <span class="cover__ribbon mono">seaside restaurant</span>
@@ -59,7 +63,11 @@ const cover = `<div class="face face--front cover">
   </div>`
 // leaf 0: cover / page 1; leaf k: page 2k / page 2k+1; the last page lies on the base board
 const leafCount = bookPages.length / 2
-let bookHtml = pageEl(bookPages[bookPages.length - 1], bookPages.length, 'page--base')
+// page block under the last page, a back board and the spine give the closed book its thickness
+let bookHtml = '<div class="book__back"></div><div class="book__spine"></div>'
+for (let k = 1; k <= 10; k++) bookHtml += `<div class="book__sheet" style="--d:${-k * 1.5}px"></div>`
+bookHtml += '<div class="book__ribbon"></div>'
+bookHtml += pageEl(bookPages[bookPages.length - 1], bookPages.length, 'page--base')
 for (let k = 0; k < leafCount; k++) {
   const front = k === 0 ? cover : pageEl(bookPages[2 * k - 1], 2 * k, 'face face--front')
   const back = pageEl(bookPages[2 * k], 2 * k + 1, 'face face--back')
@@ -212,6 +220,59 @@ if (!reduceMotion) {
     .to('.hero__ctas', { yPercent: -20, duration: 0.7, ease: 'power1.inOut' }, 0)
 }
 
+/* ── A day at Stilvi: camera flies through the photos ── */
+
+const walkShots = [
+  ['beach-day', '12:30', 'Μεσημέρι', 'Το μπλε του Ευβοϊκού από τη βεράντα'],
+  ['greek-salad', '13:15', 'Μεσημέρι', 'Χωριάτικη με θέα το νερό'],
+  ['calamari', '14:00', 'Μεσημέρι', 'Καλαμαράκια με λεμόνι'],
+  ['sea-view', '17:40', 'Απόγευμα', 'Ο κόλπος ηρεμεί'],
+  ['greek-salad-rose', '19:10', 'Σούρουπο', 'Ροζέ και δροσιά'],
+  ['sunset-table', '20:05', 'Ηλιοβασίλεμα', 'Το τραπέζι δίπλα στο κύμα'],
+  ['steak', '21:00', 'Βράδυ', 'Μπριζόλα από τα κάρβουνα'],
+  ['sunset-deck', '21:30', 'Βράδυ', 'Τα φώτα ανάβουν στο κατάστρωμα'],
+]
+const walkWorld = $('.walk__world')
+walkWorld.innerHTML = walkShots.map(([img, time, , cap], i) => `<figure class="walk__shot" data-side="${i % 2 ? 'r' : 'l'}">
+    <img src="/img/${img}.webp" alt="${esc(cap)}" loading="lazy" />
+    <figcaption><span class="mono">${time}</span>${esc(cap)}</figcaption>
+  </figure>`).join('')
+const walkEls = $$('.walk__shot')
+const clockTime = $('.walk__clock b')
+const clockPart = $('.walk__clock span')
+const WALK_GAP = 1100
+const walkState = { z: 0 }
+const layoutWalk = () => {
+  const narrow = window.innerWidth < 700
+  const spread = narrow ? window.innerWidth * 0.09 : Math.min(window.innerWidth * 0.2, 300)
+  let current = 0
+  walkEls.forEach((el, i) => {
+    const z = -i * WALK_GAP + walkState.z - 700
+    const x = (el.dataset.side === 'r' ? 1 : -1) * spread
+    const y = (i % 3 - 1) * (narrow ? 20 : 40)
+    // fade in out of the dark far away, fade out just before passing the camera
+    const far = gsap.utils.clamp(0, 1, (z + 3600) / 1600)
+    const near = gsap.utils.clamp(0, 1, (520 - z) / 380)
+    el.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px) rotateY(${-x / spread * 8}deg)`
+    el.style.opacity = (far * near).toFixed(3)
+    el.style.visibility = far * near < 0.01 ? 'hidden' : 'visible'
+    if (z > -WALK_GAP * 0.5) current = i
+  })
+  clockTime.textContent = walkShots[current][1]
+  clockPart.textContent = walkShots[current][2]
+  $('.walk').style.setProperty('--dusk', (current / (walkShots.length - 1)).toFixed(3))
+}
+layoutWalk()
+window.addEventListener('resize', layoutWalk)
+if (reduceMotion) {
+  $('.walk').classList.add('walk--static')
+} else {
+  gsap.to(walkState, {
+    z: (walkShots.length - 1) * WALK_GAP + 1000, ease: 'none', onUpdate: layoutWalk,
+    scrollTrigger: { trigger: '.walk__pin', start: 'top top', end: `+=${walkShots.length * 70}%`, pin: true, scrub: 1 },
+  })
+}
+
 /* ── 3D menu book ────────────────────────────────────── */
 
 const leaves = $$('.leaf')
@@ -221,7 +282,8 @@ const applyLeaves = () => {
   leaves.forEach((leaf, i) => {
     const a = leafState[i].a
     const flipped = a < -90
-    const z = flipped ? (i + 1) * 1.2 : (n - i) * 1.2
+    // the cover board sits a few px proud of the pages while it is closed
+    const z = flipped ? (i + 1) * 1.2 : (n - i) * 1.2 + (i === 0 ? 4 : 0)
     const lift = Math.sin((-a / 180) * Math.PI) * 30
     leaf.style.transform = `translateZ(${z + lift}px) rotateY(${a}deg)`
   })
@@ -241,7 +303,7 @@ if (reduceMotion) {
   setChapter()
 } else {
   const FLIP_GAP = 1.25
-  gsap.set('.book-rig', { rotateX: 58, rotateZ: -14, yPercent: 8, scale: 0.6, xPercent: -25 })
+  gsap.set('.book-rig', { rotateX: 52, rotateY: -26, rotateZ: -12, yPercent: 6, scale: 0.62, xPercent: -22 })
   const tl = gsap.timeline({
     defaults: { ease: 'power2.inOut' },
     scrollTrigger: {
@@ -249,12 +311,33 @@ if (reduceMotion) {
     },
     onUpdate: () => { applyLeaves(); setChapter() },
   })
-  tl.to('.book-rig', { rotateX: 6, rotateZ: 0, yPercent: 0, scale: 0.92, duration: 1 })
+  tl.to('.book-rig', { rotateX: 6, rotateY: 0, rotateZ: 0, yPercent: 0, scale: 0.92, duration: 1 })
     .to('.plinth', { opacity: 0, y: 80, duration: 0.8 }, 0.2)
     .to('.menu3d__glow', { scale: 1.6, opacity: 0.5, duration: 1 }, 0)
     .to('.book-rig', { rotateX: 0, scale: 1, xPercent: 0, duration: 1 }, 1.1)
   leafState.forEach((st, i) => tl.to(st, { a: -180, duration: 1 }, 1.1 + i * FLIP_GAP))
   tl.to('.book-rig', { scale: 0.96, duration: 0.5 }, 1.1 + leaves.length * FLIP_GAP)
+}
+
+// idle float, pointer tilt and a light sheen that slides across the cover
+const bookEl = $('.book')
+const coverEl = $('.cover')
+const tilt = { x: 0, y: 0, tx: 0, ty: 0 }
+let menuVisible = false
+new IntersectionObserver(([e]) => { menuVisible = e.isIntersecting }).observe($('.menu3d'))
+window.addEventListener('pointermove', (e) => {
+  tilt.tx = (e.clientX / window.innerWidth - 0.5) * 2
+  tilt.ty = (e.clientY / window.innerHeight - 0.5) * 2
+})
+if (!reduceMotion) {
+  gsap.ticker.add((time) => {
+    if (!menuVisible) return
+    tilt.x += (tilt.tx - tilt.x) * 0.06
+    tilt.y += (tilt.ty - tilt.y) * 0.06
+    const float = Math.sin(time * 1.3) * 6
+    bookEl.style.transform = `translateY(${float}px) rotateX(${-tilt.y * 4}deg) rotateY(${tilt.x * 6}deg)`
+    coverEl.style.setProperty('--sheen', `${50 + tilt.x * 40 + Math.sin(time * 0.6) * 25}%`)
+  })
 }
 
 /* ── Signature coverflow ─────────────────────────────── */
